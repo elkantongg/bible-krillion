@@ -1,14 +1,28 @@
-import { DatabaseSync } from 'node:sqlite'
+import Database from 'libsql'
 import { mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'
 
-export type DB = DatabaseSync
+export type DB = InstanceType<typeof Database>
 
-export function openDb(path: string): DB {
+export interface Remote {
+  url: string
+  authToken?: string
+}
+
+/**
+ * Open the game database.
+ * - no `remote`: a plain local SQLite file (dev, tests)
+ * - with `remote`: a local embedded replica of a Turso database. Reads are local and fast;
+ *   writes go to Turso, so data survives hosts with throwaway disks (e.g. Render free).
+ */
+export function openDb(path: string, remote?: Remote): DB {
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true })
-  const db = new DatabaseSync(path)
+  // libsql's bundled typings predate its sync options, so describe them here
+  const syncOpts = remote ? { syncUrl: remote.url, authToken: remote.authToken ?? '' } : undefined
+  const db = syncOpts ? new Database(path, syncOpts as ConstructorParameters<typeof Database>[1]) : new Database(path)
+  if (remote) db.sync()
+  else db.exec('PRAGMA journal_mode = WAL;')
   db.exec(`
-    PRAGMA journal_mode = WAL;
     PRAGMA busy_timeout = 3000;
 
     CREATE TABLE IF NOT EXISTS dive_prompts (

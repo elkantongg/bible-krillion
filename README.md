@@ -32,16 +32,24 @@ Requires Node ≥ 22.13 (it uses the built-in `node:sqlite`, so no native build 
 | `DB_PATH` | `./data/deep.db` | SQLite file, created automatically |
 | `PLAYER_SECRET` | dev value | **Set a long random string in production.** It signs the anonymous player tokens. |
 | `LAUNCH_DATE` | 2026-11-23 | The date of Dive #1 |
+| `TURSO_DATABASE_URL` | unset | Optional Turso database (`libsql://…`). When set, data is stored in Turso via a local replica. |
+| `TURSO_AUTH_TOKEN` | unset | Database token for the Turso URL above |
 
-### Deploying (free tier)
+### Deploying (free tier): Render + Turso
 
-Any host that runs a long-lived Node process with a persistent disk will work, for example Render, Fly.io or Railway.
-Build with `pnpm install && pnpm build`, start with `pnpm start`, and point `DB_PATH` at the persistent volume.
-WebSockets must be allowed. Party rooms live in memory, so a restart ends games in progress.
+The app is one long-lived Node process (site + `/api` + socket.io for Big Fish), so it needs a host that keeps a
+server running — serverless hosts like Vercel can't run the party mode. `render.yaml` sets up a free Render web service.
+
+1. **Turso** (free): create a database, then copy its URL (`libsql://…`) and create a database token.
+2. **Render**: *New → Blueprint*, pick this GitHub repo, and paste the Turso URL and token when asked.
+   `PLAYER_SECRET` is generated automatically. Every push to `main` redeploys.
+
+Free Render services sleep after ~15 minutes idle; the first visit afterwards takes about a minute to wake.
+Party rooms are in memory, so a restart or redeploy ends games in progress (dive data is safe in Turso).
 
 ## How it plays
 
-Landing → **Begin descent** → each prompt shows with "the clock starts in 3…" → 25-second answer window → the answer sinks through
+Landing → **Begin descent** → each prompt shows with "get ready… 3" → 25-second answer window → the answer sinks through
 the rarity tiers → result card → **Descend ▼** → … → prompt 7 → results screen (depth, zone, emoji grid, share, the most common
 answer and a deep cut for each prompt).
 

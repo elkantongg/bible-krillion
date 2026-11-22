@@ -24,7 +24,12 @@ const LAUNCH = process.env.LAUNCH_DATE ?? '2026-11-23'
 const PROD = process.env.NODE_ENV === 'production'
 if (PROD && SECRET === 'dev-only-secret') console.warn('⚠ PLAYER_SECRET is not set — set it in production')
 
-const db = openDb(resolve(root, process.env.DB_PATH ?? './data/deep.db'))
+const TURSO_URL = process.env.TURSO_DATABASE_URL
+const db = openDb(
+  resolve(root, process.env.DB_PATH ?? (TURSO_URL ? './data/replica.db' : './data/deep.db')),
+  TURSO_URL ? { url: TURSO_URL, authToken: process.env.TURSO_AUTH_TOKEN } : undefined,
+)
+if (PROD && !TURSO_URL) console.warn('⚠ TURSO_DATABASE_URL is not set — data lives only on this machine\'s disk')
 const solo = new SoloService(db, { launch: LAUNCH })
 
 // --- anonymous player tokens: "<id>.<hmac>" ---
