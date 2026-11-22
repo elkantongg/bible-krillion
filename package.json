@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "start": "NODE_ENV=production NODE_NO_WARNINGS=1 tsx server/index.ts",
     "test": "NODE_NO_WARNINGS=1 vitest run",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "questions:fetch": "mkdir -p data/theographic && for f in people places books verses; do curl -sSfL -o data/theographic/$f.json https://raw.githubusercontent.com/robertrouse/theographic-bible-metadata/master/json/$f.json; done",
+    "questions:build": "tsx scripts/build-questions.ts"
   },
   "dependencies": {
     "express": "^5.3.0",

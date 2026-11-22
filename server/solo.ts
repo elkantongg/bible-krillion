@@ -1,9 +1,9 @@
 import type { DB } from './db'
 import { tx } from './db'
-import { QUESTION_BY_ID, QUESTIONS, ALL_KEYS } from '../shared/data/index'
+import { QUESTION_BY_ID, CURATED, GENERATED, ALL_KEYS } from '../shared/data/index'
 import { matchAnswer } from '../shared/match'
 import { score, blendedShare, MISS_TIER, PROMPTS_PER_DIVE, SECONDS_PER_PROMPT } from '../shared/scoring'
-import { dateForDive, maxDiveAt, selectPrompts } from '../shared/dives'
+import { dateForDive, maxDiveAt, selectMixed } from '../shared/dives'
 import type { DiveState, OpenPrompt, PromptResult, Question, TierKey } from '../shared/types'
 
 export const LEAD_MS = 3000 // "the clock starts in 3…"
@@ -54,7 +54,7 @@ export class SoloService {
   prompts(n: number): Question[] {
     let rows = this.db.prepare('SELECT question_id FROM dive_prompts WHERE dive_no = ? ORDER BY idx').all(n) as { question_id: string }[]
     if (rows.length < PROMPTS_PER_DIVE) {
-      const ids = selectPrompts(n, QUESTIONS.map((q) => q.id))
+      const ids = selectMixed(n, CURATED.map((q) => q.id), GENERATED)
       const ins = this.db.prepare('INSERT OR IGNORE INTO dive_prompts (dive_no, idx, question_id) VALUES (?, ?, ?)')
       ids.forEach((id, i) => ins.run(n, i, id))
       rows = this.db.prepare('SELECT question_id FROM dive_prompts WHERE dive_no = ? ORDER BY idx').all(n) as { question_id: string }[]

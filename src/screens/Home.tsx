@@ -69,6 +69,17 @@ export function Home({ today }: { today: number }) {
                   <span>{r}</span>
                 </li>
               ))}
+              <li className="mt-2 border-t border-white/10 pt-3 text-xs text-white/60">
+                500+ prompts, every answer checked against the verses that name it. People &amp; places data:{' '}
+                <a className="underline" href="https://github.com/robertrouse/theographic-bible-metadata" target="_blank" rel="noreferrer">
+                  Theographic Bible Metadata
+                </a>{' '}
+                (
+                <a className="underline" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">
+                  CC BY-SA 4.0
+                </a>
+                ).
+              </li>
             </motion.ol>
           )}
         </AnimatePresence>

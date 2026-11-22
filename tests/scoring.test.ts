@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { blendedShare, score, depthFor, MAX_DEPTH, TIERS, zoneFor } from '../shared/scoring'
-import { dateForDive, diveForDate, maxDiveAt, selectPrompts } from '../shared/dives'
+import { dateForDive, diveForDate, maxDiveAt, selectPrompts, selectMixed } from '../shared/dives'
+import { CURATED, GENERATED } from '../shared/data/index'
 
 describe('rarity scoring', () => {
   it('uses curated priors on cold start', () => {
@@ -50,5 +51,22 @@ describe('daily dives', () => {
     expect(selectPrompts(5, pool)).toEqual(a)
     const firstCycle = new Set([1, 2, 3, 4].flatMap((n) => selectPrompts(n, pool)))
     expect(firstCycle.size).toBe(28) // no repeats until the pool is used up
+  })
+  it('mixes 2 curated + 5 generated prompts from different groups', () => {
+    const cur = new Set(CURATED.map((q) => q.id))
+    const groupOf = new Map(GENERATED.map((q) => [q.id, q.group]))
+    for (let n = 1; n <= 400; n++) {
+      const ids = selectMixed(n, [...cur], GENERATED)
+      expect(ids).toHaveLength(7)
+      expect(new Set(ids).size).toBe(7)
+      expect(ids.filter((id) => cur.has(id))).toHaveLength(2)
+      const groups = ids.filter((id) => !cur.has(id)).map((id) => groupOf.get(id))
+      expect(new Set(groups).size).toBeGreaterThanOrEqual(4)
+    }
+    // across one full cycle almost nothing repeats (a few leftovers roll into the next cycle)
+    const days = Math.floor(GENERATED.length / 5)
+    const all = Array.from({ length: days }, (_, i) => selectMixed(i + 1, [...cur], GENERATED).filter((id) => !cur.has(id))).flat()
+    expect(new Set(all).size / all.length).toBeGreaterThan(0.95)
+    expect(selectMixed(9, [...cur], GENERATED)).toEqual(selectMixed(9, [...cur], GENERATED))
   })
 })

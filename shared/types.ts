@@ -16,6 +16,10 @@ export interface Question {
   text: string
   category: string
   answers: Answer[]
+  /** 'curated' = hand-written; 'generated' = built from Theographic data */
+  source?: 'curated' | 'generated'
+  /** diversity key (e.g. a book) — a dive never uses two prompts from one group */
+  group?: string
 }
 
 export interface Tier {

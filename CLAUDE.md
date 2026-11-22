@@ -6,6 +6,7 @@ Modes: daily dive, archive, Big Fish (online hot-potato party via room code / li
 ## Commands
 - `pnpm dev` — web http://localhost:5280 (strictPort) + API :8787 (Vite proxies /api and /socket.io)
 - `pnpm test` — vitest (tests/*.test.ts); `pnpm typecheck`; `pnpm build`; `pnpm start` (prod, serves dist/)
+- `pnpm questions:fetch && pnpm questions:build` — regenerate `shared/data/generated.json` from Theographic (CC BY-SA 4.0, credit required)
 
 ## Layout
 - `shared/` isomorphic: `match.ts` (normalise + fuzzy), `scoring.ts` (tiers, priors, depth, zones), `dives.ts` (dive numbering, seeded selection), `data/` (questions)
@@ -17,11 +18,13 @@ Modes: daily dive, archive, Big Fish (online hot-potato party via room code / li
 - Dataset line format `Canonical|Alias:level:Ref` (level 0 obscure … 5 obvious). Protestant canon, no Apocrypha. Accuracy > quantity; never invent names. Tests enforce no alias collisions.
 - Scoring: `share=(count+40*prior[level])/(total+40)` → fixed tiers 10/20/35/60/85/100. Stats count once per player-prompt, ≤3 per IP-hash/question/day.
 - Timer is server-authoritative: deadline = opened_at + 3 s lead + 25 s; grace 1.5 s; reopen keeps clock.
-- Dive prompts are materialised in `dive_prompts` on first use (stable history).
+- Dive prompts are materialised in `dive_prompts` on first use (stable history). Daily = 2 curated + 5 generated (distinct groups, stream of seeded cycles in `shared/dives.ts`).
+- Generated answers: literal verse tags only; gender per record; no OT 'Jesus' tags; curated level is a familiarity floor; co-occurrence anchors must be familiar.
+- Budget is $0: free data/tiers only, no paid APIs.
 - Party rooms are in-memory (lost on restart). Fuse 10–30 s hidden, floor 8 s on pass, lives 1–3.
 - Original branding only — do not copy Krillion art/text/names.
 - Git: commit with the user's configured identity; NO Co-Authored-By / AI attribution trailers (user instruction).
 
 ## Status (2026-11-23)
-- Done: solo daily + archive, Big Fish online, ocean visuals, sounds, 69 tests passing, prod build.
+- Done: solo daily + archive, Big Fish online, ocean visuals, sounds, 511-question pool (29 curated + 482 generated), 72 tests passing, prod build.
 - Ideas next: more questions, share image, PWA, Postgres port if hosting needs it.

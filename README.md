@@ -84,11 +84,40 @@ points = first tier whose minShare ≤ share
 - **Anti-manipulation.** Only the first locked answer per player per prompt counts toward the rarity stats. Each hashed IP adds to a question's stats at most 3 times per day. Answers are rate-limited and capped at 40 attempts per prompt.
 - **Server-authoritative timing.** The deadline is stored server-side. Re-opening a prompt keeps the original clock, and late answers lock at 0.
 
+## Question pool (511 prompts)
+
+- **29 hand-written prompts** (`shared/data/people.ts`, `world.ts`), covering kings, prophets, animals, foods, parables, gems and more.
+- **482 generated prompts** (`shared/data/generated.json`) built from [Theographic Bible Metadata](https://github.com/robertrouse/theographic-bible-metadata),
+  which tags every person and place in all 31,102 verses. The generator (`scripts/build-questions.ts`) makes:
+  - **Book prompts:** "Name a person / place / woman mentioned in {book}"
+  - **Chapter-range prompts:** "Name a person mentioned in Genesis 1–10"
+  - **Section prompts:** "Name a woman mentioned in the four Gospels"
+  - **Word play:** names by first letter (Old Testament, New Testament, places), by exact length, and by ending ("-iah")
+  - **Chapter pairings:** "Name a person who appears in a chapter alongside Elijah", only for well-known anchors
+- **Accuracy:** every generated answer is a name the dataset tags in a verse inside the prompt's scope, and that verse is its reference.
+  Gender is checked per person, not per name, so the man Noah doesn't count as a woman in Genesis. Old Testament passages that the
+  dataset tags with "Jesus" as messianic are left out, so answers stay literal. Spelling variants are merged, and near-duplicate
+  prompts are dropped.
+- **Familiarity levels** come from how many verses mention a name. A hand-written rating is used as a minimum, so Eve stays "obvious"
+  even though few verses mention her.
+- **Daily mix:** 2 hand-written prompts plus 5 generated ones, with the generated five from different groups (no two from the same
+  book). The generated pool runs about 96 days before it cycles, and about 97% of prompts don't repeat within a cycle.
+
+Rebuild the pool (downloads about 50 MB of JSON into the gitignored `data/theographic/`):
+
+```bash
+pnpm questions:fetch && pnpm questions:build
+```
+
+**Licence:** `shared/data/generated.json` is derived from Theographic Bible Metadata by Robert Rouse, licensed
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). That file is shared under the same licence, and the game credits
+it in How to play.
+
 ## Answer validation
 
-Answers are checked against a curated, question-specific dataset (`shared/data/*.ts`):
+Answers are checked against a question-specific dataset (`shared/data/`):
 
-- **29 questions, about 1,660 answers.** Each answer has aliases or spellings, a commonness level and a scripture reference.
+- **511 questions, about 36,000 answers.** Each answer has aliases or spellings, a commonness level and a scripture reference.
 - **Normalisation.** Matching ignores case, accents, punctuation and spacing ("Tubal-cain" = "tubalcain"). It strips titles and fillers such as *King*, *Mount* and *Parable of the*, and handles simple plurals.
 - **Typo tolerance.** Up to 1 edit for 4–7 letters and 2 edits for 8+, but only when one answer is clearly closest. A tie is rejected.
 - **Real names never fuzzed in.** If the input is exactly a real biblical name from another question (for example "Moses" for *kings*), it is not fuzzy-matched into this question.
