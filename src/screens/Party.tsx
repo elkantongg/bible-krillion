@@ -51,9 +51,11 @@ export function PartyHome() {
     setErr('')
     try {
       const { socket } = await connect()
-      socket.emit('party:create', { name }, (r: { ok: boolean; code?: string; error?: string }) => {
+      // never leave the button spinning if the server is unreachable
+      socket.timeout(8000).emit('party:create', { name }, (e: Error | null, r?: { ok: boolean; code?: string; error?: string }) => {
         setBusy(false)
-        if (r.ok && r.code) go(`/party/${r.code}`)
+        if (e || !r) setErr('Could not reach the server — try again')
+        else if (r.ok && r.code) go(`/party/${r.code}`)
         else setErr(r.error ?? 'Could not create a room')
       })
     } catch {
@@ -586,7 +588,7 @@ function Over({ s, me, emit }: { s: PartyState; me: string; emit: Emit }) {
             <span className="w-5 font-mono text-white/50">{i + 1}</span>
             <Avatar p={p} size={30} />
             <span className="flex-1 truncate">{p.name}</span>
-            <span className="font-mono text-xs text-white/60">{p.answers} answers</span>
+            <span className="font-mono text-xs text-white/60">{p.answers} {p.answers === 1 ? 'answer' : 'answers'}</span>
           </li>
         ))}
       </ol>

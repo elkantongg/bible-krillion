@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PartyRoom, FUSE_FLOOR, FUSE_MAX, POP_PAUSE, type Clock } from '../server/party'
+import { PartyRoom, FUSE_FLOOR, POP_PAUSE, type Clock } from '../server/party'
 import { QUESTIONS } from '../shared/data/index'
 
 function fakeClock() {
@@ -104,7 +104,10 @@ describe('Big Fish party room', () => {
     room.setLives('p0', 1)
     room.start('p0')
     const loser = room.holderId!
-    advance(FUSE_MAX + 1)
+    advance(room.fuseEnd - 1_000_000 + 1)
+    expect(room.phase).toBe('popped') // the final swallow is shown first
+    expect(room.lastPop).toMatchObject({ playerId: loser, eliminated: true })
+    advance(POP_PAUSE + 1)
     expect(room.phase).toBe('over')
     expect(room.winnerId).not.toBe(loser)
     room.backToLobby('p0')
@@ -119,6 +122,17 @@ describe('Big Fish party room', () => {
     expect(room.hostId).toBe('p1')
     expect(room.phase).toBe('over')
     expect(room.winnerId).toBe('p1')
+  })
+
+  it('gives host back to whoever returns to an abandoned room', () => {
+    const { room } = setup(2)
+    room.start('p0')
+    room.setConnected('p0', false) // game over, host → p1
+    room.setConnected('p1', false) // nobody left to inherit
+    room.join('p0', 'back again')
+    expect(room.hostId).toBe('p0')
+    room.backToLobby('p0')
+    expect(room.phase).toBe('lobby')
   })
 
   it('seats late joiners as spectators', () => {

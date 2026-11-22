@@ -123,8 +123,8 @@ button:disabled {
   to { transform: translateX(130vw); }
 }
 @keyframes swim-rev {
-  from { transform: translateX(130vw) scaleX(-1); }
-  to { transform: translateX(-30vw) scaleX(-1); }
+  from { transform: translateX(130vw); }
+  to { transform: translateX(-30vw); }
 }
 @keyframes flicker {
   0%, 100% { opacity: 0.9; }
@@ -146,4 +146,9 @@ button:disabled {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* HUD panels sit over the bright sky at the start of a dive — tint them so text stays legible */
+.glass-hud {
+  background: linear-gradient(180deg, rgb(3 16 36 / 0.55), rgb(3 16 36 / 0.4));
 }

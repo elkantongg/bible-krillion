@@ -156,9 +156,10 @@ function Ruler({ captions }: { captions: boolean }) {
   )
 }
 
-function Fish({ className = '', color = '#0d4466' }: { className?: string; color?: string }) {
+/** artwork faces left; pass `right` when the fish travels left → right */
+function Fish({ className = '', color = '#0d4466', right = false }: { className?: string; color?: string; right?: boolean }) {
   return (
-    <svg viewBox="0 0 40 20" className={className}>
+    <svg viewBox="0 0 40 20" className={className} style={right ? { transform: 'scaleX(-1)' } : undefined}>
       <path d="M2 10 Q 12 0 26 6 L36 2 L33 10 L36 18 L26 14 Q 12 20 2 10 Z" fill={color} />
     </svg>
   )
@@ -170,7 +171,7 @@ function Creatures() {
       {/* school of fish */}
       <div className="absolute left-0 w-full" style={{ top: 90 * PX, animation: 'swim 38s linear infinite' }}>
         {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-          <Fish key={i} className="absolute w-6 opacity-60" color="#0b3f5f" />
+          <Fish key={i} className="absolute w-6 opacity-60" color="#0b3f5f" right />
         )).map((el, i) => (
           <div key={i} style={{ position: 'absolute', left: (i % 4) * 26, top: Math.floor(i / 2) * 14 + (i % 3) * 6 }}>
             {el}
@@ -199,7 +200,7 @@ function Creatures() {
 
       {/* the great fish */}
       <div className="absolute left-0 w-full" style={{ top: 1480 * PX, animation: 'swim 90s linear infinite' }}>
-        <svg viewBox="0 0 300 120" className="w-[min(70vw,420px)] opacity-25">
+        <svg viewBox="0 0 300 120" className="w-[min(70vw,420px)] opacity-25" style={{ transform: 'scaleX(-1)' }}>
           <path d="M10 60 Q 60 6 170 18 Q 230 26 250 50 L 292 22 L 280 62 L 294 100 L 248 74 Q 220 104 150 106 Q 50 106 10 60 Z" fill="#021529" />
           <circle cx="58" cy="50" r="3" fill="#7ef6dc" opacity="0.5" />
         </svg>

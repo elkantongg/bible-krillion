@@ -30,7 +30,10 @@ export function TierChip({ tier, small = false }: { tier: TierKey; small?: boole
   )
 }
 
-export function AnimatedNumber({ value, format = (n: number) => Math.round(n).toLocaleString(), duration = 1.6 }: { value: number; format?: (n: number) => string; duration?: number }) {
+// module-level so the default is referentially stable (an inline default restarts the tween every render)
+const fmtInt = (n: number) => Math.round(n).toLocaleString()
+
+export function AnimatedNumber({ value, format = fmtInt, duration = 1.6 }: { value: number; format?: (n: number) => string; duration?: number }) {
   const ref = useRef<HTMLSpanElement>(null)
   const prev = useRef(value)
   useEffect(() => {

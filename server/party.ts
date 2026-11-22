@@ -68,6 +68,8 @@ export class PartyRoom {
     if (existing) {
       existing.connected = true
       existing.name = clean
+      // the host may have left while nobody else was around to inherit the role
+      if (!this.players.some((p) => p.id === this.hostId && p.connected)) this.hostId = id
       this.changed()
       return { ok: true }
     }
@@ -206,17 +208,15 @@ export class PartyRoom {
     if (!victim) return
     victim.lives = Math.max(0, victim.lives - 1)
     this.lastPop = { playerId: victim.id, at: this.clock.now(), eliminated: victim.lives === 0 }
-    const live = this.alive.filter((p) => p.connected)
-    if (live.length <= 1) {
-      this.finish(live[0]?.id ?? null)
-      return
-    }
+    // always show the swallow — even the final one — before moving on
     this.phase = 'popped'
     this.changed()
     const nextFrom = victim.id
     this.timer = this.clock.setTimeout(() => {
       this.timer = null
       if (this.phase !== 'popped') return
+      const live = this.alive.filter((p) => p.connected)
+      if (live.length <= 1) return this.finish(live[0]?.id ?? null)
       const starter = victim.lives > 0 && victim.connected ? victim.id : this.nextHolder(nextFrom)
       this.newRound(starter)
     }, POP_PAUSE)

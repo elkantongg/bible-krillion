@@ -266,7 +266,7 @@ function Hud({ n, depth, score, results, promptNo, active }: { n: number; depth:
   return (
     <header className="sticky top-0 z-20 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6">
       <div className="mx-auto flex max-w-3xl items-center gap-2 sm:gap-4">
-        <div className="glass flex min-w-[88px] flex-col rounded-2xl px-3 py-1.5 sm:min-w-[120px] sm:px-4 sm:py-2">
+        <div className="glass glass-hud flex min-w-[88px] flex-col rounded-2xl px-3 py-1.5 sm:min-w-[120px] sm:px-4 sm:py-2">
           <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/55">depth</span>
           <span className="font-mono text-lg font-bold text-glow sm:text-2xl">
             <AnimatedNumber value={depth} format={fmtM} duration={2.2} />
@@ -290,7 +290,7 @@ function Hud({ n, depth, score, results, promptNo, active }: { n: number; depth:
             #{n} · {active ? `${promptNo} of 7` : 'complete'}
           </span>
         </div>
-        <div className="glass flex min-w-[72px] flex-col items-end rounded-2xl px-3 py-1.5 sm:min-w-[100px] sm:px-4 sm:py-2">
+        <div className="glass glass-hud flex min-w-[72px] flex-col items-end rounded-2xl px-3 py-1.5 sm:min-w-[100px] sm:px-4 sm:py-2">
           <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/55">score</span>
           <span className="font-mono text-lg font-bold text-amber sm:text-2xl">
             <AnimatedNumber value={score} />
@@ -395,7 +395,7 @@ function PromptView({
             spellCheck={false}
             enterKeyHint="send"
             aria-label="Your answer"
-            placeholder={phase === 'intro' ? `the clock starts in ${startsIn}…` : 'name one…'}
+            placeholder={phase === 'intro' ? `get ready… ${startsIn}` : 'name one…'}
             className="min-w-0 flex-1 bg-transparent px-3 py-3 text-lg text-white placeholder:text-white/40 focus:outline-none sm:text-xl"
           />
           <span
@@ -470,11 +470,15 @@ function ResultView({ r, phase, onNext, isLast, busy }: { r: PromptResult; phase
           >
             {t.emoji}
           </motion.div>
-          <h2 className="font-display text-3xl font-extrabold uppercase tracking-wide sm:text-4xl" style={{ color: TIER_COLOR[r.tier] }}>
+          <h2
+            className="font-display text-3xl font-extrabold uppercase tracking-wide sm:text-4xl"
+            style={{ color: TIER_COLOR[r.tier], textShadow: '0 2px 16px rgba(3,16,36,0.75), 0 0 2px rgba(3,16,36,0.6)' }}
+          >
             {t.label}
           </h2>
-          <p className="font-display text-2xl">{r.answer ? `“${r.answer}”` : r.raw ? `“${r.raw}”` : '—'}</p>
+          <p className="font-display text-2xl">{r.answer ? `“${r.answer}”` : '—'}</p>
           {accepted && <p className="-mt-2 font-mono text-[11px] text-white/50">you typed “{r.raw}”</p>}
+          {!r.answer && r.raw && <p className="-mt-2 font-mono text-[11px] text-white/50">last guess “{r.raw}” didn’t match</p>}
           <p className="font-mono text-sm font-bold" style={{ color: TIER_COLOR[r.tier] }}>
             {r.points ? `+${r.points} pts · sink ${(r.points * 10).toLocaleString()}m` : '+0 pts'}
           </p>
@@ -525,7 +529,7 @@ function FinalView({ state, isToday }: { state: DiveState; isToday: boolean }) {
         </h1>
         <p className="font-display text-xl text-white/85">{zone.name}</p>
         <p className="font-mono text-sm text-amber">{state.total} / 700 pts</p>
-        {state.percentile != null && <p className="text-sm text-white/70">Deeper than {state.percentile}% of divers on this dive</p>}
+        {!!state.percentile && <p className="text-sm text-white/70">Deeper than {state.percentile}% of divers on this dive</p>}
       </div>
 
       <div className="flex gap-1.5 text-2xl sm:text-3xl" aria-label="Your seven results">
@@ -562,7 +566,7 @@ function FinalView({ state, isToday }: { state: DiveState; isToday: boolean }) {
               </span>
             </div>
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
-              <span className="font-display text-lg">{r.answer ?? (r.raw ? `“${r.raw}”` : '—')}</span>
+              <span className="font-display text-lg">{r.answer ?? '—'}</span>
               <TierChip tier={r.tier} small />
             </div>
             <p className="mt-1.5 font-mono text-[11px] text-white/45">

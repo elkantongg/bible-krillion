@@ -147,7 +147,8 @@ io.on('connection', (socket) => {
   const guard = () => !limited('sock:' + player, 40, 10_000)
 
   socket.on('party:create', (msg, ack) => {
-    if (!guard() || typeof ack !== 'function') return
+    if (typeof ack !== 'function') return
+    if (!guard()) return ack({ ok: false, error: 'Slow down a little' })
     if (limited('room:' + socket.handshake.address, 20, 3_600_000)) return ack({ ok: false, error: 'Too many rooms' })
     const c = makeCode((x) => rooms.has(x))
     const room = new PartyRoom(c, realClock, broadcast)
@@ -155,7 +156,8 @@ io.on('connection', (socket) => {
     ack(enter(room, msg?.name))
   })
   socket.on('party:join', (msg, ack) => {
-    if (!guard() || typeof ack !== 'function') return
+    if (typeof ack !== 'function') return
+    if (!guard()) return ack({ ok: false, error: 'Slow down a little' })
     const room = rooms.get(String(msg?.code ?? '').toUpperCase().trim())
     if (!room) return ack({ ok: false, error: 'No room with that code' })
     ack(enter(room, msg?.name))
@@ -168,7 +170,8 @@ io.on('connection', (socket) => {
   socket.on('party:lives', (n) => inRoom()?.setLives(player, Number(n)))
   socket.on('party:lobby', () => inRoom()?.backToLobby(player))
   socket.on('party:answer', (msg, ack) => {
-    if (!guard() || typeof ack !== 'function') return
+    if (typeof ack !== 'function') return
+    if (!guard()) return ack({ ok: false, reason: 'empty' })
     const room = inRoom()
     if (!room) return ack({ ok: false, reason: 'not-playing' })
     const r = room.answer(player, String(msg?.text ?? ''))
