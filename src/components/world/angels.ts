@@ -150,7 +150,12 @@ export function angelAssets(glow: THREE.Texture): AngelAssets {
       `#include <begin_vertex>
        // the gown flows: stronger toward the hem, rippling around it
        float w = pow(clamp((0.9 - position.y) / 1.9, 0.0, 1.0), 1.8);
-       float ph = modelMatrix[3].x * 0.37 + modelMatrix[3].y * 0.11;
+       #ifdef USE_INSTANCING
+         mat4 wm = modelMatrix * instanceMatrix;
+       #else
+         mat4 wm = modelMatrix;
+       #endif
+       float ph = wm[3].x * 0.37 + wm[3].y * 0.11;
        float a = atan(position.z, position.x);
        transformed.x += sin(position.y * 3.5 + uTime * 2.1 + a * 3.0 + ph) * w * 0.07;
        transformed.z += cos(position.y * 3.1 + uTime * 1.8 + a * 2.0 + ph) * w * 0.09 - w * 0.12;`,
@@ -280,6 +285,61 @@ export class Angel {
       } else {
         a.shoulder.rotation.set(-0.45 + Math.sin(t * 0.7 + s + a.side) * 0.08, 0, a.side * 0.42)
       }
+    }
+  }
+}
+
+/**
+ * Draws the whole host with one instanced draw per body part instead of one per part per angel
+ * (~370 draw calls → ~13 above the clouds). Each Angel keeps its own bone hierarchy and pose;
+ * only its meshes are hidden, and their world matrices are copied into the instances every frame.
+ * Mirrored (left-wing) parts get their own batch under a mirrored parent, so face winding — and
+ * with it double-sided lighting — is exactly what the individual meshes had.
+ */
+const MIRROR = new THREE.Matrix4().makeScale(-1, 1, 1)
+export class AngelBatch {
+  readonly group = new THREE.Group()
+  private slots: { mesh: THREE.InstancedMesh; flip: boolean; parts: { part: THREE.Mesh; angel: Angel }[] }[] = []
+  private m = new THREE.Matrix4()
+
+  constructor(private angels: Angel[]) {
+    const byKey = new Map<string, { geo: THREE.BufferGeometry; mat: THREE.Material; flip: boolean; parts: { part: THREE.Mesh; angel: Angel }[] }>()
+    for (const angel of angels) {
+      angel.group.updateMatrixWorld(true)
+      angel.group.traverse((o) => {
+        const part = o as THREE.Mesh
+        if (!part.isMesh) return
+        const mat = part.material as THREE.Material
+        const flip = part.matrixWorld.determinant() < 0
+        const key = `${part.geometry.uuid}|${mat.uuid}|${flip}`
+        if (!byKey.has(key)) byKey.set(key, { geo: part.geometry, mat, flip, parts: [] })
+        byKey.get(key)!.parts.push({ part, angel })
+        part.visible = false // drawn by the batch from now on
+      })
+    }
+    for (const { geo, mat, flip, parts } of byKey.values()) {
+      const mesh = new THREE.InstancedMesh(geo, mat, parts.length)
+      mesh.frustumCulled = false // instances roam the whole sky; per-frame bounds aren't worth it
+      if (flip) mesh.scale.x = -1
+      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
+      mesh.visible = false
+      this.group.add(mesh)
+      this.slots.push({ mesh, flip, parts })
+    }
+  }
+
+  /** call after posing; only angels whose group is visible are drawn */
+  update() {
+    for (const a of this.angels) if (a.group.visible) a.group.updateMatrixWorld(true)
+    for (const s of this.slots) {
+      let n = 0
+      for (const { part, angel } of s.parts) {
+        if (!angel.group.visible) continue
+        s.mesh.setMatrixAt(n++, s.flip ? this.m.multiplyMatrices(MIRROR, part.matrixWorld) : part.matrixWorld)
+      }
+      s.mesh.count = n
+      s.mesh.visible = n > 0
+      s.mesh.instanceMatrix.needsUpdate = true
     }
   }
 }

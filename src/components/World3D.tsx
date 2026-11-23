@@ -7,8 +7,7 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { useDepthTarget } from '../lib/sky'
-import { setMusicAltitude } from '../lib/music'
-import { Angel, angelAssets } from './world/angels'
+import { Angel, AngelBatch, angelAssets } from './world/angels'
 import { FireChariot, FireSystem } from './world/fire'
 import { usePath } from '../lib/router'
 
@@ -700,7 +699,7 @@ export default function World3D() {
     const el = mount.current!
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const small = Math.min(window.innerWidth, window.innerHeight) < 700
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' })
+    const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' }) // the scene draws through the bloom composer, whose buffers have no MSAA: canvas MSAA would only cost
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2))
     renderer.toneMapping = THREE.ACESFilmicToneMapping
     renderer.toneMappingExposure = 1
@@ -1104,6 +1103,8 @@ export default function World3D() {
       { a: mk('flyer', 4.0, 0.58), z: -140, dy: 34, speed: -8, ph: 0.65, span: 180 },
     ]
     const allAngels = [...host.map((h) => h.a), ...trumpeters.map((x) => x.a), ...stair.map((x) => x.a), ...nearAbove.map((f) => f.a)]
+    const hostBatch = new AngelBatch(allAngels)
+    scene.add(hostBatch.group)
 
     /* chariots of fire: three circling the city, one passing close — only once the city is in sight */
     const fire = new FireSystem(16000)
@@ -1425,6 +1426,7 @@ export default function World3D() {
         beamMat.uniforms.uTime.value = t
         beamMat.uniforms.uFade.value = smooth(CLOUD_TOP + 300, CLOUD_TOP + 2000, camY)
       } else beam.visible = false
+      hostBatch.update()
 
       // ---- chariots of fire ----
       fire.begin()
@@ -1440,7 +1442,6 @@ export default function World3D() {
         nearChariot.update(fire, t, dt, x, camY + 36 + Math.sin(t * 0.45) * 4, camera.position.z - 165, Math.PI, 4.2, cA, 34)
       }
       fire.end()
-      setMusicAltitude(d)
 
       // keep ivory text readable as the sky brightens (strongest inside the white of the cloud)
       const lum = (S.mid[0] * 0.3 + S.mid[1] * 0.59 + S.mid[2] * 0.11) * (1 - inCloud) + inCloud

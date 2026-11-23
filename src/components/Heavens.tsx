@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react'
 import { animate, motion, useMotionValue, useTransform, type MotionValue } from 'motion/react'
 import { colorAt, useDepthTarget } from '../lib/sky'
 import { usePath } from '../lib/router'
-import { setMusicAltitude } from '../lib/music'
 
 /**
  * The no-WebGL fallback: a flat, painted ascent. The world scrolls downward as you climb —
@@ -240,7 +239,6 @@ function Stars({ depth }: { depth: MotionValue<number> }) {
       const dt = Math.min(50, t - last) / 16.7
       last = t
       const d = depth.get()
-      setMusicAltitude(d)
       const vel = reduce ? 0 : depth.getVelocity() * PX // px/s, positive when climbing
       ctx.clearRect(0, 0, w, h)
       const night = Math.max(0, Math.min(1, (d - 300) / 900))

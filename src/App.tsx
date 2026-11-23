@@ -4,8 +4,6 @@ import { getMeta } from './lib/api'
 import { go, usePath } from './lib/router'
 import { Heavens } from './components/Heavens'
 import { OfflineToast, Spinner } from './components/ui'
-import { installMusic } from './lib/music'
-import { isMuted } from './lib/sound'
 import { Home } from './screens/Home'
 import { Dive } from './screens/Dive'
 import { Archive } from './screens/Archive'
@@ -28,8 +26,6 @@ export function App() {
   const path = usePath()
   const [today, setToday] = useState<number | null>(null)
   const [down, setDown] = useState(false)
-
-  useEffect(() => installMusic(isMuted()), [])
 
   useEffect(() => {
     let stop = false
