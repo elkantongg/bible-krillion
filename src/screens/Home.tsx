@@ -5,7 +5,7 @@ import { depthFor } from '../../shared/scoring'
 import { api } from '../lib/api'
 import { setDepth } from '../lib/sky'
 import { go, link } from '../lib/router'
-import { knowledgeVerseOfDay } from '../lib/verses'
+import { verseOfDay } from '../lib/verses'
 import { MuteButton, useCountdownToMidnight } from '../components/ui'
 
 const RULES = [
@@ -34,7 +34,7 @@ export function Home({ today }: { today: number }) {
   const [mine, setMine] = useState<DiveState | null>(null)
   const [streak, setStreak] = useState(0)
   const left = useCountdownToMidnight()
-  const [verse, verseRef] = knowledgeVerseOfDay(today)
+  const [verse, verseRef] = verseOfDay(today)
 
   useEffect(() => {
     setDepth(0)
