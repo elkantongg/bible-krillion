@@ -1191,6 +1191,19 @@ export default function World3D() {
     }
     let frames = 0
 
+    /* pacing: the world's motion is slow and ambient, so it never needs more than 60 fps
+       (a 120 Hz display would otherwise draw every frame twice as often, for nothing you can see);
+       after a while with no input and no climb it rests at 30 fps, and any input wakes it at once */
+    const ACTIVE_MS = 1000 / 60
+    const RESTING_MS = 1000 / 30
+    const REST_AFTER = 20000
+    let lastDraw = -Infinity
+    let lastInput = performance.now()
+    let resting = false
+    const wake = () => (lastInput = performance.now())
+    const INPUTS = ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'] as const
+    for (const ev of INPUTS) window.addEventListener(ev, wake, { passive: true, capture: true })
+
     /* loop */
     const timer = new THREE.Timer()
     let raf = 0
@@ -1208,10 +1221,20 @@ export default function World3D() {
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame)
       if (document.hidden) return
+      const climbing = depth.isAnimating() || Math.abs(depth.getVelocity()) > 1
+      if (climbing) lastInput = now
+      const rest = frames > 3 && now - lastInput > REST_AFTER
+      if (rest !== resting) {
+        resting = rest
+        perf.acc = perf.n = 0 // the governor judges speed at full pace only
+      }
+      // a few ms of slack so a 60 Hz display never skips, and a 120 Hz one draws every other refresh
+      if (now - lastDraw < (resting ? RESTING_MS : ACTIVE_MS) - 3) return
+      lastDraw = now
       timer.update(now)
       const rawDt = timer.getDelta()
       const dt = Math.min(0.05, rawDt)
-      if (!reduce) govern(Math.min(0.25, rawDt))
+      if (!reduce && !resting) govern(Math.min(0.25, rawDt))
       const t = reduce ? 0 : timer.getElapsed()
       const d = depth.get()
       const vel = reduce ? 0 : depth.getVelocity()
@@ -1300,6 +1323,8 @@ export default function World3D() {
 
       // the city: far off and hazed when you first rise above the deck, drawing nearer the higher you climb
       city.visible = camY > CLOUD_TOP + 5
+      // the shadow light is dark below the deck: skip its depth pass there (the light itself stays on, so nothing recompiles)
+      renderer.shadowMap.autoUpdate = city.visible
       if (city.visible) {
         const dist = lerp(2600, 385, Math.pow(approach, 0.85))
         cityPos.set(0, top - 22, camera.position.z - dist)
@@ -1456,6 +1481,7 @@ export default function World3D() {
 
     return () => {
       cancelAnimationFrame(raf)
+      for (const ev of INPUTS) window.removeEventListener(ev, wake, { capture: true })
       window.removeEventListener('resize', resize)
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('deviceorientation', onTilt)
