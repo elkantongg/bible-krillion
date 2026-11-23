@@ -207,10 +207,10 @@ function makeJelly(color: string) {
 /* ---------------- more sea life ----------------
  * every creature is built facing +x; `update(t)` animates it in place.
  */
-interface Creature { obj: THREE.Object3D; depth: number; range: number; update: (t: number) => void }
+interface Creature { obj: THREE.Object3D; from: number; to: number; update: (t: number) => void }
 
 /** swim back and forth across the view, wrapping off-screen; returns x and heading */
-function lane(t: number, speed: number, phase: number, span = 70) {
+function lane(t: number, speed: number, phase: number, span = 48) {
   const raw = t * speed + phase * span * 2
   const x = (((raw % (span * 2)) + span * 2) % (span * 2)) - span
   return speed >= 0 ? { x, ry: 0 } : { x: -x, ry: Math.PI }
@@ -286,7 +286,7 @@ function makeDolphin(): Creature['obj'] {
 
 function makeManta(): Creature['obj'] {
   const g = new THREE.Group()
-  const top = new THREE.MeshStandardMaterial({ color: '#22303e', roughness: 0.6, side: THREE.DoubleSide })
+  const top = new THREE.MeshStandardMaterial({ color: '#2a3a4a', emissive: '#0e2236', roughness: 0.6, side: THREE.DoubleSide })
   const body = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), top)
   body.scale.set(1.3, 0.25, 0.8)
   g.add(body)
@@ -351,7 +351,7 @@ function makeSquid(color: string): Creature['obj'] {
 
 function makeAngler(): Creature['obj'] {
   const g = new THREE.Group()
-  const skin = new THREE.MeshStandardMaterial({ color: '#2a2024', roughness: 0.9, emissive: '#0a0608' })
+  const skin = new THREE.MeshStandardMaterial({ color: '#3a2c30', roughness: 0.9, emissive: '#1a1014' })
   const body = new THREE.Mesh(new THREE.SphereGeometry(0.9, 16, 12), skin)
   body.scale.set(1.1, 0.95, 0.8)
   g.add(body)
@@ -382,9 +382,41 @@ function makeAngler(): Creature['obj'] {
   return g
 }
 
+function makeDumbo(color: string): Creature['obj'] {
+  const g = new THREE.Group()
+  const mat = new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.45, roughness: 0.5, transparent: true, opacity: 0.95, side: THREE.DoubleSide })
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.9, 18, 14), mat)
+  head.scale.set(0.95, 1.1, 0.95)
+  head.position.y = 0.5
+  g.add(head)
+  const skirt = new THREE.Mesh(new THREE.ConeGeometry(1.1, 0.9, 16, 1, true), mat)
+  skirt.position.y = -0.45
+  g.add(skirt)
+  const ears: THREE.Group[] = []
+  for (const side of [1, -1]) {
+    const ear = new THREE.Mesh(new THREE.SphereGeometry(0.5, 12, 8), mat)
+    ear.scale.set(0.35, 0.12, 0.7)
+    ear.position.z = side * 0.55
+    const pivot = new THREE.Group()
+    pivot.add(ear)
+    pivot.position.set(0, 1.0, side * 0.7)
+    ears.push(pivot)
+    g.add(pivot)
+  }
+  const eyeMat = new THREE.MeshBasicMaterial({ color: '#1a1012' })
+  for (const z of [0.4, -0.4]) {
+    const e = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 6), eyeMat)
+    e.position.set(0.75, 0.5, z)
+    g.add(e)
+  }
+  g.userData.ears = ears
+  g.userData.skirt = skirt
+  return g
+}
+
 function makeWhale(): Creature['obj'] {
   const g = new THREE.Group()
-  const skin = new THREE.MeshStandardMaterial({ color: '#2c3c4c', roughness: 0.6 })
+  const skin = new THREE.MeshStandardMaterial({ color: '#34465a', emissive: '#0c1c2c', roughness: 0.6 })
   const pts = [] as THREE.Vector2[]
   for (let i = 0; i <= 24; i++) {
     const u = i / 24
@@ -643,27 +675,24 @@ export default function World3D() {
          transformed.z += sin(uTime * 9.0 + float(gl_InstanceID) * 1.7) * tailW * 0.22;`,
       )
     }
-    interface School { y: number; r: number; speed: number; count: number; tint: string; glow: number; size: number; phase: number }
+    // each school lives in a depth band [from, to] and swims around the camera's level (dy) wherever it stops,
+    // so every depth always has fish in view
+    interface School { from: number; to: number; dy: number; r: number; speed: number; count: number; tint: string; glow: number; size: number; phase: number }
     const schools: School[] = [
-      { y: -18, r: 16, speed: 0.22, count: 38, tint: '#e6f6ff', glow: 0, size: 0.9, phase: 0 },
-      { y: -45, r: 12, speed: -0.3, count: 34, tint: '#ffd38a', glow: 0, size: 0.6, phase: 0.6 },
-      { y: -110, r: 20, speed: 0.18, count: 40, tint: '#c8f0ff', glow: 0, size: 0.8, phase: 1.4 },
-      { y: -220, r: 14, speed: -0.25, count: 30, tint: '#ffb48a', glow: 0, size: 0.7, phase: 2.2 },
-      { y: -260, r: 24, speed: 0.12, count: 24, tint: '#a8c8e8', glow: 0, size: 1.6, phase: 0.3 },
-      { y: -480, r: 18, speed: 0.2, count: 30, tint: '#9ad8ff', glow: 0.2, size: 0.9, phase: 2.7 },
-      { y: -640, r: 22, speed: -0.15, count: 26, tint: '#b6c0ff', glow: 0.3, size: 1.1, phase: 1.9 },
-      { y: -900, r: 16, speed: 0.17, count: 28, tint: '#7ef0f6', glow: 1, size: 0.6, phase: 3.1 },
-      { y: -1150, r: 20, speed: -0.13, count: 22, tint: '#a6ffd8', glow: 1, size: 0.7, phase: 0.8 },
-      { y: -1650, r: 22, speed: 0.11, count: 26, tint: '#86b8ff', glow: 1, size: 0.6, phase: 2.4 },
-      { y: -2700, r: 18, speed: -0.12, count: 24, tint: '#ff9ed0', glow: 1, size: 0.6, phase: 1.1 },
-      { y: -3900, r: 22, speed: 0.1, count: 20, tint: '#7ef6dc', glow: 1, size: 0.7, phase: 3.6 },
-      { y: -4800, r: 20, speed: -0.09, count: 18, tint: '#c6a8ff', glow: 1, size: 0.6, phase: 0.2 },
-      { y: -5700, r: 18, speed: 0.08, count: 16, tint: '#9fe8ff', glow: 1, size: 0.6, phase: 2.9 },
-      { y: -70, r: 22, speed: -0.16, count: 30, tint: '#9fd6ff', glow: 0, size: 1.2, phase: 1 },
-      { y: -150, r: 18, speed: 0.2, count: 26, tint: '#7fc4e8', glow: 0, size: 1, phase: 2 },
-      { y: -330, r: 26, speed: -0.12, count: 24, tint: '#6fb0d8', glow: 0.1, size: 1.4, phase: 3 },
-      { y: -2100, r: 20, speed: 0.14, count: 30, tint: '#7ef6dc', glow: 1, size: 0.7, phase: 4 },
-      { y: -3300, r: 24, speed: -0.1, count: 22, tint: '#9fb6ff', glow: 1, size: 0.8, phase: 5 },
+      { from: 0, to: 160, dy: -5, r: 16, speed: 0.22, count: 38, tint: '#e6f6ff', glow: 0, size: 0.9, phase: 0 },
+      { from: 0, to: 320, dy: 6, r: 12, speed: -0.3, count: 34, tint: '#ffd38a', glow: 0, size: 0.6, phase: 0.6 },
+      { from: 90, to: 600, dy: -9, r: 20, speed: 0.18, count: 40, tint: '#c8f0ff', glow: 0, size: 0.8, phase: 1.4 },
+      { from: 200, to: 900, dy: 5, r: 14, speed: -0.25, count: 30, tint: '#ffb48a', glow: 0, size: 0.7, phase: 2.2 },
+      { from: 400, to: 1300, dy: -3, r: 24, speed: 0.12, count: 24, tint: '#a8c8e8', glow: 0, size: 1.6, phase: 0.3 },
+      { from: 700, to: 1700, dy: 8, r: 18, speed: 0.2, count: 30, tint: '#9ad8ff', glow: 0.3, size: 0.9, phase: 2.7 },
+      { from: 1000, to: 2300, dy: -7, r: 22, speed: -0.15, count: 28, tint: '#7ef0f6', glow: 1, size: 0.7, phase: 1.9 },
+      { from: 1600, to: 3100, dy: 5, r: 16, speed: 0.17, count: 28, tint: '#a6ffd8', glow: 1, size: 0.6, phase: 3.1 },
+      { from: 2300, to: 3900, dy: -6, r: 20, speed: -0.13, count: 26, tint: '#86b8ff', glow: 1, size: 0.7, phase: 0.8 },
+      { from: 3100, to: 4700, dy: 7, r: 22, speed: 0.11, count: 24, tint: '#ff9ed0', glow: 1, size: 0.6, phase: 2.4 },
+      { from: 3900, to: 5500, dy: -4, r: 18, speed: -0.12, count: 24, tint: '#7ef6dc', glow: 1, size: 0.7, phase: 1.1 },
+      { from: 4700, to: 6300, dy: 6, r: 22, speed: 0.1, count: 20, tint: '#c6a8ff', glow: 1, size: 0.6, phase: 3.6 },
+      { from: 5500, to: 7200, dy: -6, r: 20, speed: -0.09, count: 20, tint: '#9fe8ff', glow: 1, size: 0.6, phase: 0.2 },
+      { from: 6200, to: 7200, dy: 4, r: 18, speed: 0.08, count: 16, tint: '#b6c0ff', glow: 1, size: 0.7, phase: 2.9 },
     ]
     const totalFish = schools.reduce((s, x) => s + x.count, 0)
     const fish = new THREE.InstancedMesh(fishGeo, fishMat, totalFish)
@@ -706,11 +735,15 @@ export default function World3D() {
       [5100, 8, -30, '#b9a6ff'],
       [5600, -10, -28, '#7ef6dc'],
       [6200, 12, -26, '#ffd6f0'],
+      [6700, -14, -30, '#a6e9ff'],
+      [7000, 9, -24, '#c8b0ff'],
     ].map(([d, x, z, c]) => {
       const j = makeJelly(c as string)
       j.position.set(x as number, -(d as number), z as number)
       j.scale.setScalar(1.6)
       j.userData.base = j.position.clone()
+      j.userData.depth = d as number
+      j.userData.dy = ((((d as number) * 7) % 17) - 8) // -8..8, stable per jelly
       scene.add(j)
       return j
     })
@@ -721,38 +754,42 @@ export default function World3D() {
     scene.add(great)
     const tailPivot = great.getObjectByName('tailPivot')!
 
-    /* the rest of the sea: turtles, dolphins, rays, a whale, squid, anglerfish */
+    /* the rest of the sea: turtles, dolphins, rays, a whale, squid, anglerfish.
+     * Each lives in a depth band and swims at a fixed height (dy) relative to the camera,
+     * so wherever a dive stops there is always something swimming past. */
+    const cam = { y: 0 }
     const creatures: Creature[] = []
-    const addSwimmer = (obj: THREE.Object3D, depth: number, z: number, speed: number, phase: number, scale: number, anim: (t: number) => void, bob = 1) => {
+    const addSwimmer = (obj: THREE.Object3D, from: number, to: number, dy: number, z: number, speed: number, phase: number, scale: number, anim: (t: number) => void, bob = 1) => {
       obj.scale.setScalar(scale)
       scene.add(obj)
       creatures.push({
         obj,
-        depth,
-        range: 260,
+        from,
+        to,
         update: (t) => {
           const { x, ry } = lane(t, speed, phase)
-          obj.position.set(x, -depth + Math.sin(t * 0.4 + phase * 9) * bob, z)
+          obj.position.set(x, Math.min(-2, cam.y + dy + Math.sin(t * 0.4 + phase * 9) * bob), z)
           obj.rotation.y = ry
           anim(t)
         },
       })
     }
-    // dolphins just under the surface, leaping in a loose pod
+    // dolphins in the shallows, in a loose pod
     for (let i = 0; i < 5; i++) {
       const dol = makeDolphin()
       const tail = dol.userData.tail as THREE.Group
-      const ph = i * 0.13
-      addSwimmer(dol, 14 + i * 4, -22 - i * 3, 7, ph, 1.1, (t) => {
+      addSwimmer(dol, 0, 260, 3 - i * 1.6, -20 - i * 3, 6, 0.1 + i * 0.05, 1.1, (t) => {
         tail.rotation.z = Math.sin(t * 6 + i) * 0.35
         dol.rotation.z = Math.sin(t * 1.5 + i) * 0.15
-      }, 2.5)
+      }, 2)
     }
-    // sea turtles in the sunlit shallows
-    for (const [dd, z, sp, ph, sc] of [[60, -20, 2.2, 0.1, 1.2], [150, -28, -1.8, 0.55, 1.5], [240, -18, 2.0, 0.3, 1.0], [380, -32, -1.6, 0.8, 1.6]] as const) {
+    // sea turtles
+    for (const [from, to, dy, z, sp, ph, sc] of [
+      [20, 500, -4, -20, 2.4, 0.1, 1.3], [60, 700, 5, -28, -2.0, 0.55, 1.6], [150, 900, -8, -24, 2.1, 0.3, 1.1], [300, 1000, 2, -34, -1.8, 0.8, 1.7],
+    ] as const) {
       const tur = makeTurtle()
       const fl = tur.userData.flippers as THREE.Group[]
-      addSwimmer(tur, dd, z, sp, ph, sc, (t) => {
+      addSwimmer(tur, from, to, dy, z, sp, ph, sc, (t) => {
         const a = Math.sin(t * 1.6 + ph * 10)
         fl[0].rotation.x = a * 0.6
         fl[1].rotation.x = -a * 0.6
@@ -761,45 +798,47 @@ export default function World3D() {
         tur.rotation.z = a * 0.05
       }, 1.5)
     }
-    // manta rays gliding through the twilight
-    for (const [dd, z, sp, ph, sc] of [[200, -34, 2.6, 0.2, 1.6], [520, -26, -2.2, 0.7, 2.0], [760, -38, 2.0, 0.4, 2.4], [1400, -30, -1.8, 0.9, 2.0]] as const) {
+    // manta rays
+    for (const [from, to, dy, z, sp, ph, sc] of [
+      [100, 900, 8, -34, 2.8, 0.2, 1.7], [400, 1400, -6, -28, -2.4, 0.7, 2.0], [800, 2000, 6, -38, 2.2, 0.45, 2.4], [1300, 2600, -3, -30, -2.0, 0.9, 2.0],
+    ] as const) {
       const ray = makeManta()
       const [L, R] = ray.userData.wings as THREE.Group[]
-      addSwimmer(ray, dd, z, sp, ph, sc, (t) => {
+      addSwimmer(ray, from, to, dy, z, sp, ph, sc, (t) => {
         const a = Math.sin(t * 1.1 + ph * 6) * 0.45
         L.rotation.x = a
         R.rotation.x = -a
         ray.rotation.z = Math.sin(t * 0.5 + ph) * 0.08
       }, 3)
     }
-    // a whale passing slowly overhead in the twilight zone
-    {
+    // whales passing slowly behind everything
+    for (const [from, to, dy, sp, ph] of [[150, 1000, 10, 2.4, 0.35], [900, 2200, -12, -2.0, 0.8]] as const) {
       const whale = makeWhale()
       const tail = whale.userData.tail as THREE.Group
       const fins = whale.userData.fins as THREE.Group[]
-      addSwimmer(whale, 560, -60, 2.2, 0.35, 1.6, (t) => {
+      addSwimmer(whale, from, to, dy, -62, sp, ph, 1.6, (t) => {
         tail.rotation.z = Math.sin(t * 0.9) * 0.25
         fins[0].rotation.x = 0.3 + Math.sin(t * 0.6) * 0.15
         fins[1].rotation.x = -0.3 - Math.sin(t * 0.6) * 0.15
       }, 4)
     }
-    // squid jetting through the midnight zone
-    for (const [dd, z, sp, ph, col] of [[1800, -24, 4, 0.1, '#d0605a'], [2300, -30, -3.5, 0.6, '#e27aa8'], [3100, -22, 4.2, 0.3, '#c86a6a'], [4200, -28, -3.8, 0.8, '#e08a7a']] as const) {
+    // squid jetting in bursts through the midnight zone
+    for (const [from, to, dy, z, sp, ph, col] of [
+      [1400, 3200, 4, -24, 4, 0.1, '#d0605a'], [2000, 4000, -6, -30, -3.5, 0.6, '#e27aa8'], [2800, 4800, 7, -22, 4.2, 0.3, '#c86a6a'], [3600, 5600, -3, -28, -3.8, 0.8, '#e08a7a'], [5000, 7200, 5, -26, 3.6, 0.45, '#d878a0'],
+    ] as const) {
       const sq = makeSquid(col)
       const arms = sq.userData.arms as THREE.Line[]
       sq.scale.setScalar(1.4)
       scene.add(sq)
       creatures.push({
         obj: sq,
-        depth: dd,
-        range: 260,
+        from,
+        to,
         update: (t) => {
-          // pulse-and-glide: position advances in bursts
           const burst = t + Math.sin(t * 2.2 + ph * 9) * 0.35
           const { x, ry } = lane(burst, sp, ph)
-          sq.position.set(x, -dd + Math.sin(t * 0.5 + ph) * 2, z)
-          // squid swim mantle-first, so face the other way
-          sq.rotation.y = ry + Math.PI
+          sq.position.set(x, cam.y + dy + Math.sin(t * 0.5 + ph) * 2, z)
+          sq.rotation.y = ry + Math.PI // squid swim mantle-first
           const open = 0.5 + 0.5 * Math.sin(t * 2.2 + ph * 9)
           for (const arm of arms) {
             const p = arm.geometry.attributes.position as THREE.BufferAttribute
@@ -814,12 +853,26 @@ export default function World3D() {
         },
       })
     }
-    // anglerfish in the abyss
+    // dumbo octopuses drifting through the abyss and the trench
+    for (const [from, to, dy, z, sp, ph, col] of [
+      [4000, 6000, 3, -22, 1.3, 0.15, '#f0a8b8'], [4800, 7200, -5, -28, -1.1, 0.6, '#ffc8a0'], [5800, 7200, 6, -20, 1.2, 0.35, '#e8b0ff'], [6300, 7200, -2, -26, -1.0, 0.85, '#ffb0c8'],
+    ] as const) {
+      const oc = makeDumbo(col)
+      const ears = oc.userData.ears as THREE.Group[]
+      const skirt = oc.userData.skirt as THREE.Mesh
+      addSwimmer(oc, from, to, dy, z, sp, ph, 1.4, (t) => {
+        const a = Math.sin(t * 2.2 + ph * 7)
+        ears[0].rotation.x = a * 0.6
+        ears[1].rotation.x = -a * 0.6
+        skirt.scale.set(1 + a * 0.12, 1 - a * 0.1, 1 + a * 0.12)
+      }, 2.5)
+    }
+    // anglerfish in the abyss and trench
     for (let i = 0; i < 7; i++) {
       const ang = makeAngler()
       const lure = ang.userData.lure as THREE.Sprite
-      const dd = 3500 + i * 480
-      addSwimmer(ang, dd, -18 - (i % 3) * 6, i % 2 ? -1.1 : 1.2, i * 0.17, 1.2 + (i % 3) * 0.3, (t) => {
+      const from = 3200 + i * 500
+      addSwimmer(ang, from, from + 1600, [-5, 4, -2, 6, -7, 2, -4][i], -18 - (i % 3) * 6, i % 2 ? -1.4 : 1.5, i * 0.17, 1.2 + (i % 3) * 0.3, (t) => {
         lure.material.opacity = 0.65 + 0.35 * Math.sin(t * 2.4 + i)
         ang.rotation.z = Math.sin(t * 0.8 + i) * 0.06
       }, 1.2)
@@ -964,7 +1017,7 @@ export default function World3D() {
         hills.visible = true
       }
       water.visible = d < 260
-      hemi.intensity = Math.max(0.15, Math.min(1.5, 0.5 + d / 40) - d / 900)
+      hemi.intensity = Math.max(0.4, Math.min(1.5, 0.5 + d / 40) - d / 900)
       hemi.color.copy(tmpColor.set('#c8d4e8').lerp(c, Math.min(1, d / 600)))
       sunLight.intensity = Math.max(0, 2.6 - d / 250)
       lamp.position.copy(camera.position).add(new THREE.Vector3(0, -1, -4))
@@ -1016,7 +1069,8 @@ export default function World3D() {
       // fish
       let k = 0
       for (const sc of schools) {
-        const near = Math.abs(-sc.y - d) < 260
+        const near = d >= sc.from && d <= sc.to
+        const baseY = Math.min(-3, camY + sc.dy)
         for (let i = 0; i < sc.count; i++, k++) {
           if (!near) {
             dummy.position.set(0, -99999, 0)
@@ -1030,7 +1084,7 @@ export default function World3D() {
           const rr = sc.r + o[0] * 6
           const x = Math.cos(a) * rr
           const z = Math.sin(a) * rr * 0.55 - 22
-          const y = sc.y + o[1] * 5 + Math.sin(t * 0.8 + o[3] * 10) * 0.6
+          const y = baseY + o[1] * 5 + Math.sin(t * 0.8 + o[3] * 10) * 0.6
           dummy.position.set(x, y, z)
           // face along the direction of travel
           const dir = sc.speed > 0 ? 1 : -1
@@ -1045,11 +1099,11 @@ export default function World3D() {
 
       // jellies pulse
       for (const j of jellies) {
-        const near = Math.abs(j.position.y + d) < 200
+        const near = Math.abs(d - j.userData.depth) < 600
         j.visible = near
         if (!near) continue
         const ph = t * 1.4 + j.userData.base.x
-        j.position.y = j.userData.base.y + Math.sin(ph * 0.5) * 2
+        j.position.y = Math.min(-3, camY + j.userData.dy + Math.sin(ph * 0.5) * 2)
         j.userData.bell.scale.set(1 + Math.sin(ph) * 0.08, 0.8 - Math.sin(ph) * 0.12, 1 + Math.sin(ph) * 0.08)
         for (const line of j.userData.lines as THREE.Line[]) {
           const p = line.geometry.attributes.position as THREE.BufferAttribute
@@ -1059,16 +1113,17 @@ export default function World3D() {
       }
 
       // the rest of the sea
+      cam.y = camY
       for (const c of creatures) {
-        c.obj.visible = Math.abs(d - c.depth) < c.range
+        c.obj.visible = d >= c.from && d <= c.to
         if (c.obj.visible) c.update(t)
       }
 
       // the great fish glides past
-      great.visible = Math.abs(d - 1300) < 320
+      great.visible = d > 900 && d < 1900
       if (great.visible) {
         const gx = Math.sin(t * 0.06) * 34
-        great.position.set(gx, -1296 + Math.sin(t * 0.3) * 3, -42)
+        great.position.set(gx, camY + 2 + Math.sin(t * 0.3) * 3, -42)
         great.rotation.y = Math.cos(t * 0.06) > 0 ? 0 : Math.PI
         great.rotation.z = Math.sin(t * 0.25) * 0.05
         tailPivot.rotation.y = Math.sin(t * 1.2) * 0.35
