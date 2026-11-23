@@ -3,7 +3,7 @@ import { motion } from 'motion/react'
 import type { ArchiveEntry } from '../../shared/types'
 import { depthFor } from '../../shared/scoring'
 import { api } from '../lib/api'
-import { setDepth } from '../lib/ocean'
+import { setDepth } from '../lib/sky'
 import { link } from '../lib/router'
 import { HomeButton, MuteButton, Spinner } from '../components/ui'
 
@@ -32,15 +32,15 @@ export function Archive({ today }: { today: number }) {
       <main className="mx-auto max-w-4xl px-4 pb-12 pt-6">
         {list && (
           <div className="glass mb-6 grid grid-cols-3 rounded-2xl p-4 text-center">
-            <Stat label="dives" value={`${done.length}/${list.length}`} />
+            <Stat label="ascents" value={`${done.length}/${list.length}`} />
             <Stat label="avg score" value={String(avg)} />
-            <Stat label="avg depth" value={`${depthFor(avg).toLocaleString()}m`} />
+            <Stat label="avg altitude" value={`${depthFor(avg).toLocaleString()}m`} />
           </div>
         )}
         {err && <p className="text-center text-coral">{err}</p>}
         {!list && !err && (
           <div className="py-20">
-            <Spinner label="charting old dives…" />
+            <Spinner label="gathering past ascents…" />
           </div>
         )}
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -56,7 +56,7 @@ export function Archive({ today }: { today: number }) {
                 </span>
                 <span className="font-display text-lg">{fmt(e.date)}</span>
                 <span className={`font-mono text-sm ${e.status === 'done' ? 'text-amber' : e.status === 'partial' ? 'text-glow' : 'text-white/45'}`}>
-                  {e.status === 'done' ? `${e.score} pts · ${depthFor(e.score ?? 0).toLocaleString()}m` : e.status === 'partial' ? 'in progress ▼' : 'not dived'}
+                  {e.status === 'done' ? `${e.score} pts · ${depthFor(e.score ?? 0).toLocaleString()}m` : e.status === 'partial' ? 'in progress ▲' : 'not climbed'}
                 </span>
               </a>
             </motion.li>

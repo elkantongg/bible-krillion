@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { io, type Socket } from 'socket.io-client'
 import type { PartyDifficulty, PartyPlayer, PartySettings, PartyState } from '../../shared/types'
 import { playerToken } from '../lib/api'
-import { setDepth } from '../lib/ocean'
+import { setDepth } from '../lib/sky'
 import { go } from '../lib/router'
 import { sfx } from '../lib/sound'
 import { load, save } from '../lib/storage'
@@ -32,7 +32,7 @@ const DIFFS: { v: PartyDifficulty; label: string; note: string }[] = [
 function NameField({ value, onChange, autoFocus }: { value: string; onChange: (s: string) => void; autoFocus?: boolean }) {
   return (
     <label className="flex w-full flex-col gap-1.5 text-left">
-      <span className="eyebrow text-white/60">your diver name</span>
+      <span className="eyebrow text-white/60">your name</span>
       <input
         value={value}
         autoFocus={autoFocus}
@@ -89,19 +89,19 @@ export function PartyHome() {
       </header>
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 px-4 pb-10 text-center">
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="anim-bob">
-          <GreatFish size={150} mouth={0.35} />
+          <FireWheel size={150} blaze={0.35} />
         </motion.div>
         <div>
-          <h1 className="text-gilded font-display text-5xl font-extrabold">Big Fish</h1>
+          <h1 className="text-gilded font-display text-5xl font-extrabold">Chariots</h1>
           <p className="mt-3 text-white/80">
-            One prompt goes round the table. Name a new answer before your clock runs out, or the great fish takes a life. A question keeps going
-            round until someone is swallowed. Last diver swimming wins.
+            One prompt goes round the table, carried by a wheel of fire. Name a new answer before your clock runs out, or you fall from the chariot
+            and lose a life. A question keeps going round until someone falls. Last rider standing wins.
           </p>
-          <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.2em] text-gold/80">no sign-in · 2–12 divers · share a 4-letter code</p>
+          <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.2em] text-gold/80">no sign-in · 2–12 riders · share a 4-letter code</p>
         </div>
         <NameField value={name} onChange={setName} />
         <button onClick={() => void create()} disabled={busy} className="btn-glow w-full rounded-full px-6 py-4 font-display text-lg font-bold uppercase tracking-wider">
-          {busy ? 'Making waves…' : 'Create a room'}
+          {busy ? 'Harnessing the horses…' : 'Create a room'}
         </button>
         <div className="flex w-full items-center gap-3 text-white/40">
           <span className="rule-gold flex-1" />
@@ -225,7 +225,7 @@ export function PartyRoom({ code }: { code: string }) {
           <p className="eyebrow text-white/60">joining room</p>
           <p className="text-gilded font-mono text-5xl font-bold tracking-[0.3em]">{code}</p>
           <NameField value={name} onChange={setName} autoFocus />
-          <button className="btn-glow w-full rounded-full py-4 text-lg font-bold uppercase tracking-wider">Dive in</button>
+          <button className="btn-glow w-full rounded-full py-4 text-lg font-bold uppercase tracking-wider">Climb aboard</button>
         </form>
       </Shell>
     )
@@ -283,7 +283,7 @@ function Shell({ children, code }: { children: React.ReactNode; code?: string })
           ←
         </button>
         <span className="font-display text-lg font-bold tracking-wide">
-          Big Fish {code && <span className="ml-1 font-mono text-sm tracking-[0.2em] text-gold">{code}</span>}
+          Chariots {code && <span className="ml-1 font-mono text-sm tracking-[0.2em] text-gold">{code}</span>}
         </span>
         <MuteButton />
       </header>
@@ -341,7 +341,7 @@ function Lobby({ s, me, emit }: { s: PartyState; me: string; emit: Emit }) {
   const set = (patch: Partial<PartySettings>) => isHost && emit('party:settings', patch)
   const invite = async () => {
     try {
-      if (navigator.share && matchMedia('(pointer: coarse)').matches) await navigator.share({ title: 'Big Fish', text: `Join my Big Fish room: ${s.code}`, url })
+      if (navigator.share && matchMedia('(pointer: coarse)').matches) await navigator.share({ title: 'Chariots', text: `Join my Chariots room: ${s.code}`, url })
       else {
         await navigator.clipboard.writeText(url)
         setCopied(true)
@@ -377,7 +377,7 @@ function Lobby({ s, me, emit }: { s: PartyState; me: string; emit: Emit }) {
       </div>
 
       <div className="glass ornate w-full rounded-2xl p-4">
-        <p className="eyebrow mb-3 text-white/60">divers ({players.length}/12)</p>
+        <p className="eyebrow mb-3 text-white/60">riders ({players.length}/12)</p>
         <ul className="flex flex-wrap justify-center gap-3">
           <AnimatePresence>
             {players.map((p) => (
@@ -453,7 +453,7 @@ function Lobby({ s, me, emit }: { s: PartyState; me: string; emit: Emit }) {
           onClick={() => emit('party:start', null, ((r: { ok: boolean; error?: string }) => !r.ok && setErr(r.error ?? '')) as never)}
           className="btn-glow w-full rounded-full py-4 font-display text-lg font-bold uppercase tracking-wider"
         >
-          {players.length < 2 ? 'Waiting for divers…' : 'Start the game'}
+          {players.length < 2 ? 'Waiting for riders…' : 'Start the game'}
         </button>
       ) : (
         <p className="eyebrow text-white/60">waiting for the host to start…</p>
@@ -479,39 +479,53 @@ function Chip({ on, disabled, onClick, children, title }: { on: boolean; disable
   )
 }
 
-function GreatFish({ size, mouth, angle = 0, wobble = 0 }: { size: number; mouth: number; angle?: number; wobble?: number }) {
-  const m = Math.max(0, Math.min(1, mouth))
+/** a wheel of fire (Elijah's chariot): points at whoever holds the question and blazes as their clock runs down */
+function FireWheel({ size, blaze, angle = 0, wobble = 0 }: { size: number; blaze: number; angle?: number; wobble?: number }) {
+  const m = Math.max(0, Math.min(1, blaze))
+  const flames = Array.from({ length: 12 }, (_, i) => (i / 12) * Math.PI * 2)
   return (
-    <motion.div style={{ width: size, height: size * 0.7 }} animate={{ rotate: angle }} transition={{ type: 'spring', stiffness: 90, damping: 14 }}>
+    <motion.div style={{ width: size, height: size }} animate={{ rotate: angle }} transition={{ type: 'spring', stiffness: 90, damping: 14 }}>
       <svg
-        viewBox="0 0 200 140"
+        viewBox="-100 -100 200 200"
         className="h-full w-full overflow-visible"
         style={{
-          scale: Math.abs((((angle % 360) + 540) % 360) - 180) > 90 ? '1 -1' : '1 1',
-          transition: 'scale 0.3s',
           animation: wobble ? `bob ${Math.max(0.35, 2.2 - wobble * 1.8)}s ease-in-out infinite` : undefined,
-          filter: `drop-shadow(0 0 ${12 + m * 24}px rgba(255,127,110,${0.2 + m * 0.5})) drop-shadow(0 10px 12px rgba(0,0,0,0.4))`,
+          filter: `drop-shadow(0 0 ${10 + m * 26}px rgba(255,150,70,${0.25 + m * 0.5})) drop-shadow(0 10px 12px rgba(0,0,0,0.4))`,
         }}
       >
         <defs>
-          <radialGradient id="fishBody" cx="0.45" cy="0.3" r="0.85">
-            <stop offset="0" stopColor="#9fe0ee" />
-            <stop offset="0.5" stopColor="#2a6f99" />
-            <stop offset="1" stopColor="#0b2c48" />
+          <radialGradient id="wheelFire" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0.55" stopColor="#ffd27a" stopOpacity="0" />
+            <stop offset="0.78" stopColor="#ff9a3c" stopOpacity={0.35 + m * 0.4} />
+            <stop offset="1" stopColor="#ff5a1f" stopOpacity="0" />
           </radialGradient>
-          <linearGradient id="fishBelly" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#f6e7c4" stopOpacity="0" />
-            <stop offset="1" stopColor="#f6e7c4" stopOpacity="0.45" />
-          </linearGradient>
         </defs>
-        <path d="M20 70 L-18 36 Q -8 70 -18 104 Z" fill="#1c5a80" />
-        <path d={`M18 70 Q 30 14 110 16 Q 168 20 ${186 - m * 8} ${62 - m * 26} L 140 ${70} L ${186 - m * 8} ${78 + m * 26} Q 168 122 110 124 Q 30 126 18 70 Z`} fill="url(#fishBody)" />
-        <path d={`M40 92 Q 100 128 ${160} ${92 + m * 10}`} fill="url(#fishBelly)" />
-        <path d="M70 30 Q 96 6 122 22" fill="#1c5a80" />
-        <path d="M60 96 Q 80 122 100 110" fill="#1c5a80" />
-        <circle cx="128" cy="44" r="11" fill="#f3fbff" />
-        <circle cx={131 + m * 2} cy="44" r={5 + m * 2} fill="#031024" />
-        <circle cx="133" cy="41" r="2" fill="#fff" />
+        <circle r="98" fill="url(#wheelFire)" />
+        {/* flames licking outward from the rim, taller as time runs out */}
+        {flames.map((a, i) => {
+          const r0 = 62
+          const r1 = 74 + m * 22 + (i % 2) * 6
+          const w = 0.16
+          const p = (r: number, t: number) => `${Math.cos(t) * r} ${Math.sin(t) * r}`
+          return (
+            <path
+              key={i}
+              d={`M${p(r0, a - w)} Q${p(r1 * 0.92, a - w * 0.4)} ${p(r1, a + 0.05)} Q${p(r1 * 0.86, a + w * 0.3)} ${p(r0, a + w)} Z`}
+              fill={i % 2 ? '#ffb24a' : '#ff7a2e'}
+              opacity={0.55 + m * 0.4}
+            />
+          )
+        })}
+        <g style={{ transformOrigin: '0 0', animation: `spin-slow ${Math.max(1.2, 10 - m * 8)}s linear infinite` }}>
+          <circle r="62" fill="none" stroke="#e8c170" strokeWidth="9" />
+          <circle r="62" fill="none" stroke="#fff2c8" strokeWidth="2" opacity="0.6" />
+          {Array.from({ length: 8 }, (_, i) => (
+            <line key={i} x1="0" y1="0" x2={Math.cos((i / 8) * Math.PI * 2) * 58} y2={Math.sin((i / 8) * Math.PI * 2) * 58} stroke="#d9ad5c" strokeWidth="4" strokeLinecap="round" />
+          ))}
+          <circle r="13" fill="#f3d48c" stroke="#b8893a" strokeWidth="3" />
+        </g>
+        {/* the pointer toward the holder */}
+        <path d="M70 -9 L94 0 L70 9 Z" fill="#fff2c8" />
       </svg>
     </motion.div>
   )
@@ -555,7 +569,7 @@ function Game({ s, me, emit, typing }: { s: PartyState; me: string; emit: Emit; 
   const ry = h / 2 - 40
   const holderIdx = seats.findIndex((p) => p.id === s.holderId)
   const angleOf = (i: number) => (i / seats.length) * Math.PI * 2 + Math.PI / 2
-  const fishAngle = holderIdx >= 0 ? (Math.atan2(Math.sin(angleOf(holderIdx)) * ry, Math.cos(angleOf(holderIdx)) * rx) * 180) / Math.PI : 0
+  const wheelAngle = holderIdx >= 0 ? (Math.atan2(Math.sin(angleOf(holderIdx)) * ry, Math.cos(angleOf(holderIdx)) * rx) * 180) / Math.PI : 0
   const thisRound = new Map(s.feed.filter((f) => f.round === s.round).map((f) => [f.playerId, f]))
 
   useEffect(() => {
@@ -651,23 +665,23 @@ function Game({ s, me, emit, typing }: { s: PartyState; me: string; emit: Emit; 
                 )}
               </span>
               <span className={`max-w-full truncate text-[11px] font-semibold ${p.id === me ? 'text-gold' : ''}`}>{p.name}</span>
-              {out ? <span className="text-[10px] text-white/45">swallowed</span> : <Lives n={p.lives} max={s.settings.lives} />}
+              {out ? <span className="text-[10px] text-white/45">fallen</span> : <Lives n={p.lives} max={s.settings.lives} />}
             </motion.div>
           )
         })}
 
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ zIndex: Math.round(h / 2) }}>
           <motion.div animate={{ scale: s.phase === 'popped' ? 1.7 : 1 + (1 - frac) * 0.35 }} transition={{ type: 'spring', stiffness: 120, damping: 10 }}>
-            <GreatFish size={w < 420 ? 92 : 124} mouth={s.phase === 'popped' ? 1 : 0.1 + (1 - frac) * 0.7} angle={fishAngle} wobble={reading ? 0 : 1 - frac} />
+            <FireWheel size={w < 420 ? 92 : 124} blaze={s.phase === 'popped' ? 1 : 0.1 + (1 - frac) * 0.7} angle={wheelAngle} wobble={reading ? 0 : 1 - frac} />
           </motion.div>
         </div>
 
         <AnimatePresence>
           {s.phase === 'popped' && victim && (
             <motion.div key={s.lastPop?.at} initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[999] flex flex-col items-center justify-center gap-1 text-center">
-              <span className="font-display text-6xl font-extrabold text-coral drop-shadow-[0_0_30px_#ff7f6e] sm:text-7xl">GULP!</span>
+              <span className="font-display text-6xl font-extrabold text-coral drop-shadow-[0_0_30px_#ff7f6e] sm:text-7xl">FALLEN!</span>
               <span className="glass rounded-full px-4 py-1.5 font-semibold">
-                {victim.id === me ? 'You were' : `${victim.name} was`} swallowed
+                {victim.id === me ? 'You' : `${victim.name}`} fell from the chariot
                 {s.lastPop?.eliminated ? ' — out!' : ` · ${victim.lives} ${victim.lives === 1 ? 'life' : 'lives'} left`}
               </span>
             </motion.div>
@@ -759,7 +773,7 @@ function Between({ s, me, emit, now }: { s: PartyState; me: string; emit: Emit; 
       {r.survivedAll ? (
         <p className="font-display text-xl text-gold">🙌 Everyone survived {r.rounds} rounds!</p>
       ) : (
-        victim && <p className="font-display text-xl text-coral">🐋 {victim.id === me ? 'You' : victim.name} lost a life</p>
+        victim && <p className="font-display text-xl text-coral">🔥 {victim.id === me ? 'You' : victim.name} lost a life</p>
       )}
       <AnswerBoard items={r.answers.map((a) => ({ name: a.name, ref: a.ref, tier: a.tier, found: a.found }))} title="Every answer" note={`${r.answers.filter((a) => a.found).length} named · tap to read`} />
       <div className="flex items-center gap-3">
@@ -792,7 +806,7 @@ function Over({ s, me, emit }: { s: PartyState; me: string; emit: Emit }) {
   return (
     <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative flex w-full max-w-md flex-col items-center gap-5 pb-14 text-center">
       <Burst trigger={s.winnerId ?? 'x'} count={48} />
-      <span className="eyebrow text-white/60">last diver swimming</span>
+      <span className="eyebrow text-white/60">last rider standing</span>
       {winner ? (
         <>
           <motion.div initial={{ y: 30, rotate: -10 }} animate={{ y: 0, rotate: 0 }} transition={{ type: 'spring' }} className="relative">
@@ -803,7 +817,7 @@ function Over({ s, me, emit }: { s: PartyState; me: string; emit: Emit }) {
           <p className="font-serif text-lg italic text-ivory/80">“Well done, good and faithful servant.” — Matthew 25:21</p>
         </>
       ) : (
-        <h2 className="font-display text-4xl font-extrabold">Everyone was swallowed</h2>
+        <h2 className="font-display text-4xl font-extrabold">Everyone fell</h2>
       )}
       <ol className="glass ornate w-full rounded-2xl p-3 text-left">
         {ranked.map((p, i) => (
@@ -825,7 +839,7 @@ function Over({ s, me, emit }: { s: PartyState; me: string; emit: Emit }) {
         <p className="eyebrow text-white/60">waiting for the host…</p>
       )}
       <button onClick={() => go('/')} className="eyebrow text-white/50 hover:underline">
-        back to the surface
+        back to the hills
       </button>
     </motion.div>
   )

@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 
-/** global camera depth target (metres) shared by every screen so route changes glide */
+/** global camera altitude target (metres climbed; named "depth" for history) shared by every screen so route changes glide */
 let target = 0
 const subs = new Set<() => void>()
 export function setDepth(m: number) {
@@ -18,15 +18,15 @@ export const useDepthTarget = () =>
   )
 
 const STOPS: [number, [number, number, number]][] = [
-  // dusk-lit water: continues the cover's evening palette instead of daytime cyan
-  [0, [38, 78, 104]],
-  [150, [26, 62, 92]],
-  [500, [16, 44, 74]],
-  [1000, [10, 30, 56]],
-  [2500, [6, 18, 38]],
-  [4500, [3, 10, 24]],
-  [7000, [1, 4, 10]],
-  [9000, [0, 2, 6]],
+  // the air around you as you climb: dusk over the hills, a sunrise in the clouds, then ever brighter gold
+  [0, [58, 44, 60]],
+  [350, [196, 140, 124]],
+  [1000, [248, 226, 196]],
+  [2500, [246, 236, 216]],
+  [4000, [252, 234, 196]],
+  [5500, [255, 228, 176]],
+  [7000, [255, 232, 180]],
+  [9000, [255, 234, 186]],
 ]
 export function colorAt(d: number): string {
   if (d <= STOPS[0][0]) return `rgb(${STOPS[0][1].join(',')})`

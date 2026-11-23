@@ -3,21 +3,21 @@ import { AnimatePresence, motion } from 'motion/react'
 import type { ArchiveEntry, DiveState } from '../../shared/types'
 import { depthFor } from '../../shared/scoring'
 import { api } from '../lib/api'
-import { setDepth } from '../lib/ocean'
+import { setDepth } from '../lib/sky'
 import { go, link } from '../lib/router'
 import { knowledgeVerseOfDay } from '../lib/verses'
 import { MuteButton, useCountdownToMidnight } from '../components/ui'
 
 const RULES = [
-  'Seven Bible prompts a day — the same seven for everyone. They start gentle and get harder the deeper you go.',
+  'Seven Bible prompts a day — the same seven for everyone. They start gentle and get harder the higher you climb.',
   'You get 25 seconds to name one answer. Small typos are forgiven; wrong answers bounce off, so try again before the clock runs out.',
-  'Rare answers score big. Obvious ones float near the surface.',
-  'Every point sinks you 10 metres. A perfect 700 reaches the pearl on the trench floor at 7,000 m.',
+  'Rare answers score big. Obvious ones stay close to the ground.',
+  'Every point lifts you 10 metres: from the lake into the open sky, up through the clouds, then above them toward the golden city. A perfect 700 brings you to its gates at 7,000 m.',
   'After each prompt, see every answer with its chapter — tap one to read it.',
-  'Free Dive is unlimited practice by topic. Big Fish is a party game for 2–12 friends.',
+  'Free Flight is unlimited practice by topic. Chariots is a party game for 2–12 friends.',
 ]
 
-/** consecutive finished dives ending today (or yesterday, if today isn't done yet) */
+/** consecutive finished ascents ending today (or yesterday, if today isn't done yet) */
 function streakOf(list: ArchiveEntry[], today: number) {
   const done = new Set(list.filter((e) => e.status === 'done').map((e) => e.n))
   let n = done.has(today) ? today : today - 1
@@ -53,7 +53,7 @@ export function Home({ today }: { today: number }) {
 
   return (
     <div className="relative z-10 flex min-h-[100dvh] flex-col">
-      {/* keeps the lower half legible over the bright water */}
+      {/* keeps the lower half legible over the bright horizon */}
       <div aria-hidden className="pointer-events-none fixed inset-x-0 bottom-0 -z-10 h-[55vh] bg-gradient-to-b from-transparent via-[#030812]/55 to-[#030812]/90" />
 
       <header className="flex items-center justify-between gap-2 px-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6">
@@ -140,14 +140,14 @@ export function Home({ today }: { today: number }) {
             onClick={() => go(`/dive/${today}`)}
             className="h-14 w-full rounded-lg bg-[#ecdcb4] text-[13px] font-bold uppercase tracking-[0.2em] text-[#14100a] shadow-[0_10px_40px_-12px_rgba(236,200,140,0.6)] transition hover:-translate-y-px hover:bg-[#f4e6c3] active:translate-y-px"
           >
-            {done ? 'See my dive' : started ? 'Continue today\'s dive' : 'Begin today\'s dive'}
+            {done ? 'See my ascent' : started ? 'Continue today\'s ascent' : 'Begin today\'s ascent'}
           </button>
-          <span className="mt-3 text-xs text-ivory/45">{done ? `Next dive in ${left}` : `Dive No. ${today} · 7 questions · 25 seconds each`}</span>
+          <span className="mt-3 text-xs text-ivory/45">{done ? `Next ascent in ${left}` : `Ascent No. ${today} · 7 questions · 25 seconds each`}</span>
 
           <nav className="mt-8 grid w-full grid-cols-3 divide-x divide-ivory/10 border-y border-ivory/10">
-            <ModeLink href="/free" title="Free Dive" sub="Practice by topic" icon={<WaveIcon />} />
-            <ModeLink href="/party" title="Big Fish" sub="Play with friends" icon={<FishIcon />} />
-            <ModeLink href="/archive" title="Archive" sub="Past dives" icon={<ScrollIcon />} />
+            <ModeLink href="/free" title="Free Flight" sub="Practice by topic" icon={<WingIcon />} />
+            <ModeLink href="/party" title="Chariots" sub="Play with friends" icon={<WheelIcon />} />
+            <ModeLink href="/archive" title="Archive" sub="Past ascents" icon={<ScrollIcon />} />
           </nav>
 
         </motion.div>
@@ -167,17 +167,18 @@ function ModeLink({ href, title, sub, icon }: { href: string; title: string; sub
 }
 
 const iconProps = { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.4, strokeLinecap: 'round', strokeLinejoin: 'round' } as const
-const WaveIcon = () => (
+const WingIcon = () => (
   <svg {...iconProps} aria-hidden>
-    <path d="M2 9c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2" />
-    <path d="M2 14c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2" />
-    <path d="M2 19c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2" />
+    <path d="M12 18C9 11 5 7 2 6c1 5 3.5 9 10 12Z" />
+    <path d="M12 18c3-7 7-11 10-12-1 5-3.5 9-10 12Z" />
+    <path d="M5.5 10.5 8 12M18.5 10.5 16 12" />
   </svg>
 )
-const FishIcon = () => (
+const WheelIcon = () => (
   <svg {...iconProps} aria-hidden>
-    <path d="M2 12c3.5-5 9-6.5 14-3.5L21 5v14l-5-3.5C11 18.5 5.5 17 2 12Z" />
-    <circle cx="7" cy="11" r="0.6" fill="currentColor" />
+    <circle cx="12" cy="12" r="8" />
+    <circle cx="12" cy="12" r="1.6" />
+    <path d="M12 4v16M4 12h16M6.3 6.3l11.4 11.4M17.7 6.3 6.3 17.7" />
   </svg>
 )
 const ScrollIcon = () => (

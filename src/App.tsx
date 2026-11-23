@@ -2,8 +2,10 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { localDive } from '../shared/dives'
 import { getMeta } from './lib/api'
 import { go, usePath } from './lib/router'
-import { Ocean } from './components/Ocean'
+import { Heavens } from './components/Heavens'
 import { OfflineToast, Spinner } from './components/ui'
+import { installMusic } from './lib/music'
+import { isMuted } from './lib/sound'
 import { Home } from './screens/Home'
 import { Dive } from './screens/Dive'
 import { Archive } from './screens/Archive'
@@ -26,6 +28,8 @@ export function App() {
   const path = usePath()
   const [today, setToday] = useState<number | null>(null)
   const [down, setDown] = useState(false)
+
+  useEffect(() => installMusic(isMuted()), [])
 
   useEffect(() => {
     let stop = false
@@ -56,7 +60,7 @@ export function App() {
   else if (today == null)
     page = (
       <div className="relative z-10 grid min-h-[100dvh] place-items-center">
-        <Spinner label={down ? 'searching for signal…' : 'descending…'} />
+        <Spinner label={down ? 'searching for signal…' : 'ascending…'} />
       </div>
     )
   else if (dive) {
@@ -75,7 +79,7 @@ export function App() {
           <World3D />
         </Suspense>
       ) : (
-        <Ocean />
+        <Heavens />
       )}
       {page}
       <OfflineToast />

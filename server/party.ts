@@ -117,7 +117,7 @@ export class PartyRoom {
   }
 
   join(id: string, name: string): { ok: boolean; error?: string } {
-    const clean = name.replace(/\s+/g, ' ').trim().slice(0, 16) || 'Diver'
+    const clean = name.replace(/\s+/g, ' ').trim().slice(0, 16) || 'Pilgrim'
     const existing = this.players.find((p) => p.id === id)
     if (existing) {
       existing.connected = true
@@ -181,7 +181,7 @@ export class PartyRoom {
     if (by !== this.hostId) return { ok: false, error: 'Only the host can start' }
     if (this.phase !== 'lobby') return { ok: false, error: 'Already started' }
     const ready = this.players.filter((p) => p.connected)
-    if (ready.length < 2) return { ok: false, error: 'Need at least 2 divers' }
+    if (ready.length < 2) return { ok: false, error: 'Need at least 2 players' }
     for (const p of this.players) {
       p.spectator = !p.connected
       p.lives = p.connected ? this.settings.lives : 0

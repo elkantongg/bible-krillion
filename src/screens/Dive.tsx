@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import type { BoardEntry, DiveState, OpenPrompt, PromptResult } from '../../shared/types'
 import { depthFor, PROMPTS_PER_DIVE, TIERS, tierByKey, zoneFor } from '../../shared/scoring'
 import { api, ApiError, serverNow, syncClock } from '../lib/api'
-import { setDepth } from '../lib/ocean'
+import { setDepth } from '../lib/sky'
 import { sfx } from '../lib/sound'
 import { link } from '../lib/router'
 import { AnimatedNumber, AnswerBoard, Burst, HomeButton, MuteButton, Spinner, TIER_COLOR, TierChip, TimerRing, useCountdownToMidnight, useShake } from '../components/ui'
@@ -29,7 +29,7 @@ export function Dive({ n, isToday }: { n: number; isToday: boolean }) {
   // points shown on the HUD lag behind until the sinking animation lands
   const banked = (state?.results ?? []).filter((r) => phase !== 'sinking' || r.idx !== last?.idx).reduce((s, r) => s + r.points, 0)
   useEffect(() => {
-    // camera sits a little below the waterline so prompts read against water, not sky
+    // camera sits a little above the hills so prompts read against open sky
     setDepth(depthFor(banked) + 110)
   }, [banked])
 
@@ -228,10 +228,10 @@ export function Dive({ n, isToday }: { n: number; isToday: boolean }) {
 
           {phase === 'resume' && state && (
             <motion.div key="resume" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
-              <p className="font-mono text-xs uppercase tracking-[0.25em] text-white/60">dive #{n} · paused at prompt {state.current + 1} of 7</p>
+              <p className="font-mono text-xs uppercase tracking-[0.25em] text-white/60">ascent #{n} · paused at prompt {state.current + 1} of 7</p>
               <p className="font-display text-3xl sm:text-4xl">Catch your breath.</p>
               <button className="btn-glow rounded-full px-8 py-4 text-lg font-bold tracking-wide" onClick={() => void next()} disabled={busy}>
-                ▼ Continue descent
+                ▲ Continue ascent
               </button>
             </motion.div>
           )}
@@ -267,7 +267,7 @@ function Hud({ n, depth, score, results, promptNo, active }: { n: number; depth:
     <header className="sticky top-0 z-20 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6">
       <div className="mx-auto flex max-w-3xl items-center gap-2 sm:gap-4">
         <div className="glass glass-hud flex min-w-[88px] flex-col rounded-2xl px-3 py-1.5 sm:min-w-[120px] sm:px-4 sm:py-2">
-          <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/55">depth</span>
+          <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/55">altitude</span>
           <span className="font-mono text-lg font-bold text-glow sm:text-2xl">
             <AnimatedNumber value={depth} format={fmtM} duration={2.2} />
           </span>
@@ -344,10 +344,10 @@ function PromptView({
     >
       <div className="flex flex-1 flex-col items-center justify-center gap-4 py-6 text-center sm:gap-6">
         <span className="eyebrow text-gold/90">
-          prompt {open.idx + 1} of 7 · {open.category} · {open.idx < 3 ? 'shallows' : open.idx < 6 ? 'deeper' : 'the deep'}
+          prompt {open.idx + 1} of 7 · {open.category} · {open.idx < 3 ? 'the hills' : open.idx < 6 ? 'higher' : 'the heights'}
         </span>
         <h1 className="text-shadow-glow max-w-xl text-balance font-serif text-[2.1rem] font-semibold leading-[1.08] text-ivory sm:text-[3.4rem]">{open.text}</h1>
-        <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-white/50">▼ rarer answers sink deeper ▼</span>
+        <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-white/50">▲ rarer answers climb higher ▲</span>
       </div>
 
       <div className="sticky bottom-0 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
@@ -371,7 +371,7 @@ function PromptView({
               className="mb-2 text-center font-mono text-xs text-coral"
               role="status"
             >
-              {miss.text ? `“${miss.text}” — no echo from the deep. try again` : 'type an answer first'}
+              {miss.text ? `“${miss.text}” — that one didn’t take flight. try again` : 'type an answer first'}
             </motion.p>
           )}
         </AnimatePresence>
@@ -400,7 +400,7 @@ function PromptView({
           />
           <TimerRing frac={phase === 'intro' ? 1 : frac} secs={phase === 'intro' ? 25 : secs} size={48} urgent={urgent} />
           <button type="submit" disabled={phase !== 'answering' || busy} className="btn-glow rounded-xl px-5 py-3 font-bold uppercase tracking-wider">
-            Dive
+            Rise
           </button>
         </motion.form>
       </div>
@@ -476,7 +476,7 @@ function ResultView({ r, phase, onNext, isLast, busy }: { r: PromptResult; phase
           {accepted && <p className="-mt-2 font-mono text-[11px] text-white/50">you typed “{r.raw}”</p>}
           {!r.answer && r.raw && <p className="-mt-2 font-mono text-[11px] text-white/50">last guess “{r.raw}” didn’t match</p>}
           <p className="font-mono text-sm font-bold" style={{ color: TIER_COLOR[r.tier] }}>
-            {r.points ? `+${r.points} pts · sink ${(r.points * 10).toLocaleString()}m` : '+0 pts'}
+            {r.points ? `+${r.points} pts · rise ${(r.points * 10).toLocaleString()}m` : '+0 pts'}
           </p>
           <p className="text-white/75">{r.points ? t.blurb : 'Time ran out before anything landed.'}</p>
           {r.ref && (
@@ -486,7 +486,7 @@ function ResultView({ r, phase, onNext, isLast, busy }: { r: PromptResult; phase
           )}
           <Board questionId={r.questionId} mine={r.answer} />
           <button onClick={onNext} disabled={busy} autoFocus className="btn-glow mt-4 rounded-full px-10 py-4 text-lg font-bold uppercase tracking-[0.15em]">
-            {isLast ? 'Surface the results' : 'Descend ▼'}
+            {isLast ? 'See the results' : 'Ascend ▲'}
           </button>
           <span className="hidden font-mono text-[10px] uppercase tracking-[0.2em] text-white/35 sm:block">or press enter</span>
         </motion.div>
@@ -508,7 +508,7 @@ function FinalView({ state, isToday }: { state: DiveState; isToday: boolean }) {
 
   const share = async () => {
     const grid = Array.from({ length: PROMPTS_PER_DIVE }, (_, i) => tierByKey(state.results.find((r) => r.idx === i)?.tier ?? 'none').emoji).join('')
-    const text = `BIBLIO · Dive #${state.n}\n${grid}\n${state.total} pts · ${depth.toLocaleString()}m · ${zone.name}\n${location.origin}`
+    const text = `BIBLIO · Ascent #${state.n}\n${grid}\n${state.total} pts · ${depth.toLocaleString()}m · ${zone.name}\n${location.origin}`
     try {
       if (navigator.share && matchMedia('(pointer: coarse)').matches) await navigator.share({ text })
       else {
@@ -524,13 +524,13 @@ function FinalView({ state, isToday }: { state: DiveState; isToday: boolean }) {
   return (
     <motion.section initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center gap-6 py-4 text-center">
       <div className="flex flex-col items-center gap-1">
-        <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-glow/80">dive #{state.n} complete</span>
+        <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-glow/80">ascent #{state.n} complete</span>
         <h1 className="text-gilded font-display text-6xl font-extrabold sm:text-7xl">
           <AnimatedNumber value={depth} format={fmtM} duration={2} />
         </h1>
         <p className="font-serif text-2xl italic text-ivory/90">{zone.name}</p>
         <p className="font-mono text-sm text-amber">{state.total} / 700 pts</p>
-        {!!state.percentile && <p className="text-sm text-white/70">Deeper than {state.percentile}% of divers on this dive</p>}
+        {!!state.percentile && <p className="text-sm text-white/70">Higher than {state.percentile}% of climbers on this ascent</p>}
       </div>
 
       <div className="flex gap-1.5 text-2xl sm:text-3xl" aria-label="Your seven results">
@@ -552,10 +552,10 @@ function FinalView({ state, isToday }: { state: DiveState; isToday: boolean }) {
           Archive ⟲
         </a>
         <a {...link('/party')} className="btn-ghost rounded-full px-6 py-3 font-semibold">
-          Big Fish 🐟
+          Chariots 🔥
         </a>
       </div>
-      {isToday && <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/50">next dive in {left}</p>}
+      {isToday && <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/50">next ascent in {left}</p>}
 
       <ol className="flex w-full flex-col gap-2.5 text-left">
         {state.results.map((r) => (
@@ -572,7 +572,7 @@ function FinalView({ state, isToday }: { state: DiveState; isToday: boolean }) {
             </div>
             <p className="mt-1.5 font-mono text-[11px] text-white/45">
               most said: {r.common ?? '—'}
-              {r.pearl && <> · a deep cut: {r.pearl}</>}
+              {r.pearl && <> · a rare find: {r.pearl}</>}
             </p>
             <details className="mt-2">
               <summary className="cursor-pointer font-mono text-[11px] uppercase tracking-[0.2em] text-gold/80">every answer ↓</summary>
@@ -584,7 +584,7 @@ function FinalView({ state, isToday }: { state: DiveState; isToday: boolean }) {
         ))}
       </ol>
       <a {...link('/')} className="font-mono text-xs uppercase tracking-[0.2em] text-white/50 underline-offset-4 hover:underline">
-        back to the surface
+        back to the hills
       </a>
     </motion.section>
   )

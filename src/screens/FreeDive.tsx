@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import type { BoardEntry, PracticePrompt, TierKey } from '../../shared/types'
 import { depthFor, MAX_DEPTH, tierByKey } from '../../shared/scoring'
 import { api } from '../lib/api'
-import { setDepth } from '../lib/ocean'
+import { setDepth } from '../lib/sky'
 import { sfx } from '../lib/sound'
 import { load, save } from '../lib/storage'
 import { fmtRef, readUrl } from '../lib/refs'
@@ -179,17 +179,17 @@ export function FreeDive() {
         <div className="mx-auto flex max-w-3xl items-center gap-2">
           <HomeButton />
           <div className="glass glass-hud flex min-w-[96px] flex-col rounded-2xl px-3 py-1.5">
-            <span className="eyebrow text-[9px] text-white/55">depth</span>
+            <span className="eyebrow text-[9px] text-white/55">altitude</span>
             <span className="font-mono text-lg font-bold text-gold">
               <AnimatedNumber value={depthFor(score)} format={fmtM} duration={2} />
             </span>
           </div>
           <div className="flex flex-1 flex-col items-center">
-            <span className="font-display text-base font-bold tracking-wide">Free Dive</span>
-            <span className="flex gap-1" aria-label={`${tanks} air tanks left`}>
+            <span className="font-display text-base font-bold tracking-wide">Free Flight</span>
+            <span className="flex gap-1" aria-label={`${tanks} feathers left`}>
               {Array.from({ length: TANKS }, (_, i) => (
                 <motion.span key={i} animate={{ scale: i < tanks ? 1 : 0.7, opacity: i < tanks ? 1 : 0.25 }} className="text-sm">
-                  🫧
+                  🪶
                 </motion.span>
               ))}
             </span>
@@ -209,9 +209,9 @@ export function FreeDive() {
           {phase === 'setup' && (
             <motion.section key="setup" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
               <div>
-                <h1 className="text-gilded font-display text-5xl font-extrabold">Free Dive</h1>
+                <h1 className="text-gilded font-display text-5xl font-extrabold">Free Flight</h1>
                 <p className="mx-auto mt-3 max-w-md text-white/80">
-                  Unlimited prompts, as deep as you can go. Three air tanks — every prompt that runs out of time costs one. Pick a depth and a topic.
+                  Unlimited prompts, as high as you can climb. Three feathers — every prompt that runs out of time costs one. Pick a height and a topic.
                 </p>
               </div>
               <div className="glass ornate w-full max-w-md rounded-2xl p-5">
@@ -233,7 +233,7 @@ export function FreeDive() {
                 </div>
               </div>
               <button onClick={restart} className="btn-glow w-full max-w-sm rounded-full py-4 font-display text-lg font-bold uppercase tracking-[0.18em]">
-                ▼ Dive in
+                ▲ Take flight
               </button>
               {best > 0 && <p className="eyebrow text-white/55">your best · {best} pts · {depthFor(best).toLocaleString()}m</p>}
               {err && <p className="text-sm text-coral">{err}</p>}
@@ -258,7 +258,7 @@ export function FreeDive() {
                 <AnimatePresence>
                   {miss && (
                     <motion.p key={miss.key} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mb-2 text-center font-mono text-xs text-coral">
-                      “{miss.text}” — no echo from the deep. try again
+                      “{miss.text}” — that one didn’t take flight. try again
                     </motion.p>
                   )}
                 </AnimatePresence>
@@ -286,7 +286,7 @@ export function FreeDive() {
                   />
                   <TimerRing frac={left / (SECONDS * 1000)} secs={secs} size={48} urgent={secs <= 5} />
                   <button type="submit" disabled={busy} className="btn-glow rounded-xl px-5 py-3 font-bold uppercase tracking-wider">
-                    Dive
+                    Rise
                   </button>
                 </motion.form>
               </div>
@@ -298,14 +298,14 @@ export function FreeDive() {
               <Burst trigger={landed.points ? prompt.id : 0} color={TIER_COLOR[landed.tier]} />
               <p className="eyebrow text-white/55">{prompt.text}</p>
               <motion.div initial={{ rotate: -20, scale: 0.3 }} animate={{ rotate: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 220, damping: 10 }} className="text-6xl" style={{ filter: `drop-shadow(0 0 24px ${TIER_COLOR[landed.tier]})` }}>
-                {landed.points ? tierByKey(landed.tier).emoji : '💨'}
+                {landed.points ? tierByKey(landed.tier).emoji : '🍂'}
               </motion.div>
               <h2 className="font-display text-3xl font-extrabold" style={{ color: TIER_COLOR[landed.tier] }}>
-                {landed.points ? tierByKey(landed.tier).label : 'Out of air'}
+                {landed.points ? tierByKey(landed.tier).label : 'Out of time'}
               </h2>
               {landed.answer && <p className="font-serif text-3xl font-semibold">“{landed.answer}”</p>}
               <p className="font-mono text-sm font-bold" style={{ color: TIER_COLOR[landed.tier] }}>
-                {landed.points ? `+${landed.points} pts · sink ${(landed.points * 10).toLocaleString()}m` : `−1 air tank · ${tanks} left`}
+                {landed.points ? `+${landed.points} pts · rise ${(landed.points * 10).toLocaleString()}m` : `−1 feather · ${tanks} left`}
               </p>
               {landed.ref && (
                 <a href={readUrl(landed.ref)} target="_blank" rel="noreferrer" className="font-mono text-[11px] uppercase tracking-[0.2em] text-gold/80 hover:underline">
@@ -315,7 +315,7 @@ export function FreeDive() {
               {board && <AnswerBoard items={board.map((b) => ({ ...b, mine: b.name === landed.answer }))} note="most said → rarest" />}
               {tanks > 0 && (
                 <button onClick={() => void next()} autoFocus className="btn-glow mt-2 rounded-full px-10 py-4 text-lg font-bold uppercase tracking-[0.15em]">
-                  Next ▼
+                  Next ▲
                 </button>
               )}
             </motion.section>
@@ -323,13 +323,13 @@ export function FreeDive() {
 
           {phase === 'over' && (
             <motion.section key="over" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="flex flex-1 flex-col items-center justify-center gap-5 text-center">
-              <span className="eyebrow text-gold/80">free dive over · {count} prompts</span>
+              <span className="eyebrow text-gold/80">flight over · {count} prompts</span>
               <h1 className="text-gilded font-display text-6xl font-extrabold">{depthFor(score).toLocaleString()}m</h1>
               <p className="font-mono text-amber">{score} pts</p>
               {score > best ? <p className="font-serif text-xl italic">A new personal best!</p> : <p className="text-white/60">Your best: {best} pts</p>}
               <div className="flex gap-3">
                 <button onClick={restart} className="btn-glow rounded-full px-8 py-3 font-bold uppercase tracking-wider">
-                  Dive again
+                  Fly again
                 </button>
                 <button onClick={() => setPhase('setup')} className="btn-ghost rounded-full px-6 py-3 font-semibold">
                   Change topic

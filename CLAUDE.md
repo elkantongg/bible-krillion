@@ -1,8 +1,10 @@
-# CLAUDE.md — Into the Deep (Bible daily dive)
+# CLAUDE.md — BIBLIO (Bible daily ascent)
 
-Krillion-style Bible trivia: 7 open-answer prompts × 25 s, rarity-based points, 10 m depth per point (700 = 7,000 m).
-Modes: daily dive, archive, Free Dive (unlimited practice, 3 air tanks), Big Fish (online turn-based party via room code / link).
-Look: quiet, editorial — ivory/soft gold on a dusk-to-abyss navy; solid ivory buttons, flat dark panels, no gradients/emoji/sweeps, Cinzel + Cormorant + Manrope, three.js world (`src/components/World3D.tsx`, lazy-loaded; 2D `Ocean.tsx` is the no-WebGL fallback).
+Krillion-style Bible trivia: 7 open-answer prompts × 25 s, rarity-based points, 10 m of altitude per point (700 = 7,000 m), climbing through tiers of heaven.
+Modes: daily ascent, archive, Free Flight (unlimited practice, 3 feathers), Chariots (online turn-based party via room code / link).
+Theme: one ascent, in order — the lake at dusk (boat) → the open sky (birds) → through the middle of the clouds (rainbow) → above the clouds, where only cloud lies below and a golden castle-city (Revelation 21) draws nearer as you climb. Sky + volumetric clouds are ray-marched in one low-res background pass (`World3D.tsx` BG_FRAG, 3D Perlin–Worley noise); the castle is procedural (lathe towers, merged per material) with env reflections, shadows and bloom. Once the castle is in sight (above the clouds) the heavenly host appears — feathered angels (`world/angels.ts`: three-joint wings with real feather rows, pleated flowing robes; flyers circling, trumpeters at the gate, angels on a stairway of light) and chariots/horses of fire (`world/fire.ts`: flame particles on a galloping skeleton) — none below the clouds. Music is generated live (`lib/music.ts`: choir, harp, bells, fanfares at the cloud top and the gates; starts on first gesture, follows the mute button). Keep the quality bar: no crude primitives or cartoon figures; never scale an instanced mesh to ~0 (NaN normals → bloom blacks out the screen). Never depict God.
+Internal names still say dive/depth (routes `/dive`, `/free`, `/party`, `dive_prompts`, `setDepth`, tier keys) — user-facing copy says ascent/altitude.
+Look: quiet, editorial — ivory/soft gold on a dusk-to-abyss navy; solid ivory buttons, flat dark panels, no gradients/emoji/sweeps, Cinzel + Cormorant + Manrope, three.js world (`src/components/World3D.tsx`, lazy-loaded; 2D `Heavens.tsx` is the no-WebGL fallback).
 
 ## Commands
 - `pnpm dev` — web http://localhost:5280 (strictPort) + API :8787 (Vite proxies /api and /socket.io)
@@ -11,7 +13,7 @@ Look: quiet, editorial — ivory/soft gold on a dusk-to-abyss navy; solid ivory 
 ## Layout
 - `shared/` isomorphic: `match.ts` (normalise + fuzzy), `scoring.ts` (tiers, priors, depth, zones), `dives.ts` (dive numbering, seeded selection), `data/` (questions: `people.ts`/`world.ts` + `bank-*.ts` in the compact `@id|Category|Text` bank format)
 - `server/solo.ts` SoloService (inject `now`), `server/party.ts` PartyRoom (inject Clock), `server/index.ts` wiring
-- `src/` React 19 + Tailwind v4 + motion; `lib/ocean.ts` global depth target; `components/Ocean.tsx` background world
+- `src/` React 19 + Tailwind v4 + motion; `lib/sky.ts` global altitude target + air colours; `components/World3D.tsx` 3D world, `components/Heavens.tsx` 2D fallback
 
 ## Conventions / decisions
 - Answers never reach the client; all validation/scoring server-side. Don't import `shared/data` from `src/`.

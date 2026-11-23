@@ -210,7 +210,7 @@ export function HomeButton() {
   )
 }
 
-export function Spinner({ label = 'descending…' }: { label?: string }) {
+export function Spinner({ label = 'ascending…' }: { label?: string }) {
   return (
     <div className="flex flex-col items-center gap-3 text-white/70" role="status">
       <div className="relative h-12 w-12">

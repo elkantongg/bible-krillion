@@ -29,7 +29,7 @@ describe('rarity scoring', () => {
     expect(depthFor(0)).toBe(0)
     expect(depthFor(405)).toBe(4050)
     expect(depthFor(700)).toBe(MAX_DEPTH)
-    expect(zoneFor(4050).name).toBe('The Abyss')
+    expect(zoneFor(4050).name).toBe('Above the Clouds')
   })
 })
 

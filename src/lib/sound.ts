@@ -1,4 +1,5 @@
 import { load, save } from './storage'
+import { setMusicMuted } from './music'
 
 let ctx: AudioContext | null = null
 let muted = load('deep.muted') === '1'
@@ -6,6 +7,7 @@ export const isMuted = () => muted
 export function setMuted(m: boolean) {
   muted = m
   save('deep.muted', m ? '1' : '0')
+  setMusicMuted(m)
 }
 
 function ac() {
