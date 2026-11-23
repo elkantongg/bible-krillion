@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PartyRoom, FUSE_FLOOR, POP_PAUSE, type Clock } from '../server/party'
+import { PartyRoom, LEAD_MS, GRACE_MS, POP_PAUSE, BETWEEN_MS, partyPool, type Clock } from '../server/party'
 import { QUESTIONS } from '../shared/data/index'
 
 function fakeClock() {
@@ -30,21 +30,27 @@ function fakeClock() {
     }
     now = end
   }
-  return { clock, advance }
+  return { clock, advance, now: () => now }
 }
 
-const validFor = (room: PartyRoom, skip: Set<string> = new Set()) => {
+const valid = (room: PartyRoom) => {
   const q = QUESTIONS.find((x) => x.text === room.question!.text)!
-  const a = q.answers.find((x) => !room.used.has(x.id) && !skip.has(x.id))!
-  return a.name
+  return q.answers.find((x) => !room.used.has(x.id))!.name
 }
 
-function setup(n = 3) {
-  const { clock, advance } = fakeClock()
-  const room = new PartyRoom('ABCD', clock)
+function setup(n = 3, settings: Parameters<PartyRoom['updateSettings']>[1] = {}) {
+  const t = fakeClock()
+  const room = new PartyRoom('ABCD', t.clock)
   for (let i = 0; i < n; i++) room.join('p' + i, 'P' + i)
-  return { room, advance }
+  room.updateSettings('p0', settings)
+  return { room, ...t }
 }
+/** start the game and skip the reading time */
+const begin = (room: PartyRoom, advance: (ms: number) => void) => {
+  expect(room.start('p0').ok).toBe(true)
+  advance(LEAD_MS)
+}
+const timeOut = (room: PartyRoom, advance: (ms: number) => void, now: () => number) => advance(room.turnEndsAt! - now() + GRACE_MS + 1)
 
 describe('Big Fish party room', () => {
   it('needs the host and two players to start', () => {
@@ -55,59 +61,122 @@ describe('Big Fish party room', () => {
     room.join('b', 'B')
     expect(room.start('b').ok).toBe(false)
     expect(room.start('a').ok).toBe(true)
-    expect(room.phase).toBe('playing')
+    expect(room.phase).toBe('turn')
   })
 
-  it('only the holder can answer, and valid answers pass the fish', () => {
-    const { room } = setup()
-    room.start('p0')
-    const holder = room.holderId!
-    const other = room.players.find((p) => p.id !== holder)!.id
-    expect(room.answer(other, validFor(room))).toEqual({ ok: false, reason: 'not-your-turn' })
-    expect(room.answer(holder, 'zzzz not a thing')).toEqual({ ok: false, reason: 'nomatch' })
-    const r = room.answer(holder, validFor(room))
-    expect(r.ok).toBe(true)
-    expect(room.holderId).not.toBe(holder)
-  })
-
-  it('rejects answers already used this round', () => {
+  it('lets only the host change settings, clamped to the allowed range', () => {
     const { room } = setup(2)
-    room.start('p0')
-    const first = validFor(room)
-    room.answer(room.holderId!, first)
-    expect(room.answer(room.holderId!, first)).toEqual({ ok: false, reason: 'used' })
+    room.updateSettings('p1', { lives: 4 })
+    expect(room.settings.lives).toBe(3)
+    room.updateSettings('p0', { lives: 9, turnSeconds: 8, maxRounds: 40, difficulty: 'easy', categories: ['People', 'Nope'] })
+    expect(room.settings).toMatchObject({ lives: 5, turnSeconds: 8, maxRounds: 15, difficulty: 'easy', categories: ['People'] })
+    expect(room.players.every((p) => p.lives === 5)).toBe(true)
+    room.updateSettings('p0', { turnSeconds: 7 }) // not an offered option
+    expect(room.settings.turnSeconds).toBe(8)
   })
 
-  it('pops on whoever holds the fish when the hidden fuse runs out', () => {
-    const { room, advance } = setup(2)
+  it('uses the chosen turn length and difficulty', () => {
+    const { room, now } = setup(2, { turnSeconds: 10, difficulty: 'easy' })
     room.start('p0')
-    const holder = room.holderId!
-    advance(room.fuseEnd - 1_000_000 + 1)
+    expect(room.turnEndsAt! - now()).toBe(LEAD_MS + 10_000)
+    expect(room.question!.difficulty).toBe(1)
+    expect(partyPool({ difficulty: 'hard', categories: [] }).every((q) => q.difficulty! >= 2)).toBe(true)
+  })
+
+  it('only the diver whose turn it is can answer, and a correct answer passes the same question on', () => {
+    const { room, advance } = setup(3)
+    begin(room, advance)
+    const first = room.holderId!
+    const other = room.order.find((id) => id !== first)!
+    const q = room.question!.id
+    expect(room.answer(other, valid(room))).toEqual({ ok: false, reason: 'not-your-turn' })
+    expect(room.answer(first, 'zzzz not a thing')).toEqual({ ok: false, reason: 'nomatch' })
+    expect(room.answer(first, valid(room)).ok).toBe(true)
+    expect(room.holderId).toBe(room.order[1])
+    expect(room.question!.id).toBe(q)
+  })
+
+  it('rejects answers already used on this question', () => {
+    const { room, advance } = setup(2)
+    begin(room, advance)
+    const a = valid(room)
+    room.answer(room.holderId!, a)
+    expect(room.answer(room.holderId!, a)).toEqual({ ok: false, reason: 'used' })
+  })
+
+  it('A answers, B times out and loses a life, C still gets the question, then the round ends (spec example)', () => {
+    const { room, advance, now } = setup(3)
+    begin(room, advance)
+    const [a, b, c] = room.order
+    const q = room.question!.id
+    expect(room.answer(a, valid(room)).ok).toBe(true)
+    expect(room.holderId).toBe(b)
+    timeOut(room, advance, now)
     expect(room.phase).toBe('popped')
-    expect(room.lastPop?.playerId).toBe(holder)
-    expect(room.players.find((p) => p.id === holder)!.lives).toBe(1)
-    advance(POP_PAUSE + 1)
-    expect(room.phase).toBe('playing')
+    expect(room.players.find((p) => p.id === b)!.lives).toBe(2)
+    advance(POP_PAUSE)
+    expect(room.phase).toBe('turn')
+    expect(room.holderId).toBe(c)
+    expect(room.question!.id).toBe(q) // same question goes on to C
+    expect(room.answer(c, valid(room)).ok).toBe(true)
+    expect(room.phase).toBe('between') // someone lost a life this round → question over
+    expect(room.reveal!.survivedAll).toBe(false)
+    advance(BETWEEN_MS)
+    expect(room.phase).toBe('turn')
+    expect(room.question!.id).not.toBe(q)
+    expect(room.questionNo).toBe(2)
   })
 
-  it('never leaves the next player less than the floor', () => {
+  it('keeps the same question going round after round while everyone answers', () => {
     const { room, advance } = setup(2)
-    room.start('p0')
-    const fuse = room.fuseEnd
-    advance(fuse - 1_000_000 - 2000) // 2 s left
-    room.answer(room.holderId!, validFor(room))
-    expect(room.fuseEnd - 1_000_000 - (fuse - 1_000_000 - 2000)).toBe(FUSE_FLOOR)
+    begin(room, advance)
+    const q = room.question!.id
+    for (let i = 0; i < 2; i++) room.answer(room.holderId!, valid(room))
+    expect(room.round).toBe(2)
+    expect(room.phase).toBe('turn')
+    expect(room.question!.id).toBe(q)
   })
 
-  it('ends with the last diver swimming', () => {
-    const { room, advance } = setup(2)
-    room.setLives('p0', 1)
+  it('caps a question at the round limit and everyone survives it', () => {
+    const { room, advance } = setup(2, { maxRounds: 2 })
     room.start('p0')
+    // pick a question with plenty of answers so it can't run dry
+    room.question = QUESTIONS.find((x) => x.answers.length > 20)!
+    advance(LEAD_MS)
+    for (let i = 0; i < 4; i++) expect(room.answer(room.holderId!, valid(room)).ok).toBe(true)
+    expect(room.phase).toBe('between')
+    expect(room.reveal).toMatchObject({ survivedAll: true, rounds: 2 })
+    expect(room.players.every((p) => p.lives === 3)).toBe(true)
+  })
+
+  it('ends the question without penalty if every answer has been used', () => {
+    const { room, advance } = setup(2)
+    room.start('p0')
+    room.question = QUESTIONS.find((x) => x.answers.length === 3)!
+    advance(LEAD_MS)
+    for (let i = 0; i < 3; i++) room.answer(room.holderId!, valid(room))
+    expect(room.phase).toBe('between')
+    expect(room.reveal!.survivedAll).toBe(true)
+  })
+
+  it('rotates who starts each question', () => {
+    const { room, advance, now } = setup(3)
+    begin(room, advance)
+    const firstStarter = room.order[0]
+    timeOut(room, advance, now)
+    advance(POP_PAUSE)
+    while (room.phase === 'turn') room.answer(room.holderId!, valid(room))
+    room.skip('p0')
+    expect(room.order[0]).not.toBe(firstStarter)
+  })
+
+  it('skips eliminated divers and ends with the last diver swimming', () => {
+    const { room, advance, now } = setup(2, { lives: 1 })
+    begin(room, advance)
     const loser = room.holderId!
-    advance(room.fuseEnd - 1_000_000 + 1)
-    expect(room.phase).toBe('popped') // the final swallow is shown first
+    timeOut(room, advance, now)
     expect(room.lastPop).toMatchObject({ playerId: loser, eliminated: true })
-    advance(POP_PAUSE + 1)
+    advance(POP_PAUSE)
     expect(room.phase).toBe('over')
     expect(room.winnerId).not.toBe(loser)
     room.backToLobby('p0')
@@ -115,9 +184,18 @@ describe('Big Fish party room', () => {
     expect(room.players.every((p) => p.lives === 1)).toBe(true)
   })
 
+  it('a diver who disconnects on their turn forfeits it without losing a life', () => {
+    const { room, advance } = setup(3)
+    begin(room, advance)
+    const holder = room.holderId!
+    room.setConnected(holder, false)
+    expect(room.holderId).not.toBe(holder)
+    expect(room.players.find((p) => p.id === holder)!.lives).toBe(3)
+  })
+
   it('ends the game if everyone else disconnects, and hands host on', () => {
-    const { room } = setup(2)
-    room.start('p0')
+    const { room, advance } = setup(2)
+    begin(room, advance)
     room.setConnected('p0', false)
     expect(room.hostId).toBe('p1')
     expect(room.phase).toBe('over')
@@ -125,29 +203,30 @@ describe('Big Fish party room', () => {
   })
 
   it('gives host back to whoever returns to an abandoned room', () => {
-    const { room } = setup(2)
-    room.start('p0')
-    room.setConnected('p0', false) // game over, host → p1
-    room.setConnected('p1', false) // nobody left to inherit
+    const { room, advance } = setup(2)
+    begin(room, advance)
+    room.setConnected('p0', false)
+    room.setConnected('p1', false)
     room.join('p0', 'back again')
     expect(room.hostId).toBe('p0')
     room.backToLobby('p0')
     expect(room.phase).toBe('lobby')
   })
 
-  it('seats late joiners as spectators', () => {
-    const { room } = setup(2)
-    room.start('p0')
+  it('seats late joiners as spectators and keeps seats on reconnect', () => {
+    const { room, advance } = setup(3)
+    begin(room, advance)
     room.join('late', 'Late')
     expect(room.players.find((p) => p.id === 'late')!.spectator).toBe(true)
+    const someone = room.order[2]
+    room.setConnected(someone, false)
+    room.join(someone, 'again')
+    expect(room.players.filter((p) => p.id === someone)).toHaveLength(1)
   })
 
-  it('rejoining keeps your seat (reconnect)', () => {
+  it('rejects answers during the reading time', () => {
     const { room } = setup(2)
     room.start('p0')
-    room.setConnected('p1', false)
-    room.join('p1', 'P1')
-    expect(room.players.filter((p) => p.id === 'p1')).toHaveLength(1)
-    expect(room.players.find((p) => p.id === 'p1')!.connected).toBe(true)
+    expect(room.answer(room.holderId!, valid(room))).toEqual({ ok: false, reason: 'not-yet' })
   })
 })

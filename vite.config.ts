@@ -6,6 +6,8 @@ const API = `http://localhost:${process.env.API_PORT ?? 8787}`
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // three.js is lazy-loaded in its own chunk
+  build: { chunkSizeWarningLimit: 700 },
   server: {
     port: Number(process.env.PORT ?? 5280),
     strictPort: true,

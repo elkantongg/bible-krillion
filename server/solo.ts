@@ -1,10 +1,10 @@
 import type { DB } from './db'
 import { tx } from './db'
-import { QUESTION_BY_ID, CURATED, GENERATED, ALL_KEYS } from '../shared/data/index'
+import { QUESTION_BY_ID, QUESTIONS, ALL_KEYS } from '../shared/data/index'
 import { matchAnswer } from '../shared/match'
 import { score, blendedShare, MISS_TIER, PROMPTS_PER_DIVE, SECONDS_PER_PROMPT } from '../shared/scoring'
-import { dateForDive, maxDiveAt, selectMixed } from '../shared/dives'
-import type { DiveState, OpenPrompt, PromptResult, Question, TierKey } from '../shared/types'
+import { dateForDive, maxDiveAt, selectDaily } from '../shared/dives'
+import type { BoardEntry, DiveState, OpenPrompt, PracticePrompt, PromptResult, Question, TierKey } from '../shared/types'
 
 export const LEAD_MS = 3000 // "the clock starts in 3…"
 export const PROMPT_MS = SECONDS_PER_PROMPT * 1000
@@ -52,18 +52,84 @@ export class SoloService {
 
   /** the 7 question ids for dive n (materialised on first use so they never change) */
   prompts(n: number): Question[] {
-    let rows = this.db.prepare('SELECT question_id FROM dive_prompts WHERE dive_no = ? ORDER BY idx').all(n) as { question_id: string }[]
-    if (rows.length < PROMPTS_PER_DIVE) {
-      const ids = selectMixed(n, CURATED.map((q) => q.id), GENERATED)
+    const read = () => this.db.prepare('SELECT idx, question_id FROM dive_prompts WHERE dive_no = ? ORDER BY idx').all(n) as { idx: number; question_id: string }[]
+    let rows = read()
+    const missing = rows.some((r) => !QUESTION_BY_ID.has(r.question_id))
+    if (rows.length < PROMPTS_PER_DIVE || missing) {
+      const ids = selectDaily(n, QUESTIONS)
       const ins = this.db.prepare('INSERT OR IGNORE INTO dive_prompts (dive_no, idx, question_id) VALUES (?, ?, ?)')
       ids.forEach((id, i) => ins.run(n, i, id))
-      rows = this.db.prepare('SELECT question_id FROM dive_prompts WHERE dive_no = ? ORDER BY idx').all(n) as { question_id: string }[]
+      if (missing) {
+        // a question retired from the dataset: swap in a fresh one, keeping the rest of the dive stable
+        const kept = new Set(read().map((r) => r.question_id).filter((id) => QUESTION_BY_ID.has(id)))
+        const spare = [...ids, ...QUESTIONS.map((q) => q.id)].filter((id) => !kept.has(id))
+        const upd = this.db.prepare('UPDATE dive_prompts SET question_id = ? WHERE dive_no = ? AND idx = ?')
+        for (const r of read()) {
+          if (QUESTION_BY_ID.has(r.question_id)) continue
+          const next = spare.shift()!
+          kept.add(next)
+          upd.run(next, n, r.idx)
+        }
+      }
+      rows = read()
     }
     return rows.map((r) => {
       const q = QUESTION_BY_ID.get(r.question_id)
       if (!q) throw new GameError(500, `Question ${r.question_id} missing from dataset`)
       return q
     })
+  }
+
+  /** question ids in today's (and tomorrow's, for UTC+14) dives — kept out of practice */
+  private liveIds(): Set<string> {
+    const max = this.maxDive()
+    const ids = new Set<string>()
+    for (let n = Math.max(1, max - 1); n <= max; n++) for (const q of this.prompts(n)) ids.add(q.id)
+    return ids
+  }
+
+  /** Free Dive: a random prompt (not one of the live daily prompts) */
+  practiceNext(opts: { difficulty?: number; category?: string; exclude?: string[] }): PracticePrompt {
+    const live = this.liveIds()
+    const skip = new Set(opts.exclude ?? [])
+    let pool = QUESTIONS.filter((q) => !live.has(q.id))
+    if (opts.difficulty && [1, 2, 3].includes(opts.difficulty)) pool = pool.filter((q) => q.difficulty === opts.difficulty)
+    if (opts.category) pool = pool.filter((q) => q.category === opts.category)
+    if (!pool.length) throw new GameError(404, 'No prompts match those filters')
+    const fresh = pool.filter((q) => !skip.has(q.id))
+    const from = fresh.length ? fresh : pool
+    const q = from[Math.floor(Math.random() * from.length)]
+    return { id: q.id, text: q.text, category: q.category, difficulty: q.difficulty ?? 2, answerCount: q.answers.length }
+  }
+
+  practiceAnswer(id: string, text: string) {
+    const q = QUESTION_BY_ID.get(id)
+    if (!q || this.liveIds().has(id)) throw new GameError(404, 'Unknown prompt')
+    const clean = String(text ?? '').replace(/\s+/g, ' ').trim().slice(0, 60)
+    if (!clean) return { ok: false as const, reason: 'empty' }
+    const hit = matchAnswer(q, clean, ALL_KEYS)
+    if (!hit) return { ok: false as const, reason: 'nomatch' }
+    const { total, counts } = this.stats(q.id)
+    const s = score(counts.get(hit.id) ?? 0, total, hit.level)
+    return { ok: true as const, answerId: hit.id, answer: hit.name, ref: hit.ref, tier: s.tier.key, points: s.points }
+  }
+
+  /** every answer to a prompt — only once this player has finished it (or it isn't a live daily prompt) */
+  board(player: string, id: string): BoardEntry[] {
+    const q = QUESTION_BY_ID.get(id)
+    if (!q) throw new GameError(404, 'Unknown prompt')
+    if (this.liveIds().has(id)) {
+      const row = this.db.prepare('SELECT 1 AS x FROM dive_answers WHERE player_id = ? AND question_id = ? AND locked_at IS NOT NULL').get(player, id)
+      if (!row) throw new GameError(403, 'Finish the prompt first')
+    }
+    const { total, counts } = this.stats(q.id)
+    return q.answers
+      .map((a) => {
+        const s = score(counts.get(a.id) ?? 0, total, a.level)
+        return { id: a.id, name: a.name, ref: a.ref, tier: s.tier.key, share: s.share }
+      })
+      .sort((a, b) => b.share - a.share)
+      .map(({ share: _s, ...rest }) => rest)
   }
 
   private rows(player: string, n: number): Row[] {

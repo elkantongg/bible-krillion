@@ -79,57 +79,73 @@ export function selectPrompts(n: number, pool: string[]): string[] {
   return walk(n, pool, PROMPTS_PER_DIVE, 13)
 }
 
-export const CURATED_PER_DIVE = 2
+/** a daily dive: 3 easy, then 3 medium, then 1 hard — it gets harder the deeper you go */
+export const DAILY_MIX: [difficulty: number, count: number][] = [
+  [1, 3],
+  [2, 3],
+  [3, 1],
+]
+
+export interface PoolItem {
+  id: string
+  group?: string
+  difficulty?: number
+}
 
 /**
- * Generated prompts form one endless stream of seeded shuffles ("cycles"). Dive k takes block k:
- * the first `size` items in the stream from different groups. A new cycle is only pulled in when
- * the current one can't fill a block, so a prompt never repeats until its whole cycle is used up,
- * every dive gets a full block, and no dive has two prompts from one group (e.g. one book).
+ * Each difficulty tier is an endless stream of seeded shuffles ("cycles"). Dive k takes the next
+ * items from each stream whose category hasn't been used yet in that dive. A new cycle is only
+ * pulled in when a stream runs dry, so a prompt never repeats until its whole tier has been used,
+ * and no dive has two prompts from one category. Blocks are built in order and cached.
  */
-interface Stream {
+interface DailyStream {
   blocks: string[][]
-  buffer: string[]
-  cycle: number
+  buffers: Map<number, string[]>
+  cycles: Map<number, number>
 }
-const streams = new Map<string, Stream>()
-function blocksFor(pool: string[], size: number, groupOf: (id: string) => string | undefined, upTo: number): string[][] {
-  const sorted = [...pool].sort()
-  const sig = `${size}:${sorted.join(',')}`
-  const st = streams.get(sig) ?? { blocks: [], buffer: [], cycle: 0 }
-  streams.set(sig, st)
-  while (st.blocks.length < upTo) {
+const dailyStreams = new Map<string, DailyStream>()
+
+export function selectDaily(n: number, pool: PoolItem[]): string[] {
+  const sorted = [...pool].sort((a, b) => (a.id < b.id ? -1 : 1))
+  const sig = sorted.map((p) => `${p.id}:${p.difficulty ?? 2}`).join(',')
+  const groupOf = new Map(sorted.map((p) => [p.id, p.group ?? p.id]))
+  const tiers = new Map<number, string[]>()
+  for (const p of sorted) {
+    const d = p.difficulty ?? 2
+    if (!tiers.has(d)) tiers.set(d, [])
+    tiers.get(d)!.push(p.id)
+  }
+  const st: DailyStream = dailyStreams.get(sig) ?? { blocks: [], buffers: new Map(), cycles: new Map() }
+  dailyStreams.set(sig, st)
+  while (st.blocks.length < n) {
     const block: string[] = []
     const used = new Set<string>()
-    for (let pulls = 0; block.length < size && pulls < 3; ) {
-      for (let i = 0; i < st.buffer.length && block.length < size; i++) {
-        const id = st.buffer[i]
-        const g = groupOf(id) ?? id
-        if (used.has(g) || block.includes(id)) continue
-        used.add(g)
-        block.push(id)
-        st.buffer.splice(i--, 1)
-      }
-      if (block.length < size) {
-        st.buffer.push(...shuffled(sorted, 7919 * (st.cycle + 1) + 202))
-        st.cycle++
-        pulls++
+    for (const [d, want] of DAILY_MIX) {
+      // fall back to a neighbouring tier if a tier is empty
+      const tier = tiers.get(d)?.length ? d : [...tiers.keys()].sort((a, b) => Math.abs(a - d) - Math.abs(b - d))[0]
+      const ids = tiers.get(tier) ?? []
+      let got = 0
+      for (let pulls = 0; got < want && pulls < 3; ) {
+        const buf = st.buffers.get(tier) ?? []
+        st.buffers.set(tier, buf)
+        for (let i = 0; i < buf.length && got < want; i++) {
+          const id = buf[i]
+          const g = groupOf.get(id)!
+          if (used.has(g) || block.includes(id)) continue
+          used.add(g)
+          block.push(id)
+          buf.splice(i--, 1)
+          got++
+        }
+        if (got < want) {
+          const c = st.cycles.get(tier) ?? 0
+          buf.push(...shuffled(ids, 7919 * (c + 1) + 202 + tier * 31))
+          st.cycles.set(tier, c + 1)
+          pulls++
+        }
       }
     }
     st.blocks.push(block)
   }
-  return st.blocks
-}
-
-/**
- * Daily mix: 2 hand-written prompts + 5 generated ones (all from different groups), in a seeded
- * order. Results are persisted server-side on first use, so growing either pool never rewrites a
- * dive someone already played.
- */
-export function selectMixed(n: number, curated: string[], generated: { id: string; group?: string }[]): string[] {
-  const groups = new Map(generated.map((g) => [g.id, g.group]))
-  const c = walk(n, curated, CURATED_PER_DIVE, 101)
-  const size = PROMPTS_PER_DIVE - c.length
-  const g = generated.length ? blocksFor(generated.map((x) => x.id), size, (id) => groups.get(id), n)[n - 1] : []
-  return shuffled([...c, ...g], n * 31 + 7)
+  return st.blocks[n - 1]
 }

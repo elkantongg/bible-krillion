@@ -1,33 +1,45 @@
-import type { Answer, Question } from '../types'
+import type { Difficulty, Question } from '../types'
 import { key } from '../match'
 import { people } from './people'
 import { world } from './world'
-import generatedJson from './generated.json'
+import { peopleBank } from './bank-people'
+import { namesBank } from './bank-names'
+import { placesBank } from './bank-places'
+import { eventsBank } from './bank-events'
+import { natureBank } from './bank-nature'
+import { thingsBank } from './bank-things'
+import { moreBank } from './bank-more'
+import { extraBank } from './bank-extra'
+import { finalBank } from './bank-final'
 
-type GenRow = { id: string; text: string; category: string; group: string; answers: [string, string[], number, string][] }
-
-export const CURATED: Question[] = [...people, ...world].map((q) => ({ ...q, source: 'curated' as const, group: 'curated' }))
+/** older curated categories folded into the current set */
+const CATEGORY_ALIAS: Record<string, string> = { Creation: 'Nature' }
 
 /**
- * Familiarity floor: a name the curated set rates as well-known (e.g. Noah, Eve) stays well-known
- * in generated prompts even if the dataset tags it in few verses.
+ * Difficulty = how easy it is to think of *any* answer: the familiarity of the three best-known
+ * answers (+1 when there are many well-known ones). 1 = easy, 2 = medium, 3 = hard.
  */
-const curatedLevel = new Map<string, number>()
-for (const q of CURATED) for (const a of q.answers) for (const al of a.aliases) curatedLevel.set(key(al), Math.max(curatedLevel.get(key(al)) ?? 0, a.level))
+export function difficultyOf(q: Pick<Question, 'answers'>): Difficulty {
+  const levels = q.answers.map((a) => a.level).sort((a, b) => b - a)
+  const t = levels.slice(0, 3).reduce((s, x) => s + x, 0) + (levels.filter((x) => x >= 4).length >= 6 ? 1 : 0)
+  if (t >= 15) return 1
+  if (t >= 13) return 2
+  return 3
+}
 
-export const GENERATED: Question[] = (generatedJson as GenRow[]).map((g) => {
-  const seen = new Set<string>()
-  const answers: Answer[] = g.answers.map(([name, aliases, level, ref]) => {
-    let id = key(name) || 'x'
-    while (seen.has(id)) id += '_'
-    seen.add(id)
-    return { id, name, aliases: [name, ...aliases], level: Math.max(level, curatedLevel.get(key(name)) ?? 0), ref }
-  })
-  return { id: g.id, text: g.text, category: g.category, answers, source: 'generated' as const, group: g.group }
-})
+const finish = (q: Question, source: Question['source']): Question => {
+  const category = CATEGORY_ALIAS[q.category] ?? q.category
+  return { ...q, category, source, group: category, difficulty: difficultyOf(q) }
+}
 
-export const QUESTIONS: Question[] = [...CURATED, ...GENERATED]
+export const CURATED: Question[] = [
+  ...[...people, ...world].map((q) => finish(q, 'curated')),
+  ...[...peopleBank, ...namesBank, ...placesBank, ...eventsBank, ...natureBank, ...thingsBank, ...moreBank, ...extraBank, ...finalBank].map((q) => finish(q, 'curated')),
+]
+
+export const QUESTIONS: Question[] = CURATED
 export const QUESTION_BY_ID = new Map(QUESTIONS.map((q) => [q.id, q]))
+export const CATEGORIES = [...new Set(QUESTIONS.map((q) => q.category))].sort()
 
 /** every alias key of every question — used to stop fuzzy matching a real name into the wrong question */
 export const ALL_KEYS = new Set<string>()

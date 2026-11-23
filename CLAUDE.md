@@ -1,30 +1,31 @@
 # CLAUDE.md — Into the Deep (Bible daily dive)
 
 Krillion-style Bible trivia: 7 open-answer prompts × 25 s, rarity-based points, 10 m depth per point (700 = 7,000 m).
-Modes: daily dive, archive, Big Fish (online hot-potato party via room code / link).
+Modes: daily dive, archive, Free Dive (unlimited practice, 3 air tanks), Big Fish (online turn-based party via room code / link).
+Look: Christian "illuminated manuscript meets the deep" — gold/ivory on navy, Cinzel + Cormorant + Manrope, three.js world (`src/components/World3D.tsx`, lazy-loaded; 2D `Ocean.tsx` is the no-WebGL fallback).
 
 ## Commands
 - `pnpm dev` — web http://localhost:5280 (strictPort) + API :8787 (Vite proxies /api and /socket.io)
 - `pnpm test` — vitest (tests/*.test.ts); `pnpm typecheck`; `pnpm build`; `pnpm start` (prod, serves dist/)
-- `pnpm questions:fetch && pnpm questions:build` — regenerate `shared/data/generated.json` from Theographic (CC BY-SA 4.0, credit required)
 
 ## Layout
-- `shared/` isomorphic: `match.ts` (normalise + fuzzy), `scoring.ts` (tiers, priors, depth, zones), `dives.ts` (dive numbering, seeded selection), `data/` (questions)
+- `shared/` isomorphic: `match.ts` (normalise + fuzzy), `scoring.ts` (tiers, priors, depth, zones), `dives.ts` (dive numbering, seeded selection), `data/` (questions: `people.ts`/`world.ts` + `bank-*.ts` in the compact `@id|Category|Text` bank format)
 - `server/solo.ts` SoloService (inject `now`), `server/party.ts` PartyRoom (inject Clock), `server/index.ts` wiring
 - `src/` React 19 + Tailwind v4 + motion; `lib/ocean.ts` global depth target; `components/Ocean.tsx` background world
 
 ## Conventions / decisions
 - Answers never reach the client; all validation/scoring server-side. Don't import `shared/data` from `src/`.
-- Dataset line format `Canonical|Alias:level:Ref` (level 0 obscure … 5 obvious). Protestant canon, no Apocrypha. Accuracy > quantity; never invent names. Tests enforce no alias collisions.
+- Dataset line format `Canonical|Alias:level:Ref` (level 0 obscure … 5 obvious), answers separated by `;` or newlines; names may contain `:`. Refs are chapter-level only (verse is stripped). Protestant canon, no Apocrypha. Accuracy > quantity; never invent names. Tests enforce no alias collisions.
+- Questions are general (people, places, events, animals, roles, food & drink, objects, Jesus, faith…), never verse-specific. Difficulty 1/2/3 is computed from the three best-known answers (`difficultyOf`).
 - Scoring: `share=(count+40*prior[level])/(total+40)` → fixed tiers 10/20/35/60/85/100. Stats count once per player-prompt, ≤3 per IP-hash/question/day.
 - Timer is server-authoritative: deadline = opened_at + 3 s lead + 25 s; grace 1.5 s; reopen keeps clock.
-- Dive prompts are materialised in `dive_prompts` on first use (stable history). Daily = 2 curated + 5 generated (distinct groups, stream of seeded cycles in `shared/dives.ts`).
-- Generated answers: literal verse tags only; gender per record; no OT 'Jesus' tags; curated level is a familiarity floor; co-occurrence anchors must be familiar.
+- Dive prompts are materialised in `dive_prompts` on first use (stable history; a retired question id is swapped for a fresh one). Daily = 3 easy → 3 medium → 1 hard, 7 different categories (`selectDaily`, seeded streams per tier).
 - Budget is $0: free data/tiers only, no paid APIs.
-- Party rooms are in-memory (lost on restart). Fuse 10–30 s hidden, floor 8 s on pass, lives 1–3.
+- Party rooms are in-memory (lost on restart). Turn-based: a question passes round the table in seat order; timeout = −1 life and it still passes on; after a full round, new question if anyone lost a life, else same question again (cap `maxRounds`, default 15, then everyone survives). Host settings: lives 1–5, turn 5–60 s, difficulty easy/medium/hard/mixed, round cap, topics. Starter rotates; 3 s reading lead; reveal board between questions; emoji reactions.
+- Answer boards (`/api/board/:id`) only for prompts the player finished or non-live prompts; Free Dive never serves today's daily prompts.
 - Original branding only — do not copy Krillion art/text/names.
 - Git: commit with the user's configured identity; NO Co-Authored-By / AI attribution trailers (user instruction).
 
 ## Status (2026-11-23)
-- Done: solo daily + archive, Big Fish online, ocean visuals, sounds, 511-question pool (29 curated + 482 generated), 72 tests passing, prod build.
-- Ideas next: more questions, share image, PWA, Postgres port if hosting needs it.
+- Done: redesign (3D world, gilded theme), 502-question general pool, Free Dive, answer boards with chapter links, streaks, verse of the day, turn-based Big Fish with settings + reactions, 553 tests passing, prod build.
+- Ideas next: share image, PWA, Postgres port if hosting needs it.

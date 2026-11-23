@@ -7,7 +7,8 @@ import { fileURLToPath } from 'node:url'
 import { Server } from 'socket.io'
 import { openDb } from './db'
 import { SoloService, GameError } from './solo'
-import { PartyRoom, makeCode, realClock } from './party'
+import { PartyRoom, makeCode, realClock, REACTIONS } from './party'
+import { CATEGORIES } from '../shared/data/index'
 
 // --- config (.env is optional; real env vars win) ---
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -63,7 +64,7 @@ setInterval(() => {
 
 const app = express()
 app.set('trust proxy', 1)
-app.use(express.json({ limit: '4kb' }))
+app.use(express.json({ limit: '16kb' }))
 
 app.use('/api', (req, res, next) => {
   if (limited('api:' + req.ip, 240, 60_000)) return void res.status(429).json({ error: 'Slow down a little' })
@@ -102,6 +103,19 @@ app.post('/api/dive/:n/answer', authed((req, p) => {
 }))
 app.post('/api/dive/:n/expire', authed((req, p) => solo.expire(p, num(req.params.n), num(req.body?.idx))))
 app.get('/api/archive', authed((_req, p) => solo.archive(p)))
+app.get('/api/board/:id', authed((req, p) => solo.board(p, String(req.params.id))))
+app.get('/api/categories', (_req, res) => void res.json(CATEGORIES))
+app.post('/api/practice/next', authed((req) =>
+  solo.practiceNext({
+    difficulty: num(req.body?.difficulty) || undefined,
+    category: typeof req.body?.category === 'string' ? req.body.category : undefined,
+    exclude: Array.isArray(req.body?.exclude) ? req.body.exclude.slice(-60).map(String) : [],
+  }),
+))
+app.post('/api/practice/answer', authed((req, p) => {
+  if (limited('pans:' + p, 120, 60_000)) throw new GameError(429, 'Too many answers')
+  return solo.practiceAnswer(String(req.body?.id ?? ''), String(req.body?.text ?? ''))
+}))
 
 app.use('/api', (_req, res) => void res.status(404).json({ error: 'Not found' }))
 
@@ -173,6 +187,15 @@ io.on('connection', (socket) => {
     if (typeof ack === 'function') ack(r)
   })
   socket.on('party:lives', (n) => inRoom()?.setLives(player, Number(n)))
+  socket.on('party:settings', (patch) => {
+    if (patch && typeof patch === 'object') inRoom()?.updateSettings(player, patch)
+  })
+  socket.on('party:skip', () => inRoom()?.skip(player))
+  socket.on('party:react', (emoji) => {
+    const room = inRoom()
+    if (!room || !REACTIONS.includes(String(emoji)) || limited('react:' + player, 12, 5_000)) return
+    io.to(room.code).emit('party:react', { playerId: player, emoji: String(emoji), id: Math.random().toString(36).slice(2) })
+  })
   socket.on('party:lobby', () => inRoom()?.backToLobby(player))
   socket.on('party:answer', (msg, ack) => {
     if (typeof ack !== 'function') return
@@ -207,4 +230,4 @@ setInterval(() => {
   }
 }, 60_000).unref()
 
-http.listen(PORT, () => console.log(`🌊 Into the Deep API on http://localhost:${PORT}`))
+http.listen(PORT, () => console.log(`🌊 BIBLIO API on http://localhost:${PORT}`))

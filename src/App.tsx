@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { localDive } from '../shared/dives'
 import { getMeta } from './lib/api'
 import { go, usePath } from './lib/router'
@@ -7,7 +7,20 @@ import { OfflineToast, Spinner } from './components/ui'
 import { Home } from './screens/Home'
 import { Dive } from './screens/Dive'
 import { Archive } from './screens/Archive'
+import { FreeDive } from './screens/FreeDive'
 import { PartyHome, PartyRoom } from './screens/Party'
+
+const World3D = lazy(() => import('./components/World3D'))
+
+function hasWebGL() {
+  try {
+    const c = document.createElement('canvas')
+    return !!(c.getContext('webgl2') || c.getContext('webgl'))
+  } catch {
+    return false
+  }
+}
+const WEBGL = typeof document !== 'undefined' && hasWebGL()
 
 export function App() {
   const path = usePath()
@@ -39,6 +52,7 @@ export function App() {
   const room = path.match(/^\/party\/([A-Za-z]{4})\/?$/)
   if (room) page = <PartyRoom code={room[1].toUpperCase()} />
   else if (path === '/party' || path === '/party/') page = <PartyHome />
+  else if (path === '/free' || path === '/free/') page = <FreeDive />
   else if (today == null)
     page = (
       <div className="relative z-10 grid min-h-[100dvh] place-items-center">
@@ -56,7 +70,13 @@ export function App() {
 
   return (
     <>
-      <Ocean />
+      {WEBGL ? (
+        <Suspense fallback={<div className="fixed inset-0" style={{ background: 'linear-gradient(180deg,#2a2f62 0%,#8a7aa8 40%,#f1b48a 46%,#163a56 47%,#0b2a48 100%)' }} />}>
+          <World3D />
+        </Suspense>
+      ) : (
+        <Ocean />
+      )}
       {page}
       <OfflineToast />
     </>

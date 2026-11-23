@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import type { DiveState, OpenPrompt, PromptResult } from '../../shared/types'
+import type { BoardEntry, DiveState, OpenPrompt, PromptResult } from '../../shared/types'
 import { depthFor, PROMPTS_PER_DIVE, TIERS, tierByKey, zoneFor } from '../../shared/scoring'
 import { api, ApiError, serverNow, syncClock } from '../lib/api'
 import { setDepth } from '../lib/ocean'
 import { sfx } from '../lib/sound'
 import { link } from '../lib/router'
-import { AnimatedNumber, HomeButton, MuteButton, Spinner, TIER_COLOR, TierChip, useCountdownToMidnight, useShake } from '../components/ui'
+import { AnimatedNumber, AnswerBoard, Burst, HomeButton, MuteButton, Spinner, TIER_COLOR, TierChip, TimerRing, useCountdownToMidnight, useShake } from '../components/ui'
+import { fmtRef, readUrl } from '../lib/refs'
 
 type Phase = 'loading' | 'resume' | 'intro' | 'answering' | 'sinking' | 'result' | 'final' | 'error'
 
-export const fmtRef = (ref: string) => ref.replace(/^(\d?[A-Za-z]+)(\d)/, '$1 $2')
 const fmtM = (v: number) => `${Math.round(v).toLocaleString()}m`
 
 export function Dive({ n, isToday }: { n: number; isToday: boolean }) {
@@ -343,10 +343,10 @@ function PromptView({
       className="flex flex-1 flex-col"
     >
       <div className="flex flex-1 flex-col items-center justify-center gap-4 py-6 text-center sm:gap-6">
-        <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-glow/80">
-          prompt {open.idx + 1} of 7 · {open.category}
+        <span className="eyebrow text-gold/90">
+          prompt {open.idx + 1} of 7 · {open.category} · {open.idx < 3 ? 'shallows' : open.idx < 6 ? 'deeper' : 'the deep'}
         </span>
-        <h1 className="text-shadow-glow max-w-xl text-balance font-display text-[1.9rem] font-semibold leading-[1.12] sm:text-5xl">{open.text}</h1>
+        <h1 className="text-shadow-glow max-w-xl text-balance font-serif text-[2.1rem] font-semibold leading-[1.08] text-ivory sm:text-[3.4rem]">{open.text}</h1>
         <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-white/50">▼ rarer answers sink deeper ▼</span>
       </div>
 
@@ -356,8 +356,8 @@ function PromptView({
             className="h-full rounded-full transition-[width] duration-100 ease-linear"
             style={{
               width: `${phase === 'intro' ? 100 : frac * 100}%`,
-              background: urgent ? 'linear-gradient(90deg,#ff7f6e,#ffb36e)' : 'linear-gradient(90deg,#2fc6ae,#7ef6dc)',
-              boxShadow: urgent ? '0 0 16px #ff7f6e' : '0 0 14px rgba(126,246,220,0.6)',
+              background: urgent ? 'linear-gradient(90deg,#ff7f6e,#ffb36e)' : 'linear-gradient(90deg,#c99a45,#f3d48c)',
+              boxShadow: urgent ? '0 0 16px #ff7f6e' : '0 0 14px rgba(243,212,140,0.6)',
             }}
           />
         </div>
@@ -398,12 +398,7 @@ function PromptView({
             placeholder={phase === 'intro' ? `get ready… ${startsIn}` : 'name one…'}
             className="min-w-0 flex-1 bg-transparent px-3 py-3 text-lg text-white placeholder:text-white/40 focus:outline-none sm:text-xl"
           />
-          <span
-            className={`w-10 text-center font-mono text-xl font-bold tabular-nums ${urgent ? 'animate-pulse text-coral' : 'text-white/80'}`}
-            aria-live="off"
-          >
-            {phase === 'intro' ? 25 : secs}
-          </span>
+          <TimerRing frac={phase === 'intro' ? 1 : frac} secs={phase === 'intro' ? 25 : secs} size={48} urgent={urgent} />
           <button type="submit" disabled={phase !== 'answering' || busy} className="btn-glow rounded-xl px-5 py-3 font-bold uppercase tracking-wider">
             Dive
           </button>
@@ -459,8 +454,9 @@ function ResultView({ r, phase, onNext, isLast, busy }: { r: PromptResult; phase
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 160, damping: 16 }}
-          className="flex w-full max-w-md flex-col items-center gap-3 text-center"
+          className="relative flex w-full max-w-md flex-col items-center gap-3 text-center"
         >
+          <Burst trigger={r.points ? r.idx + 1 : 0} color={TIER_COLOR[r.tier]} count={r.points >= 60 ? 40 : 22} />
           <motion.div
             className="text-6xl sm:text-7xl"
             initial={{ rotate: -20, scale: 0.4 }}
@@ -471,19 +467,24 @@ function ResultView({ r, phase, onNext, isLast, busy }: { r: PromptResult; phase
             {t.emoji}
           </motion.div>
           <h2
-            className="font-display text-3xl font-extrabold uppercase tracking-wide sm:text-4xl"
+            className="font-display text-3xl font-extrabold tracking-wide sm:text-4xl"
             style={{ color: TIER_COLOR[r.tier], textShadow: '0 2px 16px rgba(3,16,36,0.75), 0 0 2px rgba(3,16,36,0.6)' }}
           >
             {t.label}
           </h2>
-          <p className="font-display text-2xl">{r.answer ? `“${r.answer}”` : '—'}</p>
+          <p className="font-serif text-3xl font-semibold text-ivory">{r.answer ? `“${r.answer}”` : '—'}</p>
           {accepted && <p className="-mt-2 font-mono text-[11px] text-white/50">you typed “{r.raw}”</p>}
           {!r.answer && r.raw && <p className="-mt-2 font-mono text-[11px] text-white/50">last guess “{r.raw}” didn’t match</p>}
           <p className="font-mono text-sm font-bold" style={{ color: TIER_COLOR[r.tier] }}>
             {r.points ? `+${r.points} pts · sink ${(r.points * 10).toLocaleString()}m` : '+0 pts'}
           </p>
           <p className="text-white/75">{r.points ? t.blurb : 'Time ran out before anything landed.'}</p>
-          {r.ref && <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/45">see {fmtRef(r.ref)}</p>}
+          {r.ref && (
+            <a href={readUrl(r.ref)} target="_blank" rel="noreferrer" className="font-mono text-[11px] uppercase tracking-[0.2em] text-gold/80 hover:underline">
+              📖 read {fmtRef(r.ref)}
+            </a>
+          )}
+          <Board questionId={r.questionId} mine={r.answer} />
           <button onClick={onNext} disabled={busy} autoFocus className="btn-glow mt-4 rounded-full px-10 py-4 text-lg font-bold uppercase tracking-[0.15em]">
             {isLast ? 'Surface the results' : 'Descend ▼'}
           </button>
@@ -507,7 +508,7 @@ function FinalView({ state, isToday }: { state: DiveState; isToday: boolean }) {
 
   const share = async () => {
     const grid = Array.from({ length: PROMPTS_PER_DIVE }, (_, i) => tierByKey(state.results.find((r) => r.idx === i)?.tier ?? 'none').emoji).join('')
-    const text = `Into the Deep · Dive #${state.n}\n${grid}\n${state.total} pts · ${depth.toLocaleString()}m · ${zone.name}\n${location.origin}`
+    const text = `BIBLIO · Dive #${state.n}\n${grid}\n${state.total} pts · ${depth.toLocaleString()}m · ${zone.name}\n${location.origin}`
     try {
       if (navigator.share && matchMedia('(pointer: coarse)').matches) await navigator.share({ text })
       else {
@@ -524,10 +525,10 @@ function FinalView({ state, isToday }: { state: DiveState; isToday: boolean }) {
     <motion.section initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center gap-6 py-4 text-center">
       <div className="flex flex-col items-center gap-1">
         <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-glow/80">dive #{state.n} complete</span>
-        <h1 className="text-shadow-glow font-display text-6xl font-extrabold sm:text-7xl">
+        <h1 className="text-gilded font-display text-6xl font-extrabold sm:text-7xl">
           <AnimatedNumber value={depth} format={fmtM} duration={2} />
         </h1>
-        <p className="font-display text-xl text-white/85">{zone.name}</p>
+        <p className="font-serif text-2xl italic text-ivory/90">{zone.name}</p>
         <p className="font-mono text-sm text-amber">{state.total} / 700 pts</p>
         {!!state.percentile && <p className="text-sm text-white/70">Deeper than {state.percentile}% of divers on this dive</p>}
       </div>
@@ -566,13 +567,19 @@ function FinalView({ state, isToday }: { state: DiveState; isToday: boolean }) {
               </span>
             </div>
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
-              <span className="font-display text-lg">{r.answer ?? '—'}</span>
+              <span className="font-serif text-xl font-semibold">{r.answer ?? '—'}</span>
               <TierChip tier={r.tier} small />
             </div>
             <p className="mt-1.5 font-mono text-[11px] text-white/45">
               most said: {r.common ?? '—'}
               {r.pearl && <> · a deep cut: {r.pearl}</>}
             </p>
+            <details className="mt-2">
+              <summary className="cursor-pointer font-mono text-[11px] uppercase tracking-[0.2em] text-gold/80">every answer ↓</summary>
+              <div className="mt-2">
+                <Board questionId={r.questionId} mine={r.answer} bare />
+              </div>
+            </details>
           </li>
         ))}
       </ol>
@@ -581,4 +588,21 @@ function FinalView({ state, isToday }: { state: DiveState; isToday: boolean }) {
       </a>
     </motion.section>
   )
+}
+
+/** fetches and shows every answer to a finished prompt */
+function Board({ questionId, mine, bare = false }: { questionId: string; mine: string | null; bare?: boolean }) {
+  const [items, setItems] = useState<BoardEntry[] | null>(null)
+  useEffect(() => {
+    let live = true
+    api<BoardEntry[]>(`/board/${encodeURIComponent(questionId)}`)
+      .then((b) => live && setItems(b))
+      .catch(() => {})
+    return () => {
+      live = false
+    }
+  }, [questionId])
+  if (!items) return null
+  const board = <AnswerBoard items={items.map((a) => ({ ...a, mine: a.name === mine }))} title={bare ? 'Every answer' : 'The full catch'} note="most said → rarest" />
+  return bare ? board : <div className="mt-3 w-full">{board}</div>
 }

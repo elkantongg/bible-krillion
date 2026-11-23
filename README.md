@@ -5,7 +5,8 @@ It plays in the genre of Krillion (krillion.io), with original code, visuals and
 
 - **Daily dive**: 7 prompts, 25 seconds each, the same for everyone, one dive per day.
 - **Archive**: play any past dive you missed.
-- **Big Fish**: online multiplayer with room codes and invite links. Name an answer and pass the fish before its hidden clock runs out.
+- **Big Fish**: online multiplayer with room codes and invite links (no sign-in). A question goes round the table; name a new answer before your clock runs out or lose a life. The host sets lives (1–5), seconds per turn, difficulty, round cap and topics.
+- **Free Dive**: unlimited practice by topic and difficulty, with three air tanks.
 
 ## Quick start
 
@@ -74,7 +75,7 @@ These are my assumptions, documented and consistent:
 
 - **Tier thresholds and names.** My tiers are Surface Foam 10, Shallows 20, Reef 35, Rare Find 60, Deep Cut 85, Pearl of Great Price 100. The originals' exact cut-offs aren't public.
 - **Rarity formula.** See below.
-- **Lives in Big Fish.** You get 1–3 lives (default 2) and lose one each time the fish swallows you. I couldn't verify the original's lives.
+- **Big Fish rules.** Turn-based instead of a hidden fuse: a question passes round in seat order; a timeout costs a life and the question still passes on. After a full round the question ends if anyone lost a life, otherwise it goes round again, up to the round cap (default 15), after which everyone survives.
 - **Prompt after a pop.** A new prompt starts after each swallow, and also when a category runs out.
 - **Results screen.** I designed it myself: the emoji share grid, "deeper than X%" percentile, and the most-said answer plus a deep cut. I didn't finish a live dive to compare it.
 
@@ -92,34 +93,17 @@ points = first tier whose minShare ≤ share
 - **Anti-manipulation.** Only the first locked answer per player per prompt counts toward the rarity stats. Each hashed IP adds to a question's stats at most 3 times per day. Answers are rate-limited and capped at 40 attempts per prompt.
 - **Server-authoritative timing.** The deadline is stored server-side. Re-opening a prompt keeps the original clock, and late answers lock at 0.
 
-## Question pool (511 prompts)
+## Question pool (502 prompts)
 
-- **29 hand-written prompts** (`shared/data/people.ts`, `world.ts`), covering kings, prophets, animals, foods, parables, gems and more.
-- **482 generated prompts** (`shared/data/generated.json`) built from [Theographic Bible Metadata](https://github.com/robertrouse/theographic-bible-metadata),
-  which tags every person and place in all 31,102 verses. The generator (`scripts/build-questions.ts`) makes:
-  - **Book prompts:** "Name a person / place / woman mentioned in {book}"
-  - **Chapter-range prompts:** "Name a person mentioned in Genesis 1–10"
-  - **Section prompts:** "Name a woman mentioned in the four Gospels"
-  - **Word play:** names by first letter (Old Testament, New Testament, places), by exact length, and by ending ("-iah")
-  - **Chapter pairings:** "Name a person who appears in a chapter alongside Elijah", only for well-known anchors
-- **Accuracy:** every generated answer is a name the dataset tags in a verse inside the prompt's scope, and that verse is its reference.
-  Gender is checked per person, not per name, so the man Noah doesn't count as a woman in Genesis. Old Testament passages that the
-  dataset tags with "Jesus" as messianic are left out, so answers stay literal. Spelling variants are merged, and near-duplicate
-  prompts are dropped.
-- **Familiarity levels** come from how many verses mention a name. A hand-written rating is used as a minimum, so Eve stays "obvious"
-  even though few verses mention her.
-- **Daily mix:** 2 hand-written prompts plus 5 generated ones, with the generated five from different groups (no two from the same
-  book). The generated pool runs about 96 days before it cycles, and about 97% of prompts don't repeat within a cycle.
+All prompts are hand-written and general — no verse-level trivia. They cover people, women, places, events, miracles, animals,
+nature, food & drink, roles, objects, Jesus, Scripture, faith and numbers (`shared/data/people.ts`, `world.ts` and `bank-*.ts`).
 
-Rebuild the pool (downloads about 50 MB of JSON into the gitignored `data/theographic/`):
-
-```bash
-pnpm questions:fetch && pnpm questions:build
-```
-
-**Licence:** `shared/data/generated.json` is derived from Theographic Bible Metadata by Robert Rouse, licensed
-[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). That file is shared under the same licence, and the game credits
-it in How to play.
+- **Format:** `@id|Category|Question text` followed by answers `Name|Alias:level:Ref`, separated by `;` or new lines.
+  Level 0 (very obscure) … 5 (everyone says it). References are kept at chapter level (`Ge6`).
+- **Difficulty** (1 easy, 2 medium, 3 hard) comes from how familiar the three best-known answers are.
+- **Daily mix:** 3 easy → 3 medium → 1 hard, all from different categories, so a dive gets harder as you sink. Each tier cycles
+  through its whole pool before any prompt repeats.
+- **Answer boards:** after a prompt, players can see every accepted answer with a link to read its chapter.
 
 ## Answer validation
 
@@ -162,7 +146,7 @@ saved to the database the first time it's opened, so adding questions never chan
 
 - **Original design.** The name, branding, art, copy, tier names and depth captions are all new. The ocean includes a few small
   scripture captions (Jonah, Psalm 42, Job 41).
-- **Big Fish vs Puffer Party.** It uses the same hot-potato mechanic, but with a "great fish" that opens its jaws as time passes,
-  a configurable number of lives, and rarity badges shown on each answer.
+- **Big Fish vs Puffer Party.** Turn-based round-the-table play instead of a hidden fuse, with host settings, a reveal board of
+  every answer between questions, and emoji reactions.
 - **SQLite instead of Supabase.** It's simpler to run solo and free. The schema is small, so it can be ported to Postgres if needed.
-- **Not included.** Themed packs, unlimited mode, accounts and friends.
+- **Not included.** Accounts and friends lists.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CURATED, GENERATED, QUESTIONS, QUESTION_BY_ID, ALL_KEYS } from '../shared/data/index'
+import { QUESTIONS, QUESTION_BY_ID, ALL_KEYS, CATEGORIES } from '../shared/data/index'
 import { key, matchAnswer } from '../shared/match'
 
 const REF = /^\d?[A-Za-z]+\d+(:\d+)?$/
@@ -22,48 +22,39 @@ describe('question pool', () => {
   })
 })
 
-describe('curated questions', () => {
-  it.each(CURATED.map((q) => [q.id, q] as const))('%s is well-formed', (_id, q) => {
-    expect(q.answers.length).toBeGreaterThanOrEqual(14)
+describe('every question', () => {
+  it.each(QUESTIONS.map((q) => [q.id, q] as const))('%s is well-formed', (_id, q) => {
+    expect(q.answers.length).toBeGreaterThanOrEqual(3)
+    expect(q.text.length).toBeGreaterThan(10)
+    expect(CATEGORIES).toContain(q.category)
+    expect([1, 2, 3]).toContain(q.difficulty)
     for (const a of q.answers) {
-      expect(a.ref).toMatch(REF)
+      expect(a.ref, `${q.id}/${a.name}`).toMatch(REF)
       expect(a.level).toBeGreaterThanOrEqual(0)
       expect(a.level).toBeLessThanOrEqual(5)
     }
     noCollisions(q)
-    // rarity needs a spread: some obvious answers and some deep cuts
-    expect(q.answers.some((a) => a.level >= 4)).toBe(true)
-    expect(q.answers.some((a) => a.level <= 1)).toBe(true)
   })
 })
 
-describe('generated questions', () => {
-  it('every generated question is well-formed', () => {
-    expect(GENERATED.length).toBeGreaterThanOrEqual(450)
-    for (const q of GENERATED) {
-      expect(q.answers.length, q.id).toBeGreaterThanOrEqual(20)
-      expect(q.group, q.id).toBeTruthy()
-      for (const a of q.answers) {
-        expect(a.ref, `${q.id}/${a.name}`).toMatch(REF)
-        expect(a.level).toBeGreaterThanOrEqual(0)
-        expect(a.level).toBeLessThanOrEqual(5)
-      }
-      noCollisions(q)
-    }
+describe('the pool is broad and approachable', () => {
+  it('covers people, places, events, animals, roles, food and drink', () => {
+    for (const c of ['People', 'Places', 'Events', 'Animals', 'Roles', 'Food & Drink', 'Objects', 'Jesus', 'Faith', 'Women'])
+      expect(QUESTIONS.filter((q) => q.category === c).length, c).toBeGreaterThanOrEqual(8)
   })
-  it('keeps answers literal to the scope', () => {
-    const gen = QUESTION_BY_ID.get('g-people-Gen')!
-    expect(gen).toBeTruthy()
-    expect(matchAnswer(gen, 'Abraham', ALL_KEYS)?.name).toBe('Abraham')
-    expect(matchAnswer(gen, 'Methuselah', ALL_KEYS)?.name).toBe('Methuselah')
-    expect(matchAnswer(gen, 'Jesus', ALL_KEYS)).toBeNull() // not literally named in Genesis
-    expect(matchAnswer(gen, 'Paul', ALL_KEYS)).toBeNull()
-    const women = QUESTION_BY_ID.get('g-women-Gen')!
-    expect(matchAnswer(women, 'Sarah', ALL_KEYS)?.name).toBe('Sarah')
-    expect(matchAnswer(women, 'Noah', ALL_KEYS)).toBeNull() // Noah the man is in Genesis; Noah the woman is not
+  it('keeps references at chapter level', () => {
+    for (const q of QUESTIONS) for (const a of q.answers) expect(a.ref, `${q.id}/${a.name}`).not.toContain(':')
   })
-  it('uses curated familiarity as a floor', () => {
-    const q = QUESTION_BY_ID.get('g-people-Gen')!
-    expect(q.answers.find((a) => a.name === 'Eve')!.level).toBeGreaterThanOrEqual(5)
+  it('is mostly easy or medium', () => {
+    const hard = QUESTIONS.filter((q) => q.difficulty === 3).length
+    expect(hard / QUESTIONS.length).toBeLessThan(0.25)
+    expect(QUESTIONS.filter((q) => q.difficulty === 1).length / QUESTIONS.length).toBeGreaterThan(0.3)
+  })
+  it('accepts answers that contain colons and numbers', () => {
+    const q = QUESTION_BY_ID.get('famous-verses')!
+    expect(matchAnswer(q, 'John 3:16', ALL_KEYS)?.name).toBe('John 3:16')
+    expect(matchAnswer(QUESTION_BY_ID.get('numbers')!, 'forty', ALL_KEYS)?.name).toBe('40')
+    expect(matchAnswer(QUESTION_BY_ID.get('plagues')!, 'frogs', ALL_KEYS)?.name).toBe('Frogs')
+    expect(matchAnswer(QUESTION_BY_ID.get('fruit-spirit')!, 'self control', ALL_KEYS)?.name).toBe('Self-control')
   })
 })

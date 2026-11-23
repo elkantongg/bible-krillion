@@ -8,9 +8,7 @@
     "build": "tsc -b && vite build",
     "start": "NODE_ENV=production NODE_NO_WARNINGS=1 tsx server/index.ts",
     "test": "NODE_NO_WARNINGS=1 vitest run",
-    "typecheck": "tsc -b",
-    "questions:fetch": "mkdir -p data/theographic && for f in people places books verses; do curl -sSfL -o data/theographic/$f.json https://raw.githubusercontent.com/robertrouse/theographic-bible-metadata/master/json/$f.json; done",
-    "questions:build": "tsx scripts/build-questions.ts"
+    "typecheck": "tsc -b"
   },
   "dependencies": {
     "express": "^5.3.0",
@@ -19,7 +17,8 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "socket.io": "^4.8.4",
-    "socket.io-client": "^4.8.4"
+    "socket.io-client": "^4.8.4",
+    "three": "^0.187.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.5",
@@ -27,6 +26,7 @@
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.187.0",
     "@vitejs/plugin-react": "^6.3.0",
     "concurrently": "^10.0.7",
     "tailwindcss": "^4.3.5",
