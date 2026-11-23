@@ -5,7 +5,7 @@ import { depthFor } from '../../shared/scoring'
 import { api } from '../lib/api'
 import { setDepth } from '../lib/ocean'
 import { go, link } from '../lib/router'
-import { verseOfDay } from '../lib/verses'
+import { knowledgeVerseOfDay } from '../lib/verses'
 import { MuteButton, useCountdownToMidnight } from '../components/ui'
 
 const RULES = [
@@ -34,7 +34,7 @@ export function Home({ today }: { today: number }) {
   const [mine, setMine] = useState<DiveState | null>(null)
   const [streak, setStreak] = useState(0)
   const left = useCountdownToMidnight()
-  const [verse, verseRef] = verseOfDay(today)
+  const [verse, verseRef] = knowledgeVerseOfDay(today)
 
   useEffect(() => {
     setDepth(0)
@@ -94,9 +94,10 @@ export function Home({ today }: { today: number }) {
             <svg width="9" height="9" viewBox="0 0 10 10"><path d="M5 0 10 5 5 10 0 5Z" fill="currentColor" /></svg>
             <span className="h-px w-10 bg-current" />
           </div>
-          <p className="mt-5 max-w-sm font-serif text-xl leading-snug text-ivory/85 sm:text-[1.4rem]">
-            Seven questions on the Bible. Name the answer nobody else thinks&nbsp;of.
-          </p>
+          <blockquote className="mt-5 max-w-md font-serif text-xl italic leading-snug text-ivory/85 sm:text-[1.45rem]">
+            “{verse}”
+            <footer className="mt-2 text-[10px] font-semibold not-italic uppercase tracking-[0.26em] text-gold/75">{verseRef} · KJV</footer>
+          </blockquote>
         </motion.div>
 
         <AnimatePresence>
@@ -149,10 +150,6 @@ export function Home({ today }: { today: number }) {
             <ModeLink href="/archive" title="Archive" sub="Past dives" icon={<ScrollIcon />} />
           </nav>
 
-          <blockquote className="mt-8 max-w-sm font-serif text-[15px] italic leading-snug text-ivory/55">
-            “{verse}”
-            <footer className="mt-1 text-[10px] font-semibold not-italic uppercase tracking-[0.24em] text-gold/60">{verseRef}</footer>
-          </blockquote>
         </motion.div>
       </main>
     </div>

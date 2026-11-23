@@ -203,9 +203,225 @@ function makeJelly(color: string) {
 
 /* ---------------- component ---------------- */
 
+
+/* ---------------- more sea life ----------------
+ * every creature is built facing +x; `update(t)` animates it in place.
+ */
+interface Creature { obj: THREE.Object3D; depth: number; range: number; update: (t: number) => void }
+
+/** swim back and forth across the view, wrapping off-screen; returns x and heading */
+function lane(t: number, speed: number, phase: number, span = 70) {
+  const raw = t * speed + phase * span * 2
+  const x = (((raw % (span * 2)) + span * 2) % (span * 2)) - span
+  return speed >= 0 ? { x, ry: 0 } : { x: -x, ry: Math.PI }
+}
+
+function makeTurtle(): Creature['obj'] {
+  const g = new THREE.Group()
+  const shellMat = new THREE.MeshStandardMaterial({ color: '#56603a', roughness: 0.7 })
+  const skin = new THREE.MeshStandardMaterial({ color: '#8a9a6a', roughness: 0.8 })
+  const shell = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 12), shellMat)
+  shell.scale.set(1.25, 0.42, 1)
+  g.add(shell)
+  const belly = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), skin)
+  belly.scale.set(1.15, 0.22, 0.9)
+  belly.position.y = -0.12
+  g.add(belly)
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 14, 10), skin)
+  head.scale.set(1.3, 0.85, 0.9)
+  head.position.set(1.45, 0.02, 0)
+  g.add(head)
+  const flip = (len: number, w: number) => {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 8), skin)
+    m.scale.set(w, 0.07, len)
+    const pivot = new THREE.Group()
+    m.position.z = len * 0.85
+    pivot.add(m)
+    return pivot
+  }
+  const flippers: THREE.Group[] = []
+  for (const [x, z, len, w] of [[0.6, 0.75, 1.1, 0.35], [0.6, -0.75, 1.1, 0.35], [-0.9, 0.6, 0.5, 0.22], [-0.9, -0.6, 0.5, 0.22]] as const) {
+    const f = flip(len, w)
+    f.position.set(x, -0.05, z)
+    if (z < 0) f.rotation.y = Math.PI
+    flippers.push(f)
+    g.add(f)
+  }
+  g.userData.flippers = flippers
+  return g
+}
+
+function makeDolphin(): Creature['obj'] {
+  const g = new THREE.Group()
+  const skin = new THREE.MeshStandardMaterial({ color: '#7d8f9e', roughness: 0.35, metalness: 0.1 })
+  const pts = [] as THREE.Vector2[]
+  for (let i = 0; i <= 20; i++) {
+    const u = i / 20
+    pts.push(new THREE.Vector2(Math.sin(Math.PI * Math.pow(u, 0.8)) * 0.42 * (1 - 0.6 * u * u) + 0.02, u * 3.2 - 1.6))
+  }
+  const body = new THREE.Mesh(new THREE.LatheGeometry(pts, 20), skin)
+  body.rotation.z = -Math.PI / 2
+  g.add(body)
+  const beak = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.12, 0.5, 10), skin)
+  beak.rotation.z = -Math.PI / 2
+  beak.position.x = 1.75
+  g.add(beak)
+  const finShape = new THREE.Shape()
+  finShape.moveTo(0, 0)
+  finShape.quadraticCurveTo(-0.1, 0.5, -0.45, 0.6)
+  finShape.quadraticCurveTo(-0.35, 0.2, -0.6, 0)
+  const fin = new THREE.Mesh(new THREE.ShapeGeometry(finShape), new THREE.MeshStandardMaterial({ color: '#6c7e8c', side: THREE.DoubleSide }))
+  fin.position.set(0.1, 0.36, 0)
+  g.add(fin)
+  const tail = new THREE.Group()
+  const fluke = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 6), skin)
+  fluke.scale.set(0.22, 0.04, 0.55)
+  fluke.position.x = -0.15
+  tail.add(fluke)
+  tail.position.x = -1.6
+  g.add(tail)
+  g.userData.tail = tail
+  return g
+}
+
+function makeManta(): Creature['obj'] {
+  const g = new THREE.Group()
+  const top = new THREE.MeshStandardMaterial({ color: '#22303e', roughness: 0.6, side: THREE.DoubleSide })
+  const body = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), top)
+  body.scale.set(1.3, 0.25, 0.8)
+  g.add(body)
+  const wing = (side: 1 | -1) => {
+    const sh = new THREE.Shape()
+    sh.moveTo(0.9, 0)
+    sh.quadraticCurveTo(0.2, 1.6, -0.6, 3.2)
+    sh.quadraticCurveTo(-0.5, 1.4, -1.1, 0)
+    const m = new THREE.Mesh(new THREE.ShapeGeometry(sh, 12), top)
+    m.rotation.x = side * Math.PI / 2
+    const pivot = new THREE.Group()
+    pivot.add(m)
+    pivot.position.z = side * 0.6
+    if (side < 0) m.scale.y = 1
+    return pivot
+  }
+  const L = wing(1), R = wing(-1)
+  g.add(L, R)
+  const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.05, 2.4, 6), top)
+  tail.rotation.z = Math.PI / 2
+  tail.position.x = -2.2
+  g.add(tail)
+  for (const z of [0.45, -0.45]) {
+    const horn = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 6), top)
+    horn.scale.set(1.2, 0.15, 0.35)
+    horn.position.set(1.35, 0, z)
+    g.add(horn)
+  }
+  g.userData.wings = [L, R]
+  return g
+}
+
+function makeSquid(color: string): Creature['obj'] {
+  const g = new THREE.Group()
+  const mat = new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.35, roughness: 0.4, transparent: true, opacity: 0.92 })
+  const mantle = new THREE.Mesh(new THREE.ConeGeometry(0.45, 2.2, 16), mat)
+  mantle.rotation.z = -Math.PI / 2
+  mantle.position.x = 0.9
+  g.add(mantle)
+  const fin = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 6), mat)
+  fin.scale.set(0.35, 0.04, 0.75)
+  fin.position.x = 1.7
+  g.add(fin)
+  const eyeMat = new THREE.MeshBasicMaterial({ color: '#f4f0d8' })
+  for (const z of [0.3, -0.3]) {
+    const e = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 6), eyeMat)
+    e.position.set(-0.15, 0.05, z)
+    g.add(e)
+  }
+  const lmat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.8 })
+  const arms: THREE.Line[] = []
+  for (let i = 0; i < 8; i++) {
+    const geo = new THREE.BufferGeometry().setFromPoints(Array.from({ length: 10 }, (_, k) => new THREE.Vector3(-0.2 - k * 0.18, 0, 0)))
+    const l = new THREE.Line(geo, lmat)
+    l.userData.a = (i / 8) * Math.PI * 2
+    arms.push(l)
+    g.add(l)
+  }
+  g.userData.arms = arms
+  return g
+}
+
+function makeAngler(): Creature['obj'] {
+  const g = new THREE.Group()
+  const skin = new THREE.MeshStandardMaterial({ color: '#2a2024', roughness: 0.9, emissive: '#0a0608' })
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.9, 16, 12), skin)
+  body.scale.set(1.1, 0.95, 0.8)
+  g.add(body)
+  const jaw = new THREE.Mesh(new THREE.SphereGeometry(0.75, 14, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), skin)
+  jaw.position.set(0.55, -0.1, 0)
+  jaw.scale.set(0.8, 0.7, 0.9)
+  g.add(jaw)
+  const toothMat = new THREE.MeshBasicMaterial({ color: '#d9d2c0' })
+  for (let i = 0; i < 6; i++) {
+    const tooth = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.22, 4), toothMat)
+    tooth.position.set(1.05, -0.05, -0.35 + i * 0.14)
+    g.add(tooth)
+  }
+  const tail = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.8, 4), skin)
+  tail.rotation.z = Math.PI / 2
+  tail.position.x = -1.2
+  g.add(tail)
+  const rod = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0.2, 0.8, 0), new THREE.Vector3(0.9, 1.5, 0), new THREE.Vector3(1.6, 1.2, 0)]),
+    new THREE.LineBasicMaterial({ color: '#4a3c3a' }),
+  )
+  g.add(rod)
+  const lure = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture('rgba(190,255,235,1)'), color: '#b8ffe8', transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }))
+  lure.position.set(1.6, 1.2, 0)
+  lure.scale.setScalar(1.3)
+  g.add(lure)
+  g.userData.lure = lure
+  return g
+}
+
+function makeWhale(): Creature['obj'] {
+  const g = new THREE.Group()
+  const skin = new THREE.MeshStandardMaterial({ color: '#2c3c4c', roughness: 0.6 })
+  const pts = [] as THREE.Vector2[]
+  for (let i = 0; i <= 24; i++) {
+    const u = i / 24
+    pts.push(new THREE.Vector2(Math.sin(Math.PI * Math.pow(u, 0.65)) * 1.6 * (1 - 0.7 * u * u) + 0.05, u * 11 - 5.5))
+  }
+  const body = new THREE.Mesh(new THREE.LatheGeometry(pts, 24), skin)
+  body.rotation.z = -Math.PI / 2
+  body.scale.set(1, 1, 0.85)
+  g.add(body)
+  const fins: THREE.Group[] = []
+  for (const side of [1, -1]) {
+    const f = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 6), skin)
+    f.scale.set(0.6, 0.08, 2.4)
+    f.position.z = side * 2.2
+    const pivot = new THREE.Group()
+    pivot.add(f)
+    pivot.position.set(2.2, -0.6, side * 0.6)
+    pivot.rotation.x = side * 0.3
+    fins.push(pivot)
+    g.add(pivot)
+  }
+  const tail = new THREE.Group()
+  const fluke = new THREE.Mesh(new THREE.SphereGeometry(1, 14, 6), skin)
+  fluke.scale.set(0.6, 0.08, 2.0)
+  fluke.position.x = -0.4
+  tail.add(fluke)
+  tail.position.x = -5.4
+  g.add(tail)
+  g.userData.tail = tail
+  g.userData.fins = fins
+  return g
+}
+
 export default function World3D() {
   const mount = useRef<HTMLDivElement>(null)
   const caption = useRef<HTMLDivElement>(null)
+  const veil = useRef<HTMLDivElement>(null)
   const target = useDepthTarget()
   const path = usePath()
   const depth = useMotionValue(target)
@@ -215,7 +431,8 @@ export default function World3D() {
   useEffect(() => {
     const from = depth.get()
     const dist = Math.abs(target - from)
-    const c = animate(depth, target, { duration: Math.min(3.6, Math.max(1, dist / 500)), ease: [0.55, 0, 0.2, 1] })
+    const crossing = Math.min(from, target) < 30
+    const c = animate(depth, target, { duration: Math.min(3.6, Math.max(crossing ? 2.6 : 1, dist / 500)), ease: [0.55, 0, 0.2, 1] })
     return () => c.stop()
   }, [target, depth])
 
@@ -342,7 +559,7 @@ export default function World3D() {
             } else {
               // from below: a bright, rippling ceiling of light
               float r = sin(vW.x*0.35 + uTime*1.2)*sin(vW.z*0.3 - uTime*0.9);
-              vec3 c = mix(vec3(0.45,0.82,0.92), vec3(0.85,0.98,1.0), 0.5 + 0.5*r);
+              vec3 c = mix(vec3(0.22,0.36,0.46), vec3(0.78,0.66,0.58), 0.5 + 0.5*r);
               float dist = length(cameraPosition.xz - vW.xz);
               gl_FragColor = vec4(c, mix(0.9, 0.0, smoothstep(60.0, 220.0, dist)));
             }
@@ -365,7 +582,7 @@ export default function World3D() {
       depthWrite: false,
       blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide,
-      uniforms: { uTime: { value: 0 }, uFade: { value: 1 }, uColor: { value: new THREE.Color('#d8f6ff') } },
+      uniforms: { uTime: { value: 0 }, uFade: { value: 1 }, uColor: { value: new THREE.Color('#f0d8bc') } },
       vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
       fragmentShader: `uniform float uTime; uniform float uFade; uniform vec3 uColor; varying vec2 vUv;
         void main(){
@@ -429,6 +646,19 @@ export default function World3D() {
     interface School { y: number; r: number; speed: number; count: number; tint: string; glow: number; size: number; phase: number }
     const schools: School[] = [
       { y: -18, r: 16, speed: 0.22, count: 38, tint: '#e6f6ff', glow: 0, size: 0.9, phase: 0 },
+      { y: -45, r: 12, speed: -0.3, count: 34, tint: '#ffd38a', glow: 0, size: 0.6, phase: 0.6 },
+      { y: -110, r: 20, speed: 0.18, count: 40, tint: '#c8f0ff', glow: 0, size: 0.8, phase: 1.4 },
+      { y: -220, r: 14, speed: -0.25, count: 30, tint: '#ffb48a', glow: 0, size: 0.7, phase: 2.2 },
+      { y: -260, r: 24, speed: 0.12, count: 24, tint: '#a8c8e8', glow: 0, size: 1.6, phase: 0.3 },
+      { y: -480, r: 18, speed: 0.2, count: 30, tint: '#9ad8ff', glow: 0.2, size: 0.9, phase: 2.7 },
+      { y: -640, r: 22, speed: -0.15, count: 26, tint: '#b6c0ff', glow: 0.3, size: 1.1, phase: 1.9 },
+      { y: -900, r: 16, speed: 0.17, count: 28, tint: '#7ef0f6', glow: 1, size: 0.6, phase: 3.1 },
+      { y: -1150, r: 20, speed: -0.13, count: 22, tint: '#a6ffd8', glow: 1, size: 0.7, phase: 0.8 },
+      { y: -1650, r: 22, speed: 0.11, count: 26, tint: '#86b8ff', glow: 1, size: 0.6, phase: 2.4 },
+      { y: -2700, r: 18, speed: -0.12, count: 24, tint: '#ff9ed0', glow: 1, size: 0.6, phase: 1.1 },
+      { y: -3900, r: 22, speed: 0.1, count: 20, tint: '#7ef6dc', glow: 1, size: 0.7, phase: 3.6 },
+      { y: -4800, r: 20, speed: -0.09, count: 18, tint: '#c6a8ff', glow: 1, size: 0.6, phase: 0.2 },
+      { y: -5700, r: 18, speed: 0.08, count: 16, tint: '#9fe8ff', glow: 1, size: 0.6, phase: 2.9 },
       { y: -70, r: 22, speed: -0.16, count: 30, tint: '#9fd6ff', glow: 0, size: 1.2, phase: 1 },
       { y: -150, r: 18, speed: 0.2, count: 26, tint: '#7fc4e8', glow: 0, size: 1, phase: 2 },
       { y: -330, r: 26, speed: -0.12, count: 24, tint: '#6fb0d8', glow: 0.1, size: 1.4, phase: 3 },
@@ -459,6 +689,23 @@ export default function World3D() {
       [1080, 5, -22, '#a6e9ff'],
       [1500, -9, -30, '#c8b0ff'],
       [2400, 10, -28, '#7ef6dc'],
+      [180, 14, -30, '#ffd6f0'],
+      [300, -16, -24, '#cdeaff'],
+      [420, 9, -36, '#ffc8a8'],
+      [560, -6, -20, '#d6c8ff'],
+      [640, 18, -40, '#a6e9ff'],
+      [980, -18, -28, '#ff9fd8'],
+      [1240, 12, -24, '#7ef6dc'],
+      [1720, -14, -26, '#b9a6ff'],
+      [1950, 6, -34, '#ffb0e0'],
+      [2250, -10, -22, '#a6e9ff'],
+      [2850, 14, -30, '#c8b0ff'],
+      [3300, -8, -26, '#7ef6dc'],
+      [3800, 10, -32, '#ff9fd8'],
+      [4400, -12, -24, '#a6e9ff'],
+      [5100, 8, -30, '#b9a6ff'],
+      [5600, -10, -28, '#7ef6dc'],
+      [6200, 12, -26, '#ffd6f0'],
     ].map(([d, x, z, c]) => {
       const j = makeJelly(c as string)
       j.position.set(x as number, -(d as number), z as number)
@@ -473,6 +720,110 @@ export default function World3D() {
     great.position.set(0, -1300, -45)
     scene.add(great)
     const tailPivot = great.getObjectByName('tailPivot')!
+
+    /* the rest of the sea: turtles, dolphins, rays, a whale, squid, anglerfish */
+    const creatures: Creature[] = []
+    const addSwimmer = (obj: THREE.Object3D, depth: number, z: number, speed: number, phase: number, scale: number, anim: (t: number) => void, bob = 1) => {
+      obj.scale.setScalar(scale)
+      scene.add(obj)
+      creatures.push({
+        obj,
+        depth,
+        range: 260,
+        update: (t) => {
+          const { x, ry } = lane(t, speed, phase)
+          obj.position.set(x, -depth + Math.sin(t * 0.4 + phase * 9) * bob, z)
+          obj.rotation.y = ry
+          anim(t)
+        },
+      })
+    }
+    // dolphins just under the surface, leaping in a loose pod
+    for (let i = 0; i < 5; i++) {
+      const dol = makeDolphin()
+      const tail = dol.userData.tail as THREE.Group
+      const ph = i * 0.13
+      addSwimmer(dol, 14 + i * 4, -22 - i * 3, 7, ph, 1.1, (t) => {
+        tail.rotation.z = Math.sin(t * 6 + i) * 0.35
+        dol.rotation.z = Math.sin(t * 1.5 + i) * 0.15
+      }, 2.5)
+    }
+    // sea turtles in the sunlit shallows
+    for (const [dd, z, sp, ph, sc] of [[60, -20, 2.2, 0.1, 1.2], [150, -28, -1.8, 0.55, 1.5], [240, -18, 2.0, 0.3, 1.0], [380, -32, -1.6, 0.8, 1.6]] as const) {
+      const tur = makeTurtle()
+      const fl = tur.userData.flippers as THREE.Group[]
+      addSwimmer(tur, dd, z, sp, ph, sc, (t) => {
+        const a = Math.sin(t * 1.6 + ph * 10)
+        fl[0].rotation.x = a * 0.6
+        fl[1].rotation.x = -a * 0.6
+        fl[2].rotation.x = a * 0.3
+        fl[3].rotation.x = -a * 0.3
+        tur.rotation.z = a * 0.05
+      }, 1.5)
+    }
+    // manta rays gliding through the twilight
+    for (const [dd, z, sp, ph, sc] of [[200, -34, 2.6, 0.2, 1.6], [520, -26, -2.2, 0.7, 2.0], [760, -38, 2.0, 0.4, 2.4], [1400, -30, -1.8, 0.9, 2.0]] as const) {
+      const ray = makeManta()
+      const [L, R] = ray.userData.wings as THREE.Group[]
+      addSwimmer(ray, dd, z, sp, ph, sc, (t) => {
+        const a = Math.sin(t * 1.1 + ph * 6) * 0.45
+        L.rotation.x = a
+        R.rotation.x = -a
+        ray.rotation.z = Math.sin(t * 0.5 + ph) * 0.08
+      }, 3)
+    }
+    // a whale passing slowly overhead in the twilight zone
+    {
+      const whale = makeWhale()
+      const tail = whale.userData.tail as THREE.Group
+      const fins = whale.userData.fins as THREE.Group[]
+      addSwimmer(whale, 560, -60, 2.2, 0.35, 1.6, (t) => {
+        tail.rotation.z = Math.sin(t * 0.9) * 0.25
+        fins[0].rotation.x = 0.3 + Math.sin(t * 0.6) * 0.15
+        fins[1].rotation.x = -0.3 - Math.sin(t * 0.6) * 0.15
+      }, 4)
+    }
+    // squid jetting through the midnight zone
+    for (const [dd, z, sp, ph, col] of [[1800, -24, 4, 0.1, '#d0605a'], [2300, -30, -3.5, 0.6, '#e27aa8'], [3100, -22, 4.2, 0.3, '#c86a6a'], [4200, -28, -3.8, 0.8, '#e08a7a']] as const) {
+      const sq = makeSquid(col)
+      const arms = sq.userData.arms as THREE.Line[]
+      sq.scale.setScalar(1.4)
+      scene.add(sq)
+      creatures.push({
+        obj: sq,
+        depth: dd,
+        range: 260,
+        update: (t) => {
+          // pulse-and-glide: position advances in bursts
+          const burst = t + Math.sin(t * 2.2 + ph * 9) * 0.35
+          const { x, ry } = lane(burst, sp, ph)
+          sq.position.set(x, -dd + Math.sin(t * 0.5 + ph) * 2, z)
+          // squid swim mantle-first, so face the other way
+          sq.rotation.y = ry + Math.PI
+          const open = 0.5 + 0.5 * Math.sin(t * 2.2 + ph * 9)
+          for (const arm of arms) {
+            const p = arm.geometry.attributes.position as THREE.BufferAttribute
+            const a = arm.userData.a as number
+            for (let v = 0; v < p.count; v++) {
+              const r = v * 0.035 * (0.4 + open)
+              p.setY(v, Math.cos(a) * r + Math.sin(t * 3 + v * 0.6 + a) * 0.03 * v)
+              p.setZ(v, Math.sin(a) * r)
+            }
+            p.needsUpdate = true
+          }
+        },
+      })
+    }
+    // anglerfish in the abyss
+    for (let i = 0; i < 7; i++) {
+      const ang = makeAngler()
+      const lure = ang.userData.lure as THREE.Sprite
+      const dd = 3500 + i * 480
+      addSwimmer(ang, dd, -18 - (i % 3) * 6, i % 2 ? -1.1 : 1.2, i * 0.17, 1.2 + (i % 3) * 0.3, (t) => {
+        lure.material.opacity = 0.65 + 0.35 * Math.sin(t * 2.4 + i)
+        ang.rotation.z = Math.sin(t * 0.8 + i) * 0.06
+      }, 1.2)
+    }
 
     /* angler lights + lanterns in the deep */
     const lanterns = new THREE.Group()
@@ -587,13 +938,21 @@ export default function World3D() {
       camera.lookAt(look)
       camera.rotation.z += Math.sin(t * 0.3) * 0.006
 
+      // a soft veil of churned water while the camera passes through the surface
+      if (veil.current) {
+        const moving = Math.min(1, Math.abs(vel) / 40)
+        veil.current.style.opacity = String(Math.exp(-Math.pow((d - 8) / 10, 2)) * moving)
+      }
+
       // fog + background follow the depth colour
       const under = d > 0.5 || camera.position.y < 0
       const c = rgb(d)
       if (under) {
-        fog.color.copy(c)
-        fog.density = 0.008 + Math.min(0.012, d / 400000)
-        renderer.setClearColor(c)
+        // blend from the dusk air into the water over the first metres
+        const k = Math.min(1, d / 30)
+        fog.color.copy(tmpColor.set('#3a2c3c').lerp(c, k))
+        fog.density = 0.004 + k * (0.004 + Math.min(0.012, d / 400000))
+        renderer.setClearColor(fog.color)
         sky.visible = false
         sun.visible = false
         hills.visible = false
@@ -606,7 +965,7 @@ export default function World3D() {
       }
       water.visible = d < 260
       hemi.intensity = Math.max(0.15, Math.min(1.5, 0.5 + d / 40) - d / 900)
-      hemi.color.copy(tmpColor.set('#bfe8ff').lerp(c, Math.min(1, d / 600)))
+      hemi.color.copy(tmpColor.set('#c8d4e8').lerp(c, Math.min(1, d / 600)))
       sunLight.intensity = Math.max(0, 2.6 - d / 250)
       lamp.position.copy(camera.position).add(new THREE.Vector3(0, -1, -4))
       lamp.intensity = Math.min(1, Math.max(0, (d - 700) / 1500)) * 18
@@ -699,6 +1058,12 @@ export default function World3D() {
         }
       }
 
+      // the rest of the sea
+      for (const c of creatures) {
+        c.obj.visible = Math.abs(d - c.depth) < c.range
+        if (c.obj.visible) c.update(t)
+      }
+
       // the great fish glides past
       great.visible = Math.abs(d - 1300) < 320
       if (great.visible) {
@@ -759,10 +1124,21 @@ export default function World3D() {
   }, [depth])
 
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#06213d]">
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#0a1424]">
       <div ref={mount} className="absolute inset-0" />
       {/* soft vignette + grain for a painted, cinematic feel */}
       <div className="absolute inset-0" style={{ background: 'radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(2,6,16,0.55) 100%)' }} />
+      <div
+        ref={veil}
+        className="absolute inset-0"
+        style={{
+          opacity: 0,
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
+          background:
+            'radial-gradient(3px 3px at 20% 70%, rgba(255,255,255,0.5), transparent), radial-gradient(2px 2px at 65% 40%, rgba(255,255,255,0.45), transparent), radial-gradient(4px 4px at 80% 80%, rgba(255,255,255,0.4), transparent), radial-gradient(2px 2px at 35% 25%, rgba(255,255,255,0.4), transparent), linear-gradient(180deg, rgba(58,44,60,0.65), rgba(38,78,104,0.75))',
+        }}
+      />
       <div
         ref={caption}
         className="absolute left-1/2 top-[calc(env(safe-area-inset-top)+5.5rem)] w-[min(92vw,640px)] -translate-x-1/2 text-center font-serif text-[13px] italic text-white/50 transition-opacity duration-700 sm:top-28 sm:text-[15px]"

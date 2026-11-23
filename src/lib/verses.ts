@@ -25,3 +25,21 @@ export const VERSES: [string, string][] = [
 export function verseOfDay(n: number): [string, string] {
   return VERSES[((n % VERSES.length) + VERSES.length) % VERSES.length]
 }
+
+/** KJV verses about knowledge and wisdom — the cover's epigraph, one per day */
+export const KNOWLEDGE_VERSES: [string, string][] = [
+  ['The fear of the LORD is the beginning of knowledge.', 'Proverbs 1:7'],
+  ['O the depth of the riches both of the wisdom and knowledge of God!', 'Romans 11:33'],
+  ['For the LORD giveth wisdom: out of his mouth cometh knowledge and understanding.', 'Proverbs 2:6'],
+  ['The heart of the prudent getteth knowledge; and the ear of the wise seeketh knowledge.', 'Proverbs 18:15'],
+  ['In whom are hid all the treasures of wisdom and knowledge.', 'Colossians 2:3'],
+  ['It is the glory of God to conceal a thing: but the honour of kings is to search out a matter.', 'Proverbs 25:2'],
+  ['But grow in grace, and in the knowledge of our Lord and Saviour Jesus Christ.', '2 Peter 3:18'],
+  ['The fear of the LORD is the beginning of wisdom: and the knowledge of the holy is understanding.', 'Proverbs 9:10'],
+  ['Study to shew thyself approved unto God, a workman that needeth not to be ashamed.', '2 Timothy 2:15'],
+  ['The earth shall be full of the knowledge of the LORD, as the waters cover the sea.', 'Isaiah 11:9'],
+]
+export function knowledgeVerseOfDay(n: number): [string, string] {
+  const L = KNOWLEDGE_VERSES.length
+  return KNOWLEDGE_VERSES[(((n - 1) % L) + L) % L]
+}
