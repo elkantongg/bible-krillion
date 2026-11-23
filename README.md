@@ -1,4 +1,4 @@
-# Into the Deep — the daily Bible dive
+# BIBLIO — the daily Bible dive
 
 An open-answer Bible trivia game where **rarer correct answers score more** and your score sinks you into the ocean.
 It plays in the genre of Krillion (krillion.io), with original code, visuals and branding. The Bible theme comes from the questions.
