@@ -17,10 +17,6 @@ Samothrace|Samothracia:0:Ac16; Rhodes:1:Ac21; Cos|Kos:0:Ac21; Greece:3:Ac20
 Galilee:5:Mt4; Judea:5:Mt2; Samaria:5:Jn4; Decapolis:3:Mk5; Idumea:1:Mk3; Trachonitis:0:Lk3; Iturea|Ituraea:0:Lk3
 Abilene:0:Lk3; Beyond the Jordan|Transjordan|Perea:1:Mt4; Phoenicia:1:Ac11; Gennesaret:1:Mk6
 
-@pentecost-nations|Places|Name a nation or region listed at Pentecost in Acts 2
-Parthians|Parthia:1:Ac2; Medes|Media:1:Ac2; Elamites|Elam:1:Ac2; Mesopotamia:2:Ac2; Judea:3:Ac2; Cappadocia:2:Ac2; Pontus:1:Ac2
-Asia:2:Ac2; Phrygia:1:Ac2; Pamphylia:1:Ac2; Egypt:4:Ac2; Libya:2:Ac2; Cyrene:2:Ac2; Rome:4:Ac2; Crete|Cretans:2:Ac2; Arabia|Arabs:2:Ac2
-
 @psalm-places|Places|Name a place mentioned in the book of Psalms
 Zion:5:Ps2; Jerusalem:5:Ps122; Lebanon:3:Ps29; Hermon:2:Ps133; Tabor:1:Ps89; Babylon:4:Ps137; Egypt:4:Ps105; Jordan:3:Ps114
 Bashan:2:Ps22; Tarshish:1:Ps48; Sheba:1:Ps72; Kadesh:1:Ps29; Meribah:2:Ps95; Salem:1:Ps76; Shiloh:1:Ps78; Ephrathah:1:Ps132
@@ -167,10 +163,6 @@ Darkness:5:Mt27; Earthquake:5:Mt27; Temple curtain torn|Veil torn:5:Mt27; Rocks 
 Centurion said "Surely he was the Son of God"|Centurion's confession:4:Mk15; Side pierced|Spear:4:Jn19; Legs not broken:2:Jn19
 Blood and water:3:Jn19; Women watched from a distance:2:Mk15; Thief promised paradise:2:Lk23; Crowd beat their breasts:1:Lk23
 
-@baptism-jesus|Events|Name something that happened at Jesus' baptism
-Heavens opened|Sky opened:4:Mt3; Spirit came down like a dove|Dove:5:Mt3; Voice from heaven|God spoke:5:Mt3
-This is my beloved Son|Beloved Son:4:Mt3; John hesitated|I need to be baptized by you:3:Mt3; Baptized in the Jordan|Jordan:4:Mk1
-
 @end-times|Events|Name something the Bible says will happen at the end of time
 Second coming|Jesus returns:5:Ac1; Resurrection of the dead|Dead raised:4:1Co15; Final judgment|Judgment:5:Rev20; New heaven and new earth|New earth:4:Rev21
 Caught up in the clouds|Rapture:3:1Th4; Trumpet sounds|Last trumpet:3:1Co15; Satan thrown into the lake of fire:3:Rev20; Armageddon:3:Rev16
@@ -244,22 +236,9 @@ Marching in the treetops:1:2Sa5; Singing|Hymns:3:Ac16; Donkey speaking:2:Nu22; R
 Bread:5:Mt6; Unleavened bread:5:Ex12; Loaves:4:Jn6; Cakes:3:Ge18; Wafers:2:Ex16; Roasted grain|Parched grain:2:Ru2
 Flour|Fine flour:3:Lev2; Showbread|Bread of the Presence:3:1Sa21; Barley loaves|Barley bread:3:Jn6; Meal:2:1Ki17; Heads of grain:2:Mk2
 
-@abraham-meal|Food & Drink|Name something Abraham served to his three visitors (Genesis 18)
-Bread|Cakes:5:Ge18; Calf|Veal|Meat:5:Ge18; Curds|Butter:4:Ge18; Milk:5:Ge18; Water:3:Ge18
-
-@abigail-gifts|Food & Drink|Name a food Abigail brought to David (1 Samuel 25)
-Bread|Loaves:4:1Sa25; Wine:4:1Sa25; Sheep:4:1Sa25; Roasted grain|Parched corn:3:1Sa25; Raisins|Raisin cakes:4:1Sa25
-Figs|Fig cakes:4:1Sa25
-
 @food-prep|Food & Drink|Name a way food was prepared in the Bible
 Baked:5:Lev2; Roasted:5:Ex12; Boiled:4:Ex12; Fried|Pan:2:Lev2; Broiled|Grilled|Cooked over coals:3:Jn21; Stewed:3:Ge25
 Ground|Milled:3:Nu11; Kneaded:2:Ge18; Leavened:2:Mt13; Unleavened:3:Ex12; Salted:2:Lev2; Dried:1:Nu6; Threshed:2:Ru3; Pressed:2:Ge40
-
-@dairy|Food & Drink|Name a dairy food mentioned in the Bible
-Milk:5:Ex3; Cheese:4:1Sa17; Curds|Butter:4:Ge18; Goat's milk:2:Pr27; Cream:1:Job29
-
-@ruth-food|Food & Drink|Name a food in the book of Ruth
-Barley:5:Ru1; Wheat:4:Ru2; Bread:4:Ru2; Roasted grain|Parched grain:3:Ru2; Wine vinegar|Vinegar:2:Ru2
 
 @ruler-titles|Roles|Name a title given to a ruler in the Bible
 King:5:1Sa8; Queen:5:Est1; Pharaoh:5:Ex1; Caesar|Emperor:4:Lk2; Governor:4:Mt27; Tetrarch:2:Lk3; Prince:3:Isa9; Satrap:1:Da6
@@ -330,14 +309,6 @@ Gerah:0:Ex30; Log:0:Lev14; Cor:0:1Ki4; Sabbath day's journey:2:Ac1; Day's journe
 Denarius|Penny:5:Mt22; Shekel:4:Ge23; Talent:4:Mt25; Mina|Pound:2:Lk19; Mite|Lepton|Two small coins:4:Mk12; Drachma|Silver coin:3:Lk15
 Stater|Four-drachma coin:1:Mt17; Thirty pieces of silver:3:Mt26; Daric|Drachmas of gold:0:Ezr8; Gerah:0:Ex30; Quadrans|Farthing:1:Mt5
 
-@hebrew-months|Numbers|Name a Hebrew month mentioned in the Bible
-Nisan|Abib:3:Ex13; Ziv:1:1Ki6; Sivan:1:Est8; Elul:1:Ne6; Ethanim:1:1Ki8; Bul:1:1Ki6; Chislev|Kislev:1:Ne1; Tebeth|Tevet:1:Est2
-Shebat:1:Zec1; Adar:2:Est3
-
-@seven-signs|Jesus|Name one of the seven "signs" (miracles) in John's Gospel
-Water into wine:5:Jn2; Healing the official's son|Nobleman's son:3:Jn4; Healing at the pool of Bethesda|Bethesda:3:Jn5
-Feeding the five thousand:5:Jn6; Walking on water:5:Jn6; Healing the man born blind|Man born blind:4:Jn9; Raising Lazarus:5:Jn11
-
 @honored-jesus|Jesus|Name someone who honored or anointed Jesus
 Mary of Bethany|Mary:5:Jn12; Sinful woman|Woman who washed his feet:4:Lk7; Wise men|Magi:5:Mt2; Nicodemus:3:Jn19
 Joseph of Arimathea:3:Mt27; Women with spices:3:Lk24; Simeon:3:Lk2; Anna:2:Lk2; Zacchaeus:3:Lk19; Martha:3:Jn12; Shepherds:4:Lk2
@@ -364,12 +335,6 @@ Shepherd:5:Jn10; Door|Gate:4:Jn10; Vine:5:Jn15; Bread:5:Jn6; Light:5:Jn8; Brideg
 Cornerstone|Stone the builders rejected:3:Mt21; Doctor|Physician:3:Mk2; Serpent lifted up|Bronze serpent:2:Jn3; Jonah:3:Mt12; Lightning:1:Mt24
 Living water|Water:3:Jn4; Seed|Grain of wheat:2:Jn12; Thief in the night|Thief:2:Rev16; Son of Man:3:Mk2
 
-@end-signs|Jesus|Name a sign of the end times that Jesus mentioned (Matthew 24)
-Wars:5:Mt24; Rumors of wars:4:Mt24; Famines:4:Mt24; Earthquakes:4:Mt24; False prophets:4:Mt24; False messiahs|False Christs:3:Mt24
-Persecution:3:Mt24; Abomination of desolation|Abomination that causes desolation:2:Mt24; Sun darkened:3:Mt24; Stars falling:3:Mt24
-Son of Man coming on the clouds|Coming on the clouds:3:Mt24; Trumpet call:2:Mt24; Gospel preached to all nations:3:Mt24; Days of Noah:3:Mt24
-Love growing cold:2:Mt24; Lightning from east to west:2:Mt24; Fig tree:2:Mt24; Thief in the night:2:Mt24
-
 @jesus-promises|Jesus|Name a promise Jesus made to his followers
 I will be with you always|With you always:5:Mt28; Eternal life:5:Jn3; Holy Spirit|Comforter|Helper:4:Jn14; Rest|I will give you rest:4:Mt11
 I will come again|Return:4:Jn14; Prepare a place for you|Many rooms:4:Jn14; Ask and you will receive|Ask:4:Mt7; Peace|My peace:4:Jn14
@@ -381,10 +346,7 @@ Love one another:5:Jn13; Love God|Love the Lord your God:5:Mt22; Love your neigh
 Make disciples|Go and make disciples:5:Mt28; Baptize:3:Mt28; Do this in remembrance of me:4:Lk22; Forgive:4:Mt6; Pray:3:Mt6
 Watch and pray|Keep watch:3:Mt26; Repent:3:Mk1; Believe:3:Mk1; Do not worry:4:Mt6; Take up your cross:4:Mt16; Feed my sheep:3:Jn21
 Love your enemies:4:Mt5; Do not judge:3:Mt7; Let the little children come:3:Mt19; Do not be afraid:3:Mt14; Go and sin no more:3:Jn8
-
-@not-worry|Jesus|Name something Jesus told people not to worry about
-Food|What you will eat:5:Mt6; Drink|What you will drink:4:Mt6; Clothes|What you will wear:5:Mt6; Your body|Body:3:Mt6
-Your life|Life:4:Mt6; Tomorrow:5:Mt6; What to say|What you will say:3:Mt10
+Remember Lot's wife:1:Lk17; Ephphatha|Be opened:1:Mk7; Talitha koum|Little girl get up|Little girl arise:2:Mk5; Lazarus come out|Come out:3:Jn11; Take up your mat and walk|Rise and walk:3:Jn5; Peace be still:3:Mk4; Stretch out your hand:2:Mk3; Give to Caesar what is Caesar's|Render unto Caesar:3:Mt22
 
 @after-resurrection|Jesus|Name something Jesus did after he rose from the dead
 Appeared to Mary Magdalene:5:Jn20; Walked to Emmaus|Road to Emmaus:4:Lk24; Broke bread:3:Lk24; Showed his wounds|Showed his hands and side:4:Jn20
@@ -397,18 +359,12 @@ Palm branches|Waved palms:5:Jn12; Cloaks on the road|Spread cloaks:4:Mt21; Hosan
 Colt:3:Mk11; Pharisees complained:2:Lk19; Stones would cry out:2:Lk19; Wept over Jerusalem:3:Lk19; City was stirred:2:Mt21
 Cleared the temple:3:Mt21; Children praised him:2:Mt21; Blessed is he who comes in the name of the Lord:3:Mt21
 
-@famous-chapters|Scripture|Name a famous chapter of the Bible (book and chapter)
+@famous-chapters|Scripture|Name a famous chapter of the Bible (book and chapter number)
 1 Corinthians 13:5:1Co13; Psalm 23:5:Ps23; Genesis 1:5:Ge1; Hebrews 11:4:Heb11; Isaiah 53:4:Isa53; Exodus 20:4:Ex20
 John 3:4:Jn3; Romans 8:4:Ro8; Psalm 119:3:Ps119; Psalm 91:3:Ps91; Matthew 5:3:Mt5; Ephesians 6:3:Eph6; John 1:3:Jn1
 Luke 2:3:Lk2; Isaiah 40:2:Isa40; 1 Corinthians 15:2:1Co15; Revelation 21:2:Rev21; Psalm 51:2:Ps51; Proverbs 31:3:Pr31
 Ecclesiastes 3:3:Ec3; John 11:2:Jn11; John 14:2:Jn14; Romans 12:2:Ro12; Galatians 5:2:Gal5; Matthew 28:2:Mt28; Acts 2:2:Ac2
 Psalm 139:2:Ps139; Daniel 3:2:Da3; Daniel 6:2:Da6; Philippians 4:2:Php4; 1 John 4:1:1Jn4; Genesis 3:3:Ge3; Matthew 6:3:Mt6
-
-@prison-letters|Scripture|Name a book of the Bible Paul wrote from prison
-Ephesians:4:Eph3; Philippians:5:Php1; Colossians:4:Col4; Philemon:4:Phm1; 2 Timothy|Second Timothy:3:2Ti1
-
-@king-books|Scripture|Name a book of the Bible traditionally linked to a king
-Psalms:5:Ps3; Proverbs:5:Pr1; Ecclesiastes:4:Ec1; Song of Solomon|Song of Songs:5:Song1
 
 @sign-acts|People|Name a prophet who acted out a message from God
 Ezekiel:5:Eze4; Jeremiah:5:Jer13; Isaiah:3:Isa20; Hosea:4:Hos1; Agabus:2:Ac21; Ahijah:1:1Ki11; Elisha:1:2Ki13; Zedekiah son of Kenaanah:0:1Ki22

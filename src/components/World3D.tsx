@@ -67,60 +67,71 @@ function fishGeometry(len = 1) {
   return g
 }
 
-/** a small fishing boat with a mast and yard (a quiet cross against the dawn) */
+/** hull of a Galilee fishing boat: pointed ends, rising sheer, rounded bilge */
+function hullGeometry(len = 3.2, beam = 0.8, keel = 0.5) {
+  const U = 40, V = 18
+  const pos: number[] = []
+  const idx: number[] = []
+  for (let i = 0; i <= U; i++) {
+    const u = (i / U) * 2 - 1
+    const w = beam * Math.pow(Math.max(0, 1 - u * u), 0.55)
+    const k = keel * (1 - Math.pow(Math.abs(u), 3))
+    const g = 0.28 + 0.42 * Math.pow(Math.abs(u), 3.5)
+    for (let j = 0; j <= V; j++) {
+      const v = (j / V) * Math.PI - Math.PI / 2
+      pos.push(u * len, g - (g + k) * Math.cos(v) * (1 - 0.15 * Math.abs(Math.sin(v))), w * Math.sin(v))
+    }
+  }
+  for (let i = 0; i < U; i++)
+    for (let j = 0; j < V; j++) {
+      const a = i * (V + 1) + j, b = a + V + 1
+      idx.push(a, b, a + 1, b, b + 1, a + 1)
+    }
+  const g = new THREE.BufferGeometry()
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
+  g.setIndex(idx)
+  g.computeVertexNormals()
+  return g
+}
+
+/** a small fishing boat with a mast and yard (a quiet cross against the dusk), read mostly as a silhouette */
 function makeBoat() {
   const boat = new THREE.Group()
-  const wood = new THREE.MeshStandardMaterial({ color: '#6b4228', roughness: 0.85 })
-  const dark = new THREE.MeshStandardMaterial({ color: '#3e2618', roughness: 0.9 })
-  // hull: the lower half of a stretched sphere, open on top
-  const hull = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#6b4228', roughness: 0.85, side: THREE.DoubleSide }))
-  hull.scale.set(3.1, 0.75, 1)
-  hull.position.y = 0.2
-  boat.add(hull)
-  void wood
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(1, 0.05, 6, 32), dark)
-  rim.scale.set(3.1, 1, 1)
-  rim.rotation.x = Math.PI / 2
-  rim.position.y = 0.2
-  boat.add(rim)
-  for (const x of [-1.2, 0, 1.2]) {
-    const seat = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.06, 1.7), dark)
-    seat.position.set(x, 0.05, 0)
+  const wood = new THREE.MeshStandardMaterial({ color: '#2a1a12', roughness: 0.8, side: THREE.DoubleSide })
+  const dark = new THREE.MeshStandardMaterial({ color: '#160e0a', roughness: 0.9 })
+  boat.add(new THREE.Mesh(hullGeometry(), wood))
+  for (const x of [-1.1, 0, 1.1]) {
+    const seat = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.05, 1.3), dark)
+    seat.position.set(x, 0.22, 0)
     boat.add(seat)
   }
-  const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.07, 3.6, 8), dark)
-  mast.position.set(0.4, 1.9, 0)
+  const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.06, 4.2, 8), dark)
+  mast.position.set(0.5, 2.3, 0)
   boat.add(mast)
-  const yard = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.2, 8), dark)
-  yard.rotation.x = Math.PI / 2
-  yard.position.set(0.4, 3.0, 0)
+  // yard with the sail furled along it
+  const yard = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 2.6, 8), dark)
+  yard.rotation.z = Math.PI / 2 + 0.12
+  yard.position.set(0.5, 3.6, 0)
   boat.add(yard)
-  // furled sail
-  const sail = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.09, 0.09, 2.0, 8),
-    new THREE.MeshStandardMaterial({ color: '#efe2c4', roughness: 1 }),
-  )
-  sail.rotation.x = Math.PI / 2
-  sail.position.set(0.4, 2.88, 0)
+  const sail = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.06, 2.3, 10), new THREE.MeshStandardMaterial({ color: '#8c7a62', roughness: 1 }))
+  sail.rotation.z = Math.PI / 2 + 0.12
+  sail.position.set(0.5, 3.5, 0)
   boat.add(sail)
-  // net draped over the side
-  const net = new THREE.Mesh(
-    new THREE.SphereGeometry(0.7, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2),
-    new THREE.MeshStandardMaterial({ color: '#d9c9a3', wireframe: true, transparent: true, opacity: 0.7 }),
-  )
-  net.scale.set(1.3, 0.5, 0.9)
-  net.position.set(-2.4, 0.1, 0.9)
-  boat.add(net)
-  // a lantern on the bow
-  const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.1, 12, 8), new THREE.MeshBasicMaterial({ color: '#ffd27a' }))
-  lamp.position.set(2.9, 0.6, 0)
+  // stays from masthead to bow and stern
+  const ropes = new THREE.LineBasicMaterial({ color: '#1a120d', transparent: true, opacity: 0.8 })
+  for (const end of [new THREE.Vector3(3.1, 0.7, 0), new THREE.Vector3(-3.1, 0.7, 0)])
+    boat.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0.5, 4.35, 0), end]), ropes))
+  // a lantern hung at the stern
+  const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 8), new THREE.MeshBasicMaterial({ color: '#ffd9a0' }))
+  lamp.position.set(-2.7, 1.15, 0)
   boat.add(lamp)
-  const lampLight = new THREE.PointLight('#ffbf66', 6, 8, 2)
+  const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture('rgba(255,200,120,0.9)'), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }))
+  halo.scale.set(1.6, 1.6, 1)
+  halo.position.copy(lamp.position)
+  boat.add(halo)
+  const lampLight = new THREE.PointLight('#ffb766', 5, 7, 2)
   lampLight.position.copy(lamp.position)
   boat.add(lampLight)
-  boat.traverse((o) => {
-    if ((o as THREE.Mesh).isMesh) o.castShadow = false
-  })
   return boat
 }
 
@@ -228,7 +239,7 @@ export default function World3D() {
     const hemi = new THREE.HemisphereLight('#bfe8ff', '#06233a', 1.4)
     scene.add(hemi)
     const sunLight = new THREE.DirectionalLight('#ffd9a0', 2.4)
-    sunLight.position.set(-30, 40, -60)
+    sunLight.position.set(40, 10, -100)
     scene.add(sunLight)
     const lamp = new THREE.PointLight('#ffcf7a', 0, 30, 1.6) // "a lamp to my feet" — brightens in the dark
     scene.add(lamp)
@@ -244,37 +255,52 @@ export default function World3D() {
         vertexShader: `varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
         fragmentShader: `varying vec3 vP;
           void main(){
-            float h = vP.y;
-            vec3 zenith = vec3(0.07,0.12,0.30);
-            vec3 mid = vec3(0.42,0.45,0.70);
-            vec3 horizon = vec3(1.0,0.72,0.48);
-            vec3 c = mix(horizon, mid, smoothstep(0.0,0.18,h));
-            c = mix(c, zenith, smoothstep(0.18,0.75,h));
-            // sun glow
-            vec3 sunDir = normalize(vec3(-0.35,0.06,-1.0));
-            float s = max(dot(normalize(vP), sunDir), 0.0);
-            c += vec3(1.0,0.78,0.45) * pow(s, 24.0) * 1.2 + vec3(1.0,0.6,0.35) * pow(s,4.0) * 0.35;
-            if (h < 0.0) c = mix(vec3(0.05,0.18,0.28), horizon*0.6, smoothstep(-0.2,0.0,h));
+            vec3 d = normalize(vP);
+            float h = d.y;
+            vec3 horizon = vec3(0.93,0.58,0.34);
+            vec3 low = vec3(0.42,0.30,0.38);
+            vec3 mid = vec3(0.10,0.15,0.30);
+            vec3 zenith = vec3(0.012,0.025,0.07);
+            vec3 c = mix(horizon, low, smoothstep(0.0,0.05,h));
+            c = mix(c, mid, smoothstep(0.04,0.22,h));
+            c = mix(c, zenith, smoothstep(0.2,0.8,h));
+            // the sun just above the far hills, and its long warm glow along the horizon
+            vec3 sunDir = normalize(vec3(0.3,0.035,-1.0));
+            float s = max(dot(d, sunDir), 0.0);
+            c += vec3(1.0,0.72,0.42) * (pow(s, 900.0) * 2.5 + pow(s, 60.0) * 0.45 + pow(s, 6.0) * 0.12) * (1.0 - smoothstep(0.0,0.5,h)*0.6);
+            // a few early stars, high up
+            vec3 g = floor(d * 420.0);
+            float n = fract(sin(dot(g, vec3(12.9898,78.233,37.719))) * 43758.5453);
+            c += vec3(0.9,0.92,1.0) * step(0.9975, n) * smoothstep(0.25, 0.7, h) * (0.35 + 0.65*fract(n*91.0));
+            if (h < 0.0) c = mix(vec3(0.02,0.05,0.1), horizon*0.5, smoothstep(-0.2,0.0,h));
             gl_FragColor = vec4(c,1.0);
           }`,
       }),
     )
     scene.add(sky)
-    const sun = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture('rgba(255,236,190,1)'), color: '#fff2cf', transparent: true, depthWrite: false, fog: false, blending: THREE.AdditiveBlending }))
-    sun.position.set(-210, 36, -600)
-    sun.scale.set(150, 150, 1)
+    const sun = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture('rgba(255,226,170,1)'), color: '#ffdcaa', transparent: true, opacity: 0.85, depthWrite: false, fog: false, blending: THREE.AdditiveBlending }))
+    sun.position.set(0.3 * 700, 25, -700)
+    sun.scale.set(70, 70, 1)
     scene.add(sun)
 
-    /* distant hills of Galilee */
+    /* distant hills of Galilee: three ridgelines, each hazier the farther it is */
     const hills = new THREE.Group()
-    const hillMat = new THREE.MeshBasicMaterial({ color: '#5c4f72', fog: false })
-    const hillMat2 = new THREE.MeshBasicMaterial({ color: '#433c5c', fog: false })
-    for (let i = 0; i < 14; i++) {
-      const h = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), i % 2 ? hillMat : hillMat2)
-      const a = -1.9 + (i / 13) * 2.4
-      h.position.set(Math.sin(a) * 420, -2, -Math.cos(a) * 420)
-      h.scale.set(60 + (i * 37) % 50, 18 + (i * 13) % 22, 40)
-      hills.add(h)
+    const ridge = (seed: number, x: number) =>
+      Math.sin(x * 0.006 + seed) * 0.5 + Math.sin(x * 0.017 + seed * 2.3) * 0.28 + Math.sin(x * 0.047 + seed * 5.1) * 0.12 + Math.sin(x * 0.11 + seed * 7.7) * 0.05
+    const layers = [
+      { z: -640, h: 62, base: 14, color: '#4a3a52', seed: 1.3 },
+      { z: -520, h: 40, base: 6, color: '#2c2440', seed: 4.1 },
+      { z: -400, h: 20, base: 2, color: '#171628', seed: 8.6 },
+    ]
+    for (const L of layers) {
+      const shape = new THREE.Shape()
+      const W = 2200
+      shape.moveTo(-W / 2, -10)
+      for (let x = -W / 2; x <= W / 2; x += 6) shape.lineTo(x, L.base + (ridge(L.seed, x) * 0.5 + 0.5) * L.h)
+      shape.lineTo(W / 2, -10)
+      const m = new THREE.Mesh(new THREE.ShapeGeometry(shape), new THREE.MeshBasicMaterial({ color: L.color, fog: false }))
+      m.position.z = L.z
+      hills.add(m)
     }
     scene.add(hills)
 
@@ -299,15 +325,19 @@ export default function World3D() {
             vec3 V = normalize(cameraPosition - vW);
             if (gl_FrontFacing) {
               // from above: dawn-lit water with a golden path toward the sun
-              float fres = pow(1.0 - max(V.y, 0.0), 3.0);
-              vec3 deep = vec3(0.04,0.20,0.34);
-              vec3 sky = vec3(0.85,0.62,0.55);
-              vec3 c = mix(deep, sky, fres*0.55);
-              c += vec3(0.05,0.08,0.1) * sin(vW.x*0.7+uTime)*sin(vW.z*0.6-uTime*0.8);
-              float path = exp(-pow((vW.x + 0.35*(-vW.z))*0.03, 2.0)) * smoothstep(0.0, -400.0, vW.z);
-              c += vec3(1.0,0.75,0.4) * path * (0.4 + 0.6*smoothstep(0.1,0.3,vH)) * 0.9;
+              float fres = pow(1.0 - max(V.y, 0.0), 4.0);
+              vec3 deep = vec3(0.012,0.03,0.06);
+              vec3 sky = vec3(0.30,0.24,0.34);
+              vec3 c = mix(deep, sky, fres*0.8);
+              float rip = sin(vW.x*0.7+uTime)*sin(vW.z*0.6-uTime*0.8) + 0.5*sin(vW.x*2.1-uTime*1.7)*sin(vW.z*1.7+uTime*1.3);
+              c += vec3(0.03,0.04,0.06) * rip;
+              // sun path: widens toward the horizon, broken into glints by the swell
               float dist = length(cameraPosition.xz - vW.xz);
-              c = mix(c, vec3(0.98,0.70,0.50), smoothstep(150.0, 650.0, dist));
+              float off = abs(vW.x + 0.3*vW.z) / (4.0 + dist*0.07);
+              float path = exp(-off*off*2.0) * smoothstep(-5.0, -60.0, vW.z);
+              float glint = smoothstep(0.55, 1.0, rip*0.6 + 0.4*sin(vW.x*5.3+uTime*2.6)*sin(vW.z*4.1-uTime*2.2) + vH*1.5);
+              c += vec3(1.0,0.70,0.38) * path * (0.25 + 1.6*glint);
+              c = mix(c, vec3(0.56,0.38,0.34), smoothstep(200.0, 700.0, dist));
               gl_FragColor = vec4(c, 0.96);
             } else {
               // from below: a bright, rippling ceiling of light
@@ -324,9 +354,9 @@ export default function World3D() {
 
     /* the boat */
     const boat = makeBoat()
-    boat.position.set(6, 0.42, -14)
-    boat.rotation.y = 0.5
-    boat.scale.setScalar(1.05)
+    boat.position.set(6.2, 0.2, -15)
+    boat.rotation.y = 0.35
+    boat.scale.setScalar(1.0)
     scene.add(boat)
 
     /* god rays */
@@ -553,7 +583,7 @@ export default function World3D() {
         10 + 6 * (1 - above) + Math.cos(t * 0.17) * 0.5,
       )
       const floorPull = Math.max(0, Math.min(1, (d - 6700) / 300)) * 5
-      look.set(0, camY - (above > 0 ? 0.9 : 2) - floorPull - vel * 0.004, -10)
+      look.set(0, camY - (above > 0 ? 0.9 - 1.7 * above : 2) - floorPull - vel * 0.004, -10)
       camera.lookAt(look)
       camera.rotation.z += Math.sin(t * 0.3) * 0.006
 
@@ -568,14 +598,14 @@ export default function World3D() {
         sun.visible = false
         hills.visible = false
       } else {
-        fog.color.set('#e9b08a')
-        fog.density = 0.0025
+        fog.color.set('#3a2c3c')
+        fog.density = 0.004
         sky.visible = true
         sun.visible = true
         hills.visible = true
       }
       water.visible = d < 260
-      hemi.intensity = Math.max(0.15, 1.5 - d / 900)
+      hemi.intensity = Math.max(0.15, Math.min(1.5, 0.5 + d / 40) - d / 900)
       hemi.color.copy(tmpColor.set('#bfe8ff').lerp(c, Math.min(1, d / 600)))
       sunLight.intensity = Math.max(0, 2.6 - d / 250)
       lamp.position.copy(camera.position).add(new THREE.Vector3(0, -1, -4))
@@ -593,7 +623,8 @@ export default function World3D() {
 
       // boat bobbing
       boat.visible = d < 120
-      boat.position.y = 0.42 + Math.sin(t * 1.1) * 0.12
+      boat.position.y = 0.2 + Math.sin(t * 1.1) * 0.1
+      boat.position.x = Math.min(6.2, 6.5 * camera.aspect) // stay in frame on narrow screens
       boat.rotation.z = Math.sin(t * 0.9) * 0.04
       boat.rotation.x = Math.sin(t * 0.7) * 0.03
 

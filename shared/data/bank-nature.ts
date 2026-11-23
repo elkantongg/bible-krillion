@@ -55,13 +55,6 @@ Locusts:3:Rev9; Horses:4:Rev6; Frogs:2:Rev16; Eagle:3:Eze1; Calf|Ox:2:Rev4; Scor
 Frogs:5:Ex8; Gnats|Lice:4:Ex8; Flies:4:Ex8; Locusts:5:Ex10; Fiery serpents|Snakes|Serpents:4:Nu21; Bears:3:2Ki2
 Lions:2:2Ki17; Hornets:1:Ex23; Worms:2:Ac12; Quail:1:Nu11; Great fish:2:Jon1; Mice|Rats:1:1Sa6
 
-@animal-pictures|Animals|Name an animal the Bible uses as a picture of God, Jesus or the Holy Spirit
-Lamb:5:Jn1; Lion|Lion of Judah:5:Rev5; Dove:5:Mt3; Hen|Mother hen:3:Mt23; Eagle:3:Dt32; Bear:0:Hos13; Leopard:0:Hos13
-
-@job-animals|Animals|Name an animal God describes in Job 38–41
-Lion:4:Job38; Raven:3:Job38; Mountain goat|Wild goat:2:Job39; Deer|Doe:2:Job39; Wild donkey:2:Job39; Wild ox:2:Job39
-Ostrich:3:Job39; Horse|War horse:4:Job39; Hawk:2:Job39; Eagle:3:Job39; Behemoth:4:Job40; Leviathan:4:Job41; Stork:1:Job39
-
 @proverbs-animals|Animals|Name an animal mentioned in Proverbs
 Ant:5:Pr6; Lion:4:Pr28; Dog:4:Pr26; Pig|Sow:2:Pr11; Eagle:2:Pr23; Bear:2:Pr17; Horse:2:Pr21; Donkey:2:Pr26; Ox:2:Pr14
 Hyrax|Coney|Rock badger:1:Pr30; Locust:2:Pr30; Lizard|Spider:1:Pr30; Leech:0:Pr30; Serpent|Snake:2:Pr23; Sparrow:1:Pr26
@@ -116,9 +109,6 @@ Jasper:4:Rev21; Sapphire:5:Rev21; Emerald:5:Rev21; Topaz:4:Rev21; Amethyst:4:Rev
 Agate|Chalcedony:2:Rev21; Carnelian|Sardius|Sardis|Ruby:3:Rev21; Chrysolite:2:Rev21; Chrysoprase:1:Rev21; Jacinth|Turquoise:1:Rev21
 Diamond:3:Ex28; Pearl:4:Rev21; Gold:4:Rev21; Crystal|Glass:2:Rev21; Ligure:0:Ex28; Carbuncle:0:Ex28
 
-@metals|Nature|Name a metal mentioned in the Bible
-Gold:5:Ge2; Silver:5:Ge13; Bronze|Brass:4:Nu21; Iron:4:Ge4; Copper:3:Dt8; Tin:2:Nu31; Lead:2:Nu31
-
 @colours|Nature|Name a colour mentioned in the Bible
 Scarlet:4:Isa1; Purple:5:Ac16; Blue:4:Ex28; White:5:Rev7; Black:4:Rev6; Red:5:Rev6; Green:3:Ps23; Crimson:3:Isa1
 Vermilion:1:Jer22; Gold|Golden:3:Rev21; Pale:2:Rev6; Brown:0:Ge30; Yellow:1:Lev13; Grey|Gray:0:Ge42
@@ -131,10 +121,6 @@ Silver:2:Ex26; Linen:2:Ex26; Goat hair:1:Ex26; Sand:3:Mt7; Rock:4:Mt7; Iron:1:1C
 @provided-food|Food & Drink|Name a food that God miraculously provided in the Bible
 Manna:5:Ex16; Quail:5:Ex16; Bread|Loaves:5:Jn6; Fish:5:Jn6; Wine:4:Jn2; Water:4:Ex17; Oil:3:1Ki17; Flour:3:1Ki17
 Bread and meat from ravens|Meat:2:1Ki17; Cake|Bread from an angel:2:1Ki19; Barley loaves:1:2Ki4; Honey:1:Ps81
-
-@passover-food|Food & Drink|Name something eaten or used at the Passover meal
-Lamb|Passover lamb:5:Ex12; Unleavened bread|Matzah|Bread without yeast:5:Ex12; Bitter herbs:4:Ex12; Wine|Cup:3:Lk22
-Hyssop:1:Ex12; Blood on the doorposts|Blood:3:Ex12; Bread:3:Mt26
 
 @drinks|Food & Drink|Name a drink or liquid mentioned in the Bible
 Water:5:Ex17; Wine:5:Jn2; Milk:4:Ex3; New wine:3:Mt9; Strong drink|Beer:2:Pr20; Vinegar|Sour wine:3:Jn19
@@ -150,16 +136,6 @@ Hannah accused of being drunk|Hannah:1:1Sa1; Pentecost drunkenness|New wine:2:Ac
 @jesus-food|Food & Drink|Name a food Jesus ate, served or blessed
 Bread|Loaves:5:Jn6; Fish|Broiled fish:5:Lk24; Wine:4:Jn2; Lamb|Passover lamb:3:Lk22; Honeycomb:1:Lk24; Grain|Heads of grain:2:Mk2
 Figs|Fig:2:Mk11; Barley loaves:2:Jn6; Unleavened bread:2:Mt26; Bitter herbs:1:Ex12
-
-@john-baptist|Food & Drink|Name something John the Baptist ate or wore
-Locusts:5:Mt3; Wild honey|Honey:5:Mt3; Camel's hair|Camel hair:5:Mt3; Leather belt|Belt|Girdle:4:Mt3
-
-@seven-species|Food & Drink|Name a food from the "good land" God promised in Deuteronomy 8
-Wheat:5:Dt8; Barley:4:Dt8; Grapes|Vines|Grapevines:5:Dt8; Figs|Fig trees:4:Dt8; Pomegranates:4:Dt8; Olive oil|Olives:5:Dt8; Honey:5:Dt8
-Milk:3:Ex3; Bread:2:Dt8
-
-@egypt-food|Food & Drink|Name a food the Israelites missed from Egypt (Numbers 11)
-Fish:5:Nu11; Cucumbers:4:Nu11; Melons:4:Nu11; Leeks:4:Nu11; Onions:5:Nu11; Garlic:5:Nu11; Meat|Pots of meat:3:Ex16; Bread:2:Ex16
 
 @parable-food|Food & Drink|Name a food or ingredient mentioned in Jesus' parables or sayings
 Bread:5:Mt7; Yeast|Leaven:4:Mt13; Mustard seed:4:Mt13; Salt:4:Mt5; Fish:4:Mt7; Egg|Eggs:2:Lk11; Figs:3:Mt7; Grapes:3:Mt7

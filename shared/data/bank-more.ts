@@ -22,20 +22,9 @@ Zeruiah:1:1Ch2; Abigail:1:1Ch2
 Jonathan:5:1Sa14; Michal:4:1Sa14; Ish-bosheth|Ishbosheth|Ish-baal|Eshbaal:3:2Sa2; Merab:2:1Sa14; Abinadab:1:1Sa31
 Malki-shua|Malchishua|Malchi-shua:1:1Sa31; Ishvi:0:1Sa14; Armoni:0:2Sa21; Mephibosheth:1:2Sa21
 
-@aaron-sons|People|Name one of Aaron's sons
-Nadab:4:Ex6; Abihu:4:Ex6; Eleazar:4:Ex6; Ithamar:3:Ex6
-
-@leah-children|People|Name a child of Leah
-Reuben:5:Ge29; Simeon:5:Ge29; Levi:5:Ge29; Judah:5:Ge29; Issachar:3:Ge30; Zebulun:3:Ge30; Dinah:3:Ge30
-
 @tomb-visitors|People|Name someone who went to Jesus' tomb
 Mary Magdalene:5:Jn20; Peter:5:Jn20; John|The other disciple:4:Jn20; Mary mother of James|The other Mary:3:Mt28; Salome:2:Mk16
 Joanna:2:Lk24; Joseph of Arimathea:3:Mt27; Nicodemus:2:Jn19; Roman guards|Guards:2:Mt28
-
-@upper-room|People|Name someone who was in the upper room in Acts 1
-Peter:5:Ac1; John:4:Ac1; James:4:Ac1; Andrew:3:Ac1; Philip:3:Ac1; Thomas:3:Ac1; Bartholomew:2:Ac1; Matthew:3:Ac1
-James son of Alphaeus:1:Ac1; Simon the Zealot:1:Ac1; Judas son of James|Jude:1:Ac1; Mary:4:Ac1; Jesus' brothers|Brothers of Jesus:2:Ac1
-Matthias:2:Ac1; Joseph Barsabbas|Justus|Barsabbas:1:Ac1
 
 @judges-people|People|Name a person in the book of Judges
 Samson:5:Jdg13; Gideon:5:Jdg6; Deborah:5:Jdg4; Delilah:5:Jdg16; Barak:3:Jdg4; Jael:3:Jdg4; Sisera:3:Jdg4; Ehud:3:Jdg3
@@ -62,7 +51,7 @@ Moses:5:Nu1; Aaron:5:Nu1; Miriam:4:Nu12; Joshua:4:Nu13; Caleb:4:Nu13; Korah:3:Nu
 Dathan:1:Nu16; Abiram:1:Nu16; Phinehas:2:Nu25; Eleazar:2:Nu20; Og:2:Nu21; Sihon:2:Nu21; Eldad:1:Nu11; Medad:1:Nu11
 Hobab:0:Nu10; Zimri:1:Nu25; Cozbi:0:Nu25; Zelophehad:1:Nu27; Mahlah:0:Nu27; Noah:0:Nu27; Hoglah:0:Nu27; Milcah:0:Nu27; Tirzah:0:Nu27
 
-@kings-people|People|Name a person in 1 or 2 Kings
+@kings-people|People|Name a person in the books of Kings
 Solomon:5:1Ki1; Elijah:5:1Ki17; Elisha:5:2Ki2; Ahab:5:1Ki16; Jezebel:5:1Ki16; David:4:1Ki1; Hezekiah:4:2Ki18; Josiah:4:2Ki22
 Naaman:4:2Ki5; Queen of Sheba:3:1Ki10; Jehu:3:2Ki9; Rehoboam:3:1Ki12; Jeroboam:3:1Ki12; Nebuchadnezzar:3:2Ki24; Bathsheba:2:1Ki1
 Nathan:2:1Ki1; Adonijah:2:1Ki1; Gehazi:2:2Ki5; Naboth:2:1Ki21; Obadiah:1:1Ki18; Isaiah:2:2Ki19; Sennacherib:2:2Ki18; Hiram:2:1Ki5
@@ -78,9 +67,6 @@ Seven angels|Angels:3:Rev8; Bride|Bride of the Lamb:3:Rev21; Nicolaitans:1:Rev2
 @return-exile|People|Name someone who led or helped the return from exile and the rebuilding of Jerusalem
 Nehemiah:5:Ne2; Ezra:5:Ezr7; Zerubbabel:4:Ezr3; Joshua|Jeshua:2:Ezr3; Haggai:3:Ezr5; Zechariah:3:Ezr5; Cyrus:4:Ezr1
 Sheshbazzar:1:Ezr1; Darius:2:Ezr6; Artaxerxes:2:Ne2; Eliashib:0:Ne3; Hanani:1:Ne1
-
-@nehemiah-opponents|People|Name someone who opposed Nehemiah's rebuilding of the walls
-Sanballat:5:Ne2; Tobiah:5:Ne2; Geshem|Gashmu:4:Ne2; Noadiah:1:Ne6; Shemaiah:1:Ne6
 
 @rich|People|Name someone the Bible describes as rich or wealthy
 Solomon:5:1Ki10; Abraham|Abram:4:Ge13; Job:5:Job1; Zacchaeus:4:Lk19; Rich young ruler|Rich young man:4:Mk10; Joseph of Arimathea:3:Mt27
@@ -115,9 +101,6 @@ Ben-oni|Benoni|Benjamin:2:Ge35; Moses:2:Ex2; Peleg:0:Ge10; Noah:1:Ge5
 David:5:1Sa22; Elijah:4:1Ki19; Lot:3:Ge19; Saul:2:1Sa24; Obadiah's prophets|Hundred prophets:1:1Ki18; Five kings|Five Amorite kings:1:Jos10
 Lazarus:2:Jn11; Jesus:2:Mt27; Abraham:1:Ge25; Sarah:1:Ge23
 
-@nazirites|People|Name a Nazirite (someone under a Nazirite vow) in the Bible
-Samson:5:Jdg13; Samuel:3:1Sa1; John the Baptist:3:Lk1; Paul:2:Ac18
-
 @told-to-build|People|Name someone God told to build or make something
 Noah:5:Ge6; Moses:5:Ex25; Bezalel|Bezaleel:2:Ex31; Solomon:4:1Ki5; Gideon:2:Jdg6; Joshua:2:Jos4; Jeremiah:1:Jer27
 Ezekiel:1:Eze4; Nehemiah:3:Ne2; Zerubbabel:2:Hag1; David:1:1Ch28; Jacob:2:Ge35
@@ -136,9 +119,6 @@ Moses:5:Ex4; Aaron:5:Ex4; Miriam:5:Ex15; Mary:4:Jn11; Martha:5:Jn11; Lazarus:5:J
 James:4:Mt4; John:4:Mt4; Cain:4:Ge4; Abel:4:Ge4; Jacob:5:Ge25; Esau:5:Ge25; Joseph:4:Ge37; Benjamin:3:Ge43
 Rachel:3:Ge29; Leah:3:Ge29; Absalom:2:2Sa13; Tamar:2:2Sa13; Amnon:2:2Sa13; Shem:1:Ge6; Ham:1:Ge6; Japheth:1:Ge6
 
-@pit|People|Name someone in the Bible who was thrown into a pit, well, den or cistern
-Joseph:5:Ge37; Daniel:5:Da6; Jeremiah:4:Jer38; Jonah:2:Jon2; Shadrach:2:Da3; Meshach:2:Da3; Abednego:2:Da3
-
 @boats|People|Name someone in the Bible who sailed or was on a famous boat
 Noah:5:Ge7; Jonah:5:Jon1; Paul:5:Ac27; Peter:5:Mt14; Jesus:4:Mk4; Andrew:2:Mk1; James:2:Mk1; John:2:Mk1; Luke:2:Ac27
 Aristarchus:1:Ac27; Julius:1:Ac27; Zebedee:2:Mk1; Thomas:1:Jn21; Nathanael:1:Jn21; Barnabas:2:Ac13
@@ -146,9 +126,6 @@ Aristarchus:1:Ac27; Julius:1:Ac27; Zebedee:2:Mk1; Thomas:1:Jn21; Nathanael:1:Jn2
 @argued-with-god|People|Name someone in the Bible who argued or pleaded with God
 Abraham:5:Ge18; Moses:5:Ex32; Jonah:4:Jon4; Job:4:Job23; Jeremiah:3:Jer12; Habakkuk:3:Hab1; Gideon:3:Jdg6; Elijah:2:1Ki19
 Jacob:2:Ge32; Hezekiah:2:2Ki20; Amos:1:Am7; Asaph:1:Ps73; Jesus:1:Mt26
-
-@lots|People|Name someone in the Bible chosen or exposed by casting lots
-Matthias:5:Ac1; Jonah:5:Jon1; Achan:4:Jos7; Saul:3:1Sa10; Jonathan:3:1Sa14; Zechariah|Zacharias:2:Lk1; Joseph Barsabbas|Justus:1:Ac1
 
 @roofs|People|Name someone in a Bible story that happens on a roof, wall or window
 David:5:2Sa11; Rahab:5:Jos2; Peter:3:Ac10; Paralyzed man|Paralytic:4:Mk2; Paul:4:Ac9; Eutychus:4:Ac20; Jezebel:3:2Ki9
@@ -165,9 +142,6 @@ Nobleman's son|Official's son:3:Jn4; Publius' father:1:Ac28; Centurion's servant
 @beautiful|People|Name someone the Bible describes as beautiful or handsome
 Sarah:4:Ge12; Rebekah:4:Ge24; Rachel:5:Ge29; Joseph:4:Ge39; David:4:1Sa16; Abigail:3:1Sa25; Bathsheba:5:2Sa11; Tamar:2:2Sa13
 Absalom:4:2Sa14; Esther:5:Est2; Vashti:3:Est1; Job's daughters:1:Job42; Abishag:1:1Ki1; Moses:2:Ac7; Saul:2:1Sa9; Adonijah:0:1Ki1
-
-@tall-short|People|Name someone in the Bible remembered for their height (very tall or short)
-Goliath:5:1Sa17; Zacchaeus:5:Lk19; Saul:4:1Sa9; Og:3:Dt3; Anakim|Anak:2:Nu13; Eliab:1:1Sa16; Egyptian giant:0:1Ch11
 
 @princesses|Women|Name a princess (king's daughter) in the Bible
 Michal:5:1Sa18; Pharaoh's daughter:5:Ex2; Tamar:3:2Sa13; Merab:2:1Sa18; Jehosheba|Jehoshabeath:1:2Ki11; Athaliah:1:2Ki8

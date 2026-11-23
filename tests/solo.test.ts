@@ -14,7 +14,8 @@ beforeEach(() => {
 /** a valid answer for prompt idx of dive 1 at a given commonness */
 const answerFor = (idx: number, level?: number) => {
   const q = svc.prompts(1)[idx]
-  const a = level == null ? q.answers[0] : q.answers.find((x) => x.level === level) ?? q.answers[0]
+  const byLevel = [...q.answers].sort((x, y) => x.level - y.level)
+  const a = level == null ? q.answers[0] : level === 0 ? byLevel[0] : byLevel[byLevel.length - 1]
   return a.name
 }
 const start = (p: string, idx: number) => {

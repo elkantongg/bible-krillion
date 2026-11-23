@@ -60,10 +60,6 @@ Lois:1:2Ti1; Lucifer:2:Isa14; Legion:2:Mk5; Lemuel:0:Pr31; Linus:0:2Ti4; Lysias:
 Thomas:5:Jn20; Timothy:5:Ac16; Titus:4:Gal2; Tamar:3:Ge38; Tabitha:3:Ac9; Thaddaeus:2:Mt10; Terah:2:Ge11
 Tychicus:1:Eph6; Tertius:0:Ro16; Theophilus:2:Lk1; Tubal-cain|Tubalcain:1:Ge4; Tobiah:1:Ne2; Trophimus:0:Ac20; Tiglath-Pileser:0:2Ki15
 
-@o-names|People|Name a Bible character whose name begins with O
-Obadiah:3:Ob1; Orpah:3:Ru1; Obed:2:Ru4; Og:2:Nu21; Onesimus:2:Phm1; Othniel:2:Jdg3; Omri:1:1Ki16; Oholiab|Aholiab:0:Ex31
-Onan:1:Ge38; Oded:0:2Ch28; Onesiphorus:0:2Ti1; Oreb:0:Jdg7
-
 @i-names|People|Name a Bible character whose name begins with I
 Isaac:5:Ge21; Isaiah:5:Isa1; Ishmael:4:Ge16; Israel:4:Ge32; Issachar:2:Ge30; Ichabod:2:1Sa4; Iscariot:2:Mt10
 Ish-bosheth|Ishbosheth:1:2Sa2; Ira:0:2Sa20; Ittai:0:2Sa15; Igal:0:Nu13; Immanuel|Emmanuel:2:Isa7

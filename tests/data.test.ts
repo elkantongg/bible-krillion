@@ -16,15 +16,21 @@ function noCollisions(q: (typeof QUESTIONS)[number]) {
 }
 
 describe('question pool', () => {
-  it('has 500+ questions and unique ids', () => {
-    expect(QUESTIONS.length).toBeGreaterThanOrEqual(500)
+  it('has 400+ questions and unique ids', () => {
+    expect(QUESTIONS.length).toBeGreaterThanOrEqual(400)
     expect(new Set(QUESTIONS.map((q) => q.id)).size).toBe(QUESTIONS.length)
   })
 })
 
 describe('every question', () => {
   it.each(QUESTIONS.map((q) => [q.id, q] as const))('%s is well-formed', (_id, q) => {
-    expect(q.answers.length).toBeGreaterThanOrEqual(3)
+    // open-ended: many answers spread over the rarity tiers, from obvious to obscure
+    expect(q.answers.length, 'at least 8 answers').toBeGreaterThanOrEqual(8)
+    const levels = new Set(q.answers.map((a) => a.level))
+    expect(levels.size, 'answers span at least 4 tiers').toBeGreaterThanOrEqual(4)
+    expect(Math.max(...levels), 'has a well-known answer').toBeGreaterThanOrEqual(4)
+    // general questions only: never tied to a particular chapter or passage
+    if (!/^famous-(verses|chapters)$/.test(q.id)) expect(q.text, 'no chapter/verse numbers').not.toMatch(/\d/)
     expect(q.text.length).toBeGreaterThan(10)
     expect(CATEGORIES).toContain(q.category)
     expect([1, 2, 3]).toContain(q.difficulty)
@@ -54,7 +60,5 @@ describe('the pool is broad and approachable', () => {
     const q = QUESTION_BY_ID.get('famous-verses')!
     expect(matchAnswer(q, 'John 3:16', ALL_KEYS)?.name).toBe('John 3:16')
     expect(matchAnswer(QUESTION_BY_ID.get('numbers')!, 'forty', ALL_KEYS)?.name).toBe('40')
-    expect(matchAnswer(QUESTION_BY_ID.get('plagues')!, 'frogs', ALL_KEYS)?.name).toBe('Frogs')
-    expect(matchAnswer(QUESTION_BY_ID.get('fruit-spirit')!, 'self control', ALL_KEYS)?.name).toBe('Self-control')
   })
 })

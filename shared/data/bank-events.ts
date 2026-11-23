@@ -2,10 +2,6 @@
 import { bank } from './define'
 
 export const eventsBank = bank(`
-@plagues|Events|Name one of the ten plagues of Egypt
-Blood|Water into blood|River of blood:5:Ex7; Frogs:5:Ex8; Gnats|Lice:4:Ex8; Flies:4:Ex8; Livestock|Dead livestock|Pestilence|Cattle disease:3:Ex9
-Boils|Sores:4:Ex9; Hail:4:Ex9; Locusts:5:Ex10; Darkness:5:Ex10; Death of the firstborn|Firstborn|Death:5:Ex11
-
 @creation|Events|Name something God made during the six days of creation
 Light:5:Ge1; Sky|Heaven|Heavens|Firmament|Expanse:3:Ge1; Land|Earth|Dry land:4:Ge1; Sea|Seas|Oceans|Water:4:Ge1
 Plants|Vegetation|Grass:3:Ge1; Trees:3:Ge1; Sun:5:Ge1; Moon:5:Ge1; Stars:5:Ge1; Fish:4:Ge1; Birds:4:Ge1
@@ -52,18 +48,6 @@ Sabbath:4:Ex20; Jubilee|Year of Jubilee:1:Lev25; New Moon:1:Nu10; Sabbath year|S
 Noah:5:Ge9; Abraham|Abram:5:Ge15; Moses:4:Ex24; David:4:2Sa7; Israel:3:Ex19; Isaac:2:Ge17; Jacob:2:Ge35
 Phinehas:0:Nu25; Levi:0:Mal2; Joshua:1:Jos24
 
-@commandments|Faith|Name one of the Ten Commandments
-No other gods|You shall have no other gods|Have no other gods|Thou shalt have no other gods:5:Ex20
-No idols|No graven images|Do not make idols|Idols|Graven images:4:Ex20
-Do not take the Lord's name in vain|Name in vain|Don't take God's name in vain|Taking the Lord's name in vain|Blasphemy:4:Ex20
-Keep the Sabbath|Remember the Sabbath|Sabbath|Keep the Sabbath holy:5:Ex20
-Honor your father and mother|Honour your father and mother|Honor your parents|Honour your parents|Obey your parents:5:Ex20
-Do not murder|You shall not murder|Thou shalt not kill|Do not kill|Murder|Killing|Don't kill:5:Ex20
-Do not commit adultery|Thou shalt not commit adultery|Adultery|No adultery:4:Ex20
-Do not steal|Thou shalt not steal|Stealing|Steal|Don't steal|No stealing:5:Ex20
-Do not lie|Do not bear false witness|Thou shalt not bear false witness|False witness|Lying|Don't lie|No lying:4:Ex20
-Do not covet|Thou shalt not covet|Coveting|Covet|Don't covet|Jealousy:3:Ex20
-
 @battles|Events|Name a battle or war in the Bible
 Jericho|Battle of Jericho:5:Jos6; Ai|Battle of Ai:3:Jos8; David and Goliath|Valley of Elah:4:1Sa17; Gideon's battle|Midianites|Gideon:3:Jdg7
 Armageddon|Har-Magedon:3:Rev16; Mount Gilboa|Gilboa:2:1Sa31; Aphek:1:1Sa4; Gibeon|Sun stood still:2:Jos10; Rephidim|Amalekites:2:Ex17
@@ -90,30 +74,11 @@ Oil and flour|Widow's oil:3:1Ki17; Balaam's talking donkey|Talking donkey:4:Nu22
 Shadow went backward|Sundial:1:2Ki20; Plagues|Ten plagues:4:Ex7; Crossing the Jordan|Jordan parted:3:Jos3; Elijah taken to heaven|Chariot of fire:4:2Ki2
 Ravens fed Elijah|Ravens:3:1Ki17; Samson's strength:3:Jdg16; Rain after drought:2:1Ki18; Staff became a snake:3:Ex7
 
-@pentecost|Events|Name something that happened on the day of Pentecost (Acts 2)
+@pentecost|Events|Name something that happened on the day of Pentecost
 Holy Spirit came|Holy Spirit|Spirit poured out:5:Ac2; Tongues of fire|Fire:5:Ac2; Rushing wind|Wind|Mighty wind:5:Ac2
 Speaking in tongues|Tongues|Languages|Other languages:5:Ac2; Peter preached|Peter's sermon|Sermon:4:Ac2
 Three thousand saved|3000 baptized|Three thousand baptized|Baptism:4:Ac2; Accused of being drunk|Drunk|New wine:3:Ac2
 Prophecy of Joel|Joel's prophecy|Joel:2:Ac2; Shared everything|Sharing possessions:2:Ac2
-
-@i-am|Jesus|Complete one of Jesus' "I am…" sayings in John's Gospel
-Bread of life|Bread:5:Jn6; Light of the world|Light:5:Jn8; Door|Gate|Door of the sheep:4:Jn10; Good shepherd|Shepherd:5:Jn10
-Resurrection and the life|Resurrection|The resurrection and the life:4:Jn11; Way|Way the truth and the life|The way|Truth|Life:5:Jn14
-True vine|Vine:4:Jn15; Before Abraham was I am|Before Abraham:2:Jn8
-
-@beatitudes|Jesus|Name a group Jesus called "blessed" in the Beatitudes
-Poor in spirit|Poor:5:Mt5; Those who mourn|Mourn|Mourners:5:Mt5; Meek|The meek:5:Mt5
-Hunger and thirst for righteousness|Those who hunger|Hungry:4:Mt5; Merciful|The merciful:5:Mt5; Pure in heart|Pure:5:Mt5
-Peacemakers|Peacemaker:5:Mt5; Persecuted|Those persecuted for righteousness:4:Mt5; Insulted|Reviled:2:Mt5
-
-@fruit-spirit|Faith|Name a fruit of the Spirit (Galatians 5)
-Love:5:Gal5; Joy:5:Gal5; Peace:5:Gal5; Patience|Longsuffering|Forbearance:4:Gal5; Kindness:4:Gal5; Goodness:4:Gal5
-Faithfulness|Faith:4:Gal5; Gentleness|Meekness:4:Gal5; Self-control|Self control|Temperance:4:Gal5
-
-@armor|Faith|Name a piece of the armor of God (Ephesians 6)
-Belt of truth|Belt|Girdle|Truth:5:Eph6; Breastplate of righteousness|Breastplate|Righteousness:5:Eph6
-Shoes of peace|Shoes|Feet|Sandals|Gospel of peace|Readiness:4:Eph6; Shield of faith|Shield|Faith:5:Eph6
-Helmet of salvation|Helmet|Salvation:5:Eph6; Sword of the Spirit|Sword|Word of God:5:Eph6
 
 @spiritual-gifts|Faith|Name a spiritual gift mentioned by Paul
 Prophecy:4:1Co12; Teaching:4:Ro12; Wisdom:3:1Co12; Knowledge:3:1Co12; Faith:3:1Co12; Healing|Healings|Gifts of healing:4:1Co12
@@ -122,23 +87,12 @@ Discernment|Distinguishing between spirits|Discerning of spirits:2:1Co12; Apostl
 Pastors|Shepherds:2:Eph4; Giving|Generosity:2:Ro12; Leadership|Leading:2:Ro12; Mercy:2:Ro12; Serving|Service|Ministry:2:Ro12
 Encouragement|Exhortation:2:Ro12; Administration|Helps|Helping:1:1Co12
 
-@lords-prayer|Faith|Name a word or phrase from the Lord's Prayer
-Our Father|Father:5:Mt6; Heaven|In heaven:4:Mt6; Hallowed|Hallowed be thy name:5:Mt6; Name|Thy name:3:Mt6; Kingdom|Thy kingdom come:4:Mt6
-Will|Thy will be done:4:Mt6; Earth|On earth:3:Mt6; Daily bread|Bread:5:Mt6; Forgive|Forgive us:4:Mt6; Debts|Debtors:3:Mt6
-Trespasses:3:Lk11; Temptation|Lead us not into temptation:4:Mt6; Evil|Deliver us from evil:4:Mt6; Power:2:Mt6; Glory:2:Mt6; Amen:3:Mt6
-
-@love-is|Faith|Finish the phrase from 1 Corinthians 13: "Love is…" (or "Love does not…")
-Patient:5:1Co13; Kind:5:1Co13; Does not envy|Not envious|Not jealous:4:1Co13; Does not boast|Not boastful:4:1Co13
-Not proud|Not arrogant:4:1Co13; Not rude:3:1Co13; Not self-seeking|Not selfish:3:1Co13; Not easily angered|Not irritable:3:1Co13
-Keeps no record of wrongs|No record of wrongs:4:1Co13; Rejoices with the truth|Rejoices in truth:2:1Co13; Protects|Bears all things:2:1Co13
-Trusts|Believes all things:2:1Co13; Hopes|Hopes all things:2:1Co13; Perseveres|Endures|Endures all things:2:1Co13; Never fails|Never ends:3:1Co13
-
 @offerings|Faith|Name a kind of offering or sacrifice in the Law of Moses
 Burnt offering:5:Lev1; Grain offering|Meal offering|Cereal offering:3:Lev2; Peace offering|Fellowship offering:3:Lev3
 Sin offering:4:Lev4; Guilt offering|Trespass offering:3:Lev5; Drink offering:2:Nu15; Wave offering:2:Lev7; Heave offering:1:Ex29
 Freewill offering:2:Lev22; Thank offering|Thanksgiving offering:2:Lev7; Firstfruits:2:Lev23; Tithe:3:Lev27; Incense:2:Ex30
 
-@fall-curses|Events|Name a consequence of the Fall in Genesis 3
+@fall-curses|Events|Name a consequence of Adam and Eve's sin
 Pain in childbirth|Childbirth:5:Ge3; Thorns and thistles|Thorns|Thistles:4:Ge3; Sweat|Toil|Hard work:4:Ge3; Death|Return to dust|Dust:4:Ge3
 Serpent crawls on its belly|Belly|Crawl:4:Ge3; Enmity|Hostility:2:Ge3; Banished from Eden|Expelled from the garden|Exile:5:Ge3
 Cursed ground|Ground cursed:3:Ge3; Shame|Nakedness:3:Ge3; Cherubim guarding Eden|Flaming sword:2:Ge3
@@ -164,30 +118,6 @@ New Jerusalem:5:Rev21; Lake of fire:4:Rev20; Thousand years|Millennium:3:Rev20; 
 Lamb:4:Rev5; 144000|144,000|One hundred forty-four thousand:3:Rev7; Two witnesses:2:Rev11; Seven churches:4:Rev2
 Twenty-four elders|Elders:2:Rev4; Book of life:3:Rev20; Tree of life:3:Rev22; River of life|River of the water of life:2:Rev22
 Babylon|Whore of Babylon:3:Rev17; Alpha and Omega:4:Rev1; Locusts:2:Rev9; Sea of glass:2:Rev4; Pearly gates|Gates of pearl:3:Rev21
-
-@horsemen|Events|Name one of the four horsemen of Revelation 6 (by colour or what it brings)
-White horse|White|Conquest|Conqueror:5:Rev6; Red horse|Red|War:5:Rev6; Black horse|Black|Famine:5:Rev6; Pale horse|Pale|Death|Green:5:Rev6
-
-@flesh-works|Faith|Name one of the "works of the flesh" in Galatians 5
-Sexual immorality|Fornication|Immorality:4:Gal5; Impurity|Uncleanness:3:Gal5; Idolatry:4:Gal5; Witchcraft|Sorcery:4:Gal5
-Hatred|Hate|Enmity:4:Gal5; Discord|Strife:3:Gal5; Jealousy:4:Gal5; Rage|Anger|Wrath|Fits of rage:4:Gal5
-Selfish ambition|Rivalry:3:Gal5; Dissensions|Divisions:2:Gal5; Factions|Heresies:2:Gal5; Envy|Envying:4:Gal5
-Drunkenness:4:Gal5; Orgies|Revelling|Carousing:2:Gal5; Debauchery|Lasciviousness|Sensuality:2:Gal5; Murder|Murders:1:Gal5
-
-@things-god-hates|Faith|Name one of the things the Lord hates in Proverbs 6
-Haughty eyes|Proud look|Pride:4:Pr6; Lying tongue|Lying|Lies:5:Pr6; Hands that shed innocent blood|Murder:4:Pr6
-Heart that devises wicked schemes|Wicked heart|Wicked plans:3:Pr6; Feet quick to rush into evil|Feet that run to evil:3:Pr6
-False witness:4:Pr6; Stirring up conflict|Sowing discord|Discord:3:Pr6
-
-@think-on|Faith|Name one of the things Philippians 4 tells us to think about
-True|Truth:5:Php4; Noble|Honest|Honorable:4:Php4; Right|Just:4:Php4; Pure:5:Php4; Lovely:4:Php4
-Admirable|Of good report|Commendable:3:Php4; Excellent|Virtue:3:Php4; Praiseworthy|Praise:3:Php4
-
-@cross-words|Jesus|Name one of the sayings of Jesus on the cross
-Father forgive them|Forgive them|Father forgive them for they know not what they do:5:Lk23
-Today you will be with me in paradise|Paradise|Today you will be with me:4:Lk23; Woman behold your son|Behold your son|Here is your mother:3:Jn19
-My God my God why have you forsaken me|Why have you forsaken me|Forsaken|Eloi Eloi lama sabachthani|Eli Eli lama sabachthani:5:Mt27
-I thirst|I am thirsty|Thirsty:4:Jn19; It is finished|Finished:5:Jn19; Into your hands I commit my spirit|Into your hands|Father into your hands:4:Lk23
 
 @mount-sinai|Events|Name something that happened at Mount Sinai (Horeb)
 Ten Commandments|Commandments|Tablets:5:Ex20; Burning bush:4:Ex3; Golden calf:5:Ex32; Thunder and lightning|Thunder|Lightning:3:Ex19
@@ -295,7 +225,7 @@ Tree of life:5:Ge2; Tree of the knowledge of good and evil|Tree of knowledge:5:G
 Fig leaves:4:Ge3; Adam:5:Ge2; Eve:5:Ge3; Rivers|River:3:Ge2; Cherubim:3:Ge3; Flaming sword:3:Ge3; Garments of skin|Clothes of skin:2:Ge3
 Gold:1:Ge2; Onyx:1:Ge2; Bdellium|Aromatic resin:0:Ge2; Animals:3:Ge2; Rib:4:Ge2; Mist:1:Ge2
 
-@david-goliath|Events|Name something in the story of David and Goliath (1 Samuel 17)
+@david-goliath|Events|Name something in the story of David and Goliath
 Sling:5:1Sa17; Stones|Five smooth stones|Stone:5:1Sa17; Giant|Goliath:5:1Sa17; Sword:4:1Sa17; Armor:4:1Sa17; Shield:3:1Sa17
 Spear:3:1Sa17; Javelin:2:1Sa17; Staff:2:1Sa17; Brook|Stream:2:1Sa17; Valley of Elah|Elah:2:1Sa17; Philistines:4:1Sa17
 Saul:4:1Sa17; Israelites|Israel:3:1Sa17; Helmet:2:1Sa17; Cheese|Cheeses:1:1Sa17; Bread|Loaves:1:1Sa17; Roasted grain:0:1Sa17

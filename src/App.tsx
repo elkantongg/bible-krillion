@@ -71,7 +71,7 @@ export function App() {
   return (
     <>
       {WEBGL ? (
-        <Suspense fallback={<div className="fixed inset-0" style={{ background: 'linear-gradient(180deg,#2a2f62 0%,#8a7aa8 40%,#f1b48a 46%,#163a56 47%,#0b2a48 100%)' }} />}>
+        <Suspense fallback={<div className="fixed inset-0" style={{ background: 'linear-gradient(180deg,#03081a 0%,#14204a 40%,#5a4258 56%,#0a0f1e 58%,#030812 100%)' }} />}>
           <World3D />
         </Suspense>
       ) : (

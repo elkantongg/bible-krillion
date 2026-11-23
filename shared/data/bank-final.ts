@@ -17,23 +17,10 @@ Sheaves|Sheaves of grain:5:Ge37; Sun:4:Ge37; Moon:4:Ge37; Eleven stars|Stars:4:G
 Vine:3:Ge40; Three branches|Branches:2:Ge40; Grapes:2:Ge40; Pharaoh's cup|Cup:3:Ge40; Baskets|Three baskets:3:Ge40; Birds:3:Ge40; Bread|Baked goods:2:Ge40
 Nile|River:2:Ge41
 
-@romans-16|People|Name someone Paul greets or mentions in Romans 16
-Phoebe:4:Ro16; Priscilla|Prisca:4:Ro16; Aquila:4:Ro16; Timothy:3:Ro16; Epenetus:0:Ro16; Mary:1:Ro16; Andronicus:1:Ro16; Junia:1:Ro16
-Ampliatus|Amplias:0:Ro16; Urbanus|Urbane:0:Ro16; Stachys:0:Ro16; Apelles:0:Ro16; Aristobulus:0:Ro16; Herodion:0:Ro16; Narcissus:0:Ro16
-Tryphena:0:Ro16; Tryphosa:0:Ro16; Persis:0:Ro16; Rufus:1:Ro16; Asyncritus:0:Ro16; Phlegon:0:Ro16; Hermes:0:Ro16; Patrobas:0:Ro16
-Hermas:0:Ro16; Philologus:0:Ro16; Julia:0:Ro16; Nereus:0:Ro16; Olympas:0:Ro16; Lucius:0:Ro16; Jason:0:Ro16; Sosipater:0:Ro16
-Tertius:1:Ro16; Gaius:1:Ro16; Erastus:1:Ro16; Quartus:0:Ro16
-
-@sacred-woods|Nature|Name a kind of wood used to build the tabernacle or temple
-Acacia|Shittim:5:Ex25; Cedar:5:1Ki6; Cypress|Pine|Fir|Juniper:3:1Ki6; Olive wood|Olive:4:1Ki6; Algum|Almug:1:1Ki10
-
 @gates|Places|Name a famous gate mentioned in the Bible
 Beautiful Gate:5:Ac3; Sheep Gate:3:Jn5; Gates of Gaza|Gaza gates:4:Jdg16; Pearly gates|Gates of pearl:5:Rev21; Narrow gate:5:Mt7
 Wide gate:3:Mt7; Fish Gate:2:Ne3; Dung Gate|Refuse Gate:2:Ne2; Water Gate:2:Ne8; Valley Gate:2:Ne2; Fountain Gate:1:Ne3
 Horse Gate:1:Ne3; East Gate:2:Eze44; Gates of hell|Gates of Hades:3:Mt16; Gate of heaven:2:Ge28; Twelve gates:3:Rev21
-
-@east-tribes|People|Name a tribe that settled east of the Jordan River
-Reuben:5:Nu32; Gad:5:Nu32; Manasseh|Half-tribe of Manasseh:5:Nu32
 
 @elijah-provision|Events|Name something God provided for Elijah
 Ravens:5:1Ki17; Bread and meat|Bread|Meat:4:1Ki17; Water from the brook|Brook Cherith|Water:4:1Ki17; Flour and oil|Flour|Oil:5:1Ki17

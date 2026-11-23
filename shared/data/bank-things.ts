@@ -184,17 +184,6 @@ Ark of the Covenant|Ark:5:1Ki8; Cherubim:4:1Ki6; Altar:4:1Ki8; Gold:4:1Ki6; Ceda
 Lampstands:3:1Ki7; Jachin:1:1Ki7; Boaz:1:1Ki7; Bronze sea|Molten sea|The Sea:2:1Ki7; Basins|Stands:1:1Ki7; Porch|Portico:1:1Ki6
 Pillars:3:1Ki7; Hiram:2:1Ki7; Cloud|Glory:3:1Ki8; Stones:2:1Ki6; Olive wood:1:1Ki6; Table:1:1Ki7
 
-@psalm23|Scripture|Name something mentioned in Psalm 23
-Shepherd:5:Ps23; Green pastures|Pastures:5:Ps23; Still waters|Quiet waters:5:Ps23; Paths of righteousness|Paths:4:Ps23
-Valley of the shadow of death|Valley:5:Ps23; Rod:4:Ps23; Staff:4:Ps23; Table:4:Ps23; Oil:3:Ps23; Cup:4:Ps23
-Goodness:3:Ps23; Mercy|Love:3:Ps23; House of the Lord:4:Ps23; Enemies:3:Ps23; Soul:3:Ps23; Evil:2:Ps23; Head:2:Ps23; Want:2:Ps23
-
-@psalm-writers|Scripture|Name someone who wrote a psalm
-David:5:Ps3; Asaph:3:Ps50; Sons of Korah|Korah:3:Ps42; Solomon:3:Ps72; Moses:3:Ps90; Heman:1:Ps88; Ethan:1:Ps89
-
-@languages|Scripture|Name a language the Bible was originally written in
-Hebrew:5:Ge1; Greek:5:Jn1; Aramaic:4:Da2
-
 @translations|Scripture|Name an English Bible translation (or version)
 King James|KJV|King James Version:5:Ge1; NIV|New International Version:5:Ge1; ESV|English Standard Version:4:Ge1
 NKJV|New King James:3:Ge1; NASB|New American Standard:3:Ge1; NLT|New Living Translation:3:Ge1; RSV|Revised Standard Version:2:Ge1
@@ -228,30 +217,7 @@ Titus:3:Tit1; Philemon:2:Phm1
 Hebrews:4:Heb1; James:5:Jas1; 1 Peter|First Peter|Peter:4:1Pe1; 2 Peter|Second Peter:3:2Pe1; 1 John|First John|John:4:1Jn1
 2 John|Second John:2:2Jn1; 3 John|Third John:2:3Jn1; Jude:3:Jude1; Revelation:2:Rev1
 
-@gospels|Scripture|Name one of the four Gospels
-Matthew:5:Mt1; Mark:5:Mk1; Luke:5:Lk1; John:5:Jn1
-
-@law-books|Scripture|Name one of the five books of the Law (the Torah / Pentateuch)
-Genesis:5:Ge1; Exodus:5:Ex1; Leviticus:4:Lev1; Numbers:4:Nu1; Deuteronomy:4:Dt1
-
-@history-books|Scripture|Name an Old Testament history book (Joshua–Esther)
-Joshua:4:Jos1; Judges:4:Jdg1; Ruth:4:Ru1; 1 Samuel|First Samuel|Samuel:4:1Sa1; 2 Samuel|Second Samuel:3:2Sa1
-1 Kings|First Kings|Kings:4:1Ki1; 2 Kings|Second Kings:3:2Ki1; 1 Chronicles|First Chronicles|Chronicles:3:1Ch1
-2 Chronicles|Second Chronicles:2:2Ch1; Ezra:3:Ezr1; Nehemiah:3:Ne1; Esther:4:Est1
-
-@wisdom-books|Scripture|Name a book of poetry or wisdom in the Old Testament
-Job:4:Job1; Psalms|Psalm:5:Ps1; Proverbs:5:Pr1; Ecclesiastes:4:Ec1; Song of Solomon|Song of Songs:4:Song1; Lamentations:2:La1
-
-@one-chapter|Scripture|Name a book of the Bible that has only one chapter
-Obadiah:4:Ob1; Philemon:4:Phm1; 2 John|Second John:4:2Jn1; 3 John|Third John:4:3Jn1; Jude:4:Jude1
-
-@short-titles|Scripture|Name a book of the Bible with a one-word title of four letters or fewer
-Job:5:Job1; Ruth:5:Ru1; Joel:3:Joel1; Amos:3:Am1; Mark:5:Mk1; Luke:5:Lk1; John:5:Jn1; Acts:4:Ac1; Jude:3:Jude1; Ezra:3:Ezr1
-
-@john-books|Scripture|Name a book of the Bible traditionally credited to the apostle John
-John|Gospel of John:5:Jn1; 1 John|First John:4:1Jn1; 2 John|Second John:3:2Jn1; 3 John|Third John:3:3Jn1; Revelation:4:Rev1
-
-@famous-verses|Scripture|Name a famous Bible verse by its reference (e.g. "John 3:16")
+@famous-verses|Scripture|Name a famous Bible verse by its reference (book, chapter and verse number)
 John 3:16:5:Jn3; Genesis 1:1:4:Ge1; Psalm 23:1|Psalm 23:4:Ps23; Romans 8:28:4:Ro8; Jeremiah 29:11:4:Jer29
 Philippians 4:13:4:Php4; Proverbs 3:5|Proverbs 3:5-6:3:Pr3; Joshua 1:9:3:Jos1; Isaiah 40:31:3:Isa40; Matthew 28:19|Matthew 28:19-20:3:Mt28
 Romans 3:23:3:Ro3; Romans 6:23:3:Ro6; John 14:6:3:Jn14; John 11:35:3:Jn11; Psalm 46:10:2:Ps46; Ephesians 2:8|Ephesians 2:8-9:2:Eph2
@@ -302,34 +268,10 @@ Land|Canaan|The land:5:Ge12; Descendants|Offspring|Children:5:Ge15; As many as t
 Great nation:4:Ge12; Blessing|Blessed:4:Ge12; Great name:3:Ge12; A son|Son|Isaac:5:Ge17; Kings:2:Ge17; Bless all nations|All families blessed:3:Ge12
 Covenant:3:Ge17; Shield|Reward:2:Ge15
 
-@elder-qualities|Faith|Name a quality Paul lists for church elders or overseers (1 Timothy 3, Titus 1)
-Above reproach|Blameless:4:1Ti3; Faithful to his wife|Husband of one wife:3:1Ti3; Temperate|Sober:3:1Ti3; Self-controlled:3:1Ti3
-Respectable:2:1Ti3; Hospitable|Hospitality:4:1Ti3; Able to teach:4:1Ti3; Not a drunkard|Not given to wine:3:1Ti3; Not violent:3:1Ti3
-Gentle:3:1Ti3; Not quarrelsome:2:1Ti3; Not a lover of money|Not greedy:3:1Ti3; Manages his household well:2:1Ti3
-Not a recent convert|Not a new convert:2:1Ti3; Good reputation:2:1Ti3; Holy:1:Tit1; Just|Upright:1:Tit1; Loves what is good:1:Tit1
-
-@virtues|Faith|Name one of the "theological virtues" that remain in 1 Corinthians 13
-Faith:5:1Co13; Hope:5:1Co13; Love|Charity:5:1Co13
-
-@temptations|Jesus|Name one of the temptations of Jesus in the wilderness
-Turn stones into bread|Stones into bread|Bread:5:Mt4; Throw himself from the temple|Jump from the temple|Temple:5:Mt4
-Worship Satan for the kingdoms of the world|Kingdoms of the world|Worship Satan:5:Mt4
-
-@sermon-mount|Jesus|Name a teaching from the Sermon on the Mount
-Beatitudes:5:Mt5; Salt of the earth:4:Mt5; Light of the world:4:Mt5; Lord's Prayer:5:Mt6; Turn the other cheek:4:Mt5
-Love your enemies:5:Mt5; Golden rule|Do unto others:4:Mt7; House on the rock|Wise and foolish builders:4:Mt7; Do not worry|Don't worry:4:Mt6
-Treasures in heaven:4:Mt6; Do not judge|Judge not:4:Mt7; Ask seek knock|Ask and it will be given:4:Mt7; Narrow gate:3:Mt7
-Lilies of the field|Consider the lilies:3:Mt6; Go the extra mile:3:Mt5; Plank in your eye|Speck and log|Log in your eye:3:Mt7
-Wolves in sheep's clothing|False prophets:2:Mt7; Seek first the kingdom:3:Mt6; Giving to the needy|Secret giving:2:Mt6; Fasting:2:Mt6
-City on a hill:3:Mt5; Two masters:2:Mt6; Birds of the air:3:Mt6; Oaths|Let your yes be yes:2:Mt5; Pearls before swine:2:Mt7
-
 @followers-called|Jesus|Name something Jesus called his followers
 Salt|Salt of the earth:5:Mt5; Light|Light of the world:5:Mt5; Sheep:4:Jn10; Friends:4:Jn15; Branches:4:Jn15; Fishers of men:5:Mt4
 Disciples:4:Jn13; Children|Little children:3:Jn13; Servants:2:Lk17; Little flock|Flock:3:Lk12; Brothers|Brothers and sisters:2:Mt12
 Witnesses:3:Ac1; Sons of Thunder:1:Mk3; Workers|Laborers:2:Mt9
-
-@lost-parables|Jesus|Name one of the parables about something lost and found (Luke 15)
-Lost sheep|Sheep:5:Lk15; Lost coin|Coin:5:Lk15; Lost son|Prodigal son|Son:5:Lk15
 
 @farm-parables|Jesus|Name a parable of Jesus that involves seeds, plants, farms or vineyards
 Sower|Parable of the sower|Four soils:5:Mt13; Mustard seed:5:Mt13; Wheat and tares|Wheat and weeds|Tares:4:Mt13; Growing seed:2:Mk4

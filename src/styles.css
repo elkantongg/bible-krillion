@@ -61,51 +61,17 @@ button:disabled {
 /* vellum: a dark, slightly translucent panel edged in gold leaf */
 .glass {
   position: relative;
-  background:
-    linear-gradient(180deg, rgb(255 248 230 / 0.07), rgb(255 248 230 / 0.025)),
-    rgb(6 16 34 / 0.55);
-  border: 1px solid rgb(232 193 112 / 0.22);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-  box-shadow:
-    0 18px 50px -18px rgb(0 0 0 / 0.7),
-    inset 0 1px 0 rgb(255 240 200 / 0.1),
-    inset 0 0 0 1px rgb(255 255 255 / 0.02);
+  background: rgb(5 10 22 / 0.72);
+  border: 1px solid rgb(251 243 226 / 0.1);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 20px 50px -24px rgb(0 0 0 / 0.8);
 }
 .glass-hud {
   background: linear-gradient(180deg, rgb(6 16 34 / 0.7), rgb(6 16 34 / 0.5));
 }
 .glass-gold {
-  border-color: rgb(232 193 112 / 0.55);
-  box-shadow:
-    0 18px 50px -18px rgb(0 0 0 / 0.7),
-    0 0 40px -12px rgb(232 193 112 / 0.45),
-    inset 0 1px 0 rgb(255 240 200 / 0.16);
-}
-
-/* illuminated-manuscript corner ornaments */
-.ornate::before,
-.ornate::after {
-  content: '';
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  border: 1.5px solid rgb(232 193 112 / 0.6);
-  pointer-events: none;
-}
-.ornate::before {
-  top: 7px;
-  left: 7px;
-  border-right: 0;
-  border-bottom: 0;
-  border-top-left-radius: 6px;
-}
-.ornate::after {
-  bottom: 7px;
-  right: 7px;
-  border-left: 0;
-  border-top: 0;
-  border-bottom-right-radius: 6px;
+  border-color: rgb(232 193 112 / 0.4);
 }
 
 /* ---------- buttons ---------- */
@@ -113,49 +79,32 @@ button:disabled {
 /* gilded primary button with a slow light sweep */
 .btn-glow {
   position: relative;
-  overflow: hidden;
-  isolation: isolate;
-  background: linear-gradient(180deg, #fbe7b0 0%, #e8c170 45%, #c3913e 100%);
-  color: #2a1a05;
-  box-shadow:
-    0 0 0 1px rgb(255 245 215 / 0.55) inset,
-    0 -2px 0 rgb(120 80 20 / 0.35) inset,
-    0 12px 30px -8px rgb(232 193 112 / 0.55),
-    0 0 70px -14px rgb(255 214 140 / 0.55);
-  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s;
-}
-.btn-glow::after {
-  content: '';
-  position: absolute;
-  inset: -40% auto -40% -60%;
-  width: 40%;
-  transform: skewX(-20deg);
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent);
-  animation: sweep 4.5s ease-in-out infinite;
-  z-index: -1;
+  background: #ecdcb4;
+  color: #14100a;
+  border-radius: 10px;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  box-shadow: 0 10px 40px -14px rgb(236 200 140 / 0.6);
+  transition: transform 0.15s ease, background 0.2s, filter 0.2s;
 }
 .btn-glow:hover:not(:disabled) {
-  transform: translateY(-2px);
-  filter: brightness(1.05);
-  box-shadow:
-    0 0 0 1px rgb(255 245 215 / 0.7) inset,
-    0 -2px 0 rgb(120 80 20 / 0.35) inset,
-    0 18px 40px -8px rgb(232 193 112 / 0.7),
-    0 0 90px -10px rgb(255 214 140 / 0.7);
+  transform: translateY(-1px);
+  background: #f4e6c3;
 }
 .btn-glow:active:not(:disabled) {
   transform: translateY(1px) scale(0.985);
 }
 .btn-glow:disabled {
-  filter: grayscale(0.75) brightness(0.65);
-}
-.btn-glow:disabled::after {
-  display: none;
+  filter: grayscale(0.6) brightness(0.6);
 }
 
 .btn-ghost {
-  border: 1px solid rgb(251 243 226 / 0.2);
-  background: rgb(251 243 226 / 0.05);
+  border: 1px solid rgb(251 243 226 / 0.16);
+  background: transparent;
+  border-radius: 10px;
   transition: background 0.2s, border-color 0.2s, transform 0.15s;
 }
 .btn-ghost:hover:not(:disabled) {
@@ -172,10 +121,9 @@ button:disabled {
   transition: all 0.2s;
 }
 .chip[data-on='true'] {
-  border-color: rgb(232 193 112 / 0.85);
-  background: linear-gradient(180deg, rgb(232 193 112 / 0.3), rgb(232 193 112 / 0.12));
+  border-color: rgb(236 220 180 / 0.8);
+  background: rgb(236 220 180 / 0.14);
   color: #fff4d6;
-  box-shadow: 0 0 24px -6px rgb(232 193 112 / 0.6);
 }
 
 /* ---------- text ---------- */
@@ -184,16 +132,16 @@ button:disabled {
   text-shadow: 0 0 30px rgb(243 212 140 / 0.35), 0 2px 14px rgb(0 0 0 / 0.55);
 }
 .text-gilded {
-  background: linear-gradient(180deg, #fff6dc 0%, #f3d48c 40%, #c99a45 75%, #f6dc9c 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 3px 18px rgb(0 0 0 / 0.55)) drop-shadow(0 0 30px rgb(243 212 140 / 0.25));
+  color: #f1e3c2;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-shadow: 0 2px 30px rgb(0 0 0 / 0.45);
 }
 .eyebrow {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.3em;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
 }
 .rule-gold {

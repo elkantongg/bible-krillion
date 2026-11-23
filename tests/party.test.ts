@@ -152,9 +152,9 @@ describe('Big Fish party room', () => {
   it('ends the question without penalty if every answer has been used', () => {
     const { room, advance } = setup(2)
     room.start('p0')
-    room.question = QUESTIONS.find((x) => x.answers.length === 3)!
+    room.question = [...QUESTIONS].sort((a, b) => a.answers.length - b.answers.length)[0]
     advance(LEAD_MS)
-    for (let i = 0; i < 3; i++) room.answer(room.holderId!, valid(room))
+    for (let i = 0; i < room.question.answers.length; i++) room.answer(room.holderId!, valid(room))
     expect(room.phase).toBe('between')
     expect(room.reveal!.survivedAll).toBe(true)
   })

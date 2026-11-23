@@ -8,20 +8,11 @@ Philip:3:Mt10; Bartholomew|Nathanael:2:Mt10; Thomas|Didymus|Doubting Thomas:4:Mt
 James son of Alphaeus|James the Less:1:Mt10; Thaddaeus|Jude|Judas son of James|Lebbaeus:1:Mt10
 Simon the Zealot|Simon the Canaanite|Zealot:1:Mt10; Judas Iscariot|Judas|Iscariot:4:Mt10; Matthias:1:Ac1
 
-@ark|People|Name someone who was on Noah's ark
-Noah:5:Ge7; Shem:3:Ge7; Ham:3:Ge7; Japheth|Japhet:3:Ge7
-
-@adam-family|People|Name a member of Adam's family (Genesis 1–5)
-Adam:5:Ge2; Eve:5:Ge3; Cain:5:Ge4; Abel:5:Ge4; Seth:3:Ge4; Enosh|Enos:1:Ge4; Enoch:1:Ge4
-
 @abraham-family|People|Name a member of Abraham's family
 Abraham|Abram:5:Ge12; Sarah|Sarai:5:Ge17; Isaac:5:Ge21; Ishmael:4:Ge16; Hagar:4:Ge16; Lot:4:Ge12; Terah:2:Ge11
 Rebekah|Rebecca:3:Ge24; Nahor:1:Ge11; Haran:1:Ge11; Keturah:1:Ge25; Milcah:0:Ge11; Jacob:3:Ge25; Esau:3:Ge25
 
-@jacob-wives|People|Name one of the mothers of Jacob's twelve sons
-Leah:4:Ge29; Rachel:5:Ge29; Bilhah:2:Ge30; Zilpah:2:Ge30
-
-@joseph-story|People|Name a person in the story of Joseph (Genesis 37–50)
+@joseph-story|People|Name a person in the story of Joseph, son of Jacob
 Joseph:5:Ge37; Jacob|Israel:5:Ge37; Reuben:3:Ge37; Judah:3:Ge37; Benjamin:4:Ge42; Simeon:2:Ge42; Potiphar:4:Ge39
 Pharaoh:4:Ge41; Asenath:1:Ge41; Manasseh:2:Ge41; Ephraim:2:Ge41; Levi:1:Ge46; Dan:0:Ge46; Naphtali:0:Ge46
 Gad:0:Ge46; Asher:0:Ge46; Issachar:0:Ge46; Zebulun:0:Ge46; Tamar:1:Ge38
@@ -34,10 +25,6 @@ Amram:1:Ex6; Jochebed:2:Ex6; Nadab:1:Ex6; Abihu:1:Ex6; Eleazar:1:Ex6
 Moses:5:Ex2; Aaron:5:Ex4; Miriam:4:Ex15; Pharaoh:5:Ex1; Joshua:3:Ex17; Jethro|Reuel:3:Ex18; Zipporah:3:Ex2
 Hur:1:Ex17; Bezalel|Bezaleel:1:Ex31; Oholiab|Aholiab:0:Ex31; Shiphrah:1:Ex1; Puah:0:Ex1; Jochebed:1:Ex6
 Gershom:1:Ex2; Nadab:1:Ex24; Abihu:1:Ex24
-
-@spies|People|Name one of the twelve spies Moses sent into Canaan
-Joshua|Hoshea|Oshea:5:Nu13; Caleb:5:Nu13; Shammua:0:Nu13; Shaphat:0:Nu13; Igal:0:Nu13; Palti:0:Nu13
-Gaddiel:0:Nu13; Gaddi:0:Nu13; Ammiel:0:Nu13; Sethur:0:Nu13; Nahbi:0:Nu13; Geuel:0:Nu13
 
 @david-life|People|Name a person in the life of King David
 Saul:5:1Sa16; Jonathan:5:1Sa18; Goliath:5:1Sa17; Bathsheba:5:2Sa11; Uriah:4:2Sa11; Nathan:4:2Sa12
@@ -72,15 +59,6 @@ Obed:2:Ru4; Jesse:1:Ru4; David:1:Ru4
 @job-book|People|Name a person in the book of Job
 Job:5:Job1; Satan:4:Job1; Eliphaz:3:Job2; Bildad:3:Job2; Zophar:3:Job2; Elihu:2:Job32; Jemimah:1:Job42
 Keziah|Kezia:0:Job42; Keren-happuch|Kerenhappuch:0:Job42
-
-@job-friends|People|Name one of Job's friends
-Eliphaz:5:Job2; Bildad:5:Job2; Zophar:5:Job2; Elihu:3:Job32
-
-@furnace|People|Name one of the three men thrown into the fiery furnace
-Shadrach|Hananiah:5:Da3; Meshach|Mishael:5:Da3; Abednego|Azariah:5:Da3
-
-@seven-deacons|People|Name one of the seven men chosen to serve in Acts 6
-Stephen:5:Ac6; Philip:4:Ac6; Prochorus|Procorus:0:Ac6; Nicanor:0:Ac6; Timon:0:Ac6; Parmenas:0:Ac6; Nicolas|Nicolaus:0:Ac6
 
 @paul-team|People|Name a companion or co-worker of the apostle Paul
 Barnabas:5:Ac13; Silas|Silvanus:5:Ac15; Timothy|Timotheus:5:Ac16; Luke:4:Col4; Titus:4:Gal2; Mark|John Mark:3:Ac12
@@ -119,22 +97,9 @@ Mary:5:Lk2; Eve:4:Ge4; Sarah:5:Ge21; Hannah:4:1Sa1; Rebekah:3:Ge25; Rachel:3:Ge3
 Leah:2:Ge29; Jochebed:2:Ex6; Naomi:2:Ru1; Ruth:2:Ru4; Bathsheba:2:2Sa12; Hagar:2:Ge16; Eunice:1:2Ti1
 Zipporah:1:Ex2; Tamar:0:Ge38; Rizpah:0:2Sa21; Lois:1:2Ti1
 
-@miracle-babies|Women|Name a woman who had a child after being unable to conceive
-Sarah|Sarai:5:Ge21; Hannah:5:1Sa1; Elizabeth|Elisabeth:4:Lk1; Rachel:4:Ge30; Rebekah:2:Ge25
-Samson's mother|Manoah's wife:1:Jdg13; Shunammite woman|Shunammite:1:2Ki4
-
-@900-years|People|Name someone in Genesis who lived more than 900 years
-Methuselah:5:Ge5; Noah:4:Ge9; Adam:3:Ge5; Jared:1:Ge5; Seth:1:Ge5; Enosh|Enos:0:Ge5; Kenan|Cainan:0:Ge5
-
-@twins|People|Name a twin in the Bible
-Jacob:5:Ge25; Esau:5:Ge25; Thomas|Didymus:3:Jn11; Perez|Pharez:1:Ge38; Zerah|Zarah:1:Ge38
-
 @shepherds|Roles|Name someone in the Bible who looked after sheep or flocks
 David:5:1Sa16; Abel:4:Ge4; Moses:4:Ex3; Jacob:3:Ge30; Rachel:2:Ge29; Amos:2:Am1; Joseph:1:Ge37
 Zipporah:1:Ex2; Lot:1:Ge13; Abraham|Abram:1:Ge13; Shepherds at Bethlehem|Bethlehem shepherds:2:Lk2
-
-@fishermen|Roles|Name a fisherman in the Bible
-Peter|Simon Peter:5:Mt4; Andrew:4:Mt4; James:4:Mt4; John:4:Mt4; Zebedee:2:Mt4; Thomas:1:Jn21; Nathanael:1:Jn21
 
 @good-kings|People|Name a king of Judah who "did what was right in the eyes of the Lord"
 Josiah:4:2Ki22; Hezekiah:4:2Ki18; Asa:2:1Ki15; Jehoshaphat:3:1Ki22; Uzziah|Azariah:2:2Ki15; Jotham:1:2Ki15
@@ -149,26 +114,12 @@ Belshazzar:2:Da5; Abimelech:1:Jdg9; Eglon:1:Jdg3; Agag:1:1Sa15; Sennacherib:1:2K
 Esther:5:Est2; Vashti:4:Est1; Jezebel:4:1Ki16; Queen of Sheba|Sheba:4:1Ki10; Athaliah:2:2Ki11
 Candace:1:Ac8; Michal:1:2Sa6; Bathsheba:2:1Ki2; Maacah|Maachah:0:1Ki15; Abigail:1:2Sa2
 
-@minor-prophets|People|Name one of the twelve "minor" prophets (Hosea–Malachi)
-Hosea:3:Hos1; Joel:3:Joel1; Amos:3:Am1; Obadiah:2:Ob1; Jonah:5:Jon1; Micah:3:Mic1; Nahum:2:Na1
-Habakkuk:3:Hab1; Zephaniah:2:Zep1; Haggai:2:Hag1; Zechariah:2:Zec1; Malachi:3:Mal1
-
-@major-prophets|People|Name one of the "major" prophets
-Isaiah:5:Isa1; Jeremiah:5:Jer1; Ezekiel:4:Eze1; Daniel:4:Da1
-
-@prophetesses|Women|Name a woman called a prophetess in the Bible
-Deborah:5:Jdg4; Miriam:4:Ex15; Anna:4:Lk2; Huldah:2:2Ki22; Noadiah:0:Ne6; Daughters of Philip|Philip's daughters:1:Ac21
-
 @authors|People|Name someone traditionally credited with writing part of the Bible
 Moses:5:Dt31; Paul:5:Ro1; John:5:Jn21; David:4:Ps3; Solomon:4:Pr1; Peter:4:1Pe1; Luke:4:Lk1; Matthew:4:Mt9
 Mark:4:Mk1; James:3:Jas1; Jude:2:Jude1; Isaiah:3:Isa1; Jeremiah:3:Jer1; Ezekiel:2:Eze1; Daniel:2:Da7
 Ezra:2:Ezr7; Nehemiah:2:Ne1; Samuel:2:1Sa10; Asaph:1:Ps50; Agur:0:Pr30; Lemuel:0:Pr31; Hosea:1:Hos1
 Joel:1:Joel1; Amos:1:Am1; Obadiah:1:Ob1; Jonah:1:Jon1; Micah:1:Mic1; Nahum:1:Na1; Habakkuk:1:Hab1
 Zephaniah:1:Zep1; Haggai:1:Hag1; Zechariah:1:Zec1; Malachi:1:Mal1; Joshua:1:Jos24
-
-@angels|People|Name an angel or heavenly being in the Bible
-Gabriel:5:Lk1; Michael:5:Jude1; Satan|Lucifer|Devil:3:Isa14; Seraphim|Seraph:3:Isa6; Cherubim|Cherub:3:Ge3
-Abaddon|Apollyon:1:Rev9; Living creatures|Four living creatures:1:Rev4; Angel of the Lord:3:Ge16
 
 @giants|People|Name a giant (or giant people) in the Bible
 Goliath:5:1Sa17; Og:3:Dt3; Anak|Anakim|Sons of Anak|Anakites:2:Nu13; Nephilim:3:Ge6; Rephaim:1:Dt2
@@ -197,9 +148,6 @@ Barnabas:1:Ac4; James and John|Boanerges|Sons of Thunder:1:Mk3
 Noah:4:Ge8; Abraham|Abram:5:Ge12; Isaac:2:Ge26; Jacob:3:Ge35; Moses:3:Ex17; Gideon:2:Jdg6; David:3:2Sa24
 Elijah:4:1Ki18; Joshua:2:Jos8; Samuel:1:1Sa7; Saul:1:1Sa14; Aaron:2:Ex32; Solomon:2:1Ki8
 
-@lion-slayers|People|Name someone in the Bible who killed a lion
-Samson:5:Jdg14; David:5:1Sa17; Benaiah:1:2Sa23
-
 @protectors|People|Name someone who hid or protected others from danger
 Rahab:5:Jos2; Jochebed:3:Ex2; Michal:2:1Sa19; Obadiah:1:1Ki18; Jehosheba|Jehoshabeath:0:2Ki11; Jonathan:2:1Sa20
 Joseph:3:Mt2; Shiphrah:1:Ex1; Puah:0:Ex1; Pharaoh's daughter:2:Ex2
@@ -211,16 +159,9 @@ Micah:2:Mic1; Nahum:1:Na1; Habakkuk:1:Hab1; Zephaniah:1:Zep1; Haggai:1:Hag1; Zec
 Matthew:4:Mt1; Mark:4:Mk1; Luke:4:Lk1; John:5:Jn1; Timothy:3:1Ti1; Titus:2:Tit1; Philemon:2:Phm1; James:3:Jas1
 Peter:4:1Pe1; Jude:2:Jude1
 
-@taken-up|People|Name someone in the Bible who went up to heaven without dying (or ascended)
-Elijah:5:2Ki2; Enoch:4:Ge5; Jesus:5:Ac1
-
 @blind|People|Name someone in the Bible who was blind or blinded
 Bartimaeus:4:Mk10; Samson:4:Jdg16; Paul|Saul:4:Ac9; Isaac:3:Ge27; Eli:1:1Sa4; Elymas|Bar-Jesus:1:Ac13
 Zedekiah:1:2Ki25; Ahijah:0:1Ki14; Man born blind:3:Jn9
-
-@lepers|People|Name someone in the Bible who had leprosy
-Naaman:5:2Ki5; Miriam:3:Nu12; Uzziah|Azariah:2:2Ch26; Gehazi:2:2Ki5; Moses:1:Ex4; Simon the leper:2:Mk14
-Ten lepers|Samaritan leper:2:Lk17
 
 @servants|Roles|Name a servant or slave mentioned by name in the Bible
 Hagar:4:Ge16; Eliezer:2:Ge15; Onesimus:3:Phm1; Gehazi:3:2Ki4; Rhoda:2:Ac12; Malchus:2:Jn18; Bilhah:1:Ge30
@@ -234,9 +175,6 @@ Nepheg:0:2Sa5; Japhia:0:2Sa5; Elishama:0:2Sa5; Eliada:0:2Sa5; Eliphelet:0:2Sa5
 @david-wives|Women|Name a wife of King David
 Bathsheba:5:2Sa11; Michal:4:1Sa18; Abigail:3:1Sa25; Ahinoam:1:1Sa25; Maacah|Maachah:0:2Sa3; Haggith:0:2Sa3
 Abital:0:2Sa3; Eglah:0:2Sa3
-
-@forty-days-fast|People|Name someone in the Bible who fasted for forty days
-Jesus:5:Mt4; Moses:4:Ex34; Elijah:3:1Ki19
 
 @wept|People|Name someone in the Bible who is described as weeping
 Jesus:5:Jn11; Peter:4:Mt26; Hannah:3:1Sa1; Joseph:3:Ge45; David:3:2Sa18; Mary Magdalene:3:Jn20; Jeremiah:3:Jer9
@@ -267,17 +205,6 @@ Hiram|Huram:2:1Ki7; Moses:3:Ex40; David:2:2Sa5; Jeroboam:1:1Ki12; Herod:1:Jn2
 @mountain-meetings|People|Name someone who met with God on a mountain
 Moses:5:Ex19; Elijah:4:1Ki19; Abraham:3:Ge22; Peter:3:Mt17; James:2:Mt17; John:2:Mt17; Aaron:2:Ex24; Jesus:4:Mt17
 Nadab:0:Ex24; Abihu:0:Ex24; Joshua:1:Ex24
-
-@transfiguration|People|Name someone who was present at the Transfiguration
-Jesus:5:Mt17; Peter:5:Mt17; James:4:Mt17; John:4:Mt17; Moses:4:Mt17; Elijah:4:Mt17
-
-@hebrews11|People|Name someone listed in the "hall of faith" in Hebrews 11
-Abel:3:Heb11; Enoch:3:Heb11; Noah:5:Heb11; Abraham:5:Heb11; Sarah:4:Heb11; Isaac:4:Heb11; Jacob:4:Heb11
-Joseph:3:Heb11; Moses:5:Heb11; Rahab:3:Heb11; Gideon:3:Heb11; Barak:1:Heb11; Samson:2:Heb11; Jephthah:1:Heb11
-David:3:Heb11; Samuel:2:Heb11
-
-@matthew-women|Women|Name a woman listed in Jesus' genealogy in Matthew 1
-Mary:5:Mt1; Ruth:4:Mt1; Rahab:3:Mt1; Tamar:2:Mt1; Bathsheba|Wife of Uriah|Uriah's wife:3:Mt1
 
 @in-egypt|People|Name someone in the Bible who lived in or went down to Egypt
 Joseph:5:Ge39; Moses:5:Ex2; Jacob|Israel:4:Ge46; Abraham|Abram:3:Ge12; Sarah|Sarai:2:Ge12; Aaron:4:Ex4
@@ -332,10 +259,6 @@ Mary:5:Lk1; Joseph:4:Mt1; Zechariah|Zacharias:4:Lk1; Gideon:4:Jdg6; Abraham:3:Ge
 Jacob:3:Ge32; Daniel:3:Da9; Balaam:3:Nu22; Peter:3:Ac12; Cornelius:3:Ac10; Elijah:2:1Ki19; Philip:2:Ac8
 Paul:2:Ac27; Manoah:2:Jdg13; Joshua:1:Jos5; Shepherds:4:Lk2; John:2:Rev1; Women at the tomb|Mary Magdalene:3:Mt28
 
-@announced-births|People|Name a child whose birth was announced beforehand by God or an angel
-Jesus:5:Lk1; Isaac:4:Ge18; John the Baptist|John:4:Lk1; Samson:3:Jdg13; Ishmael:2:Ge16; Josiah:0:1Ki13
-Shunammite's son:0:2Ki4
-
 @children|People|Name a child or baby who appears in a Bible story
 Moses:5:Ex2; Jesus:5:Lk2; Samuel:4:1Sa3; Isaac:3:Ge22; John the Baptist:3:Lk1; David:3:1Sa17; Joash:1:2Ki11
 Ishmael:2:Ge21; Obed:1:Ru4; Josiah:1:2Ki22; Jairus's daughter|Jairus daughter:2:Mk5; Timothy:1:2Ti3
@@ -377,7 +300,7 @@ Samson:2:Jdg13; Benjamin:2:Ge35; Perez:1:Ge38; Zerah:1:Ge38; Cain:2:Ge4; Seth:1:
 Joseph:2:Ge30; Ichabod:1:1Sa4
 
 @marriages|People|Name someone whose marriage or wedding is described in the Bible
-Adam:4:Ge2; Eve:4:Ge2; Isaac:4:Ge24; Rebekah:4:Ge24; Jacob:4:Ge29; Rachel:4:Ge29; Leah:3:Ge29; Ruth:4:Ru4
+Adam:5:Ge2; Eve:5:Ge2; Isaac:4:Ge24; Rebekah:4:Ge24; Jacob:4:Ge29; Rachel:4:Ge29; Leah:3:Ge29; Ruth:4:Ru4
 Boaz:4:Ru4; Esther:3:Est2; Samson:2:Jdg14; Moses:2:Ex2; Zipporah:2:Ex2; David:3:1Sa18; Michal:2:1Sa18
 Abigail:2:1Sa25; Hosea:2:Hos1; Gomer:2:Hos1; Joseph:3:Mt1; Mary:3:Mt1
 

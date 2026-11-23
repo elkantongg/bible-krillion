@@ -626,7 +626,7 @@ Jambres:0:2Ti3:8
 Benjamin:1:Ro11:1
 `),
 
-  q('genealogy', 'Name someone in the genealogy of Jesus (Matthew 1 or Luke 3)', 'People', `
+  q('genealogy', 'Name an ancestor of Jesus named in the Bible', 'People', `
 Abraham:5:Mt1:1
 David:5:Mt1:1
 Isaac:4:Mt1:2
