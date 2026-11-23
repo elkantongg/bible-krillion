@@ -505,19 +505,21 @@ precision highp sampler3D;
 uniform sampler3D uNoise;
 uniform mat4 uInvProj; uniform mat4 uCamWorld; uniform vec3 uCamPos;
 uniform float uTime;
-uniform vec3 uHorizon; uniform vec3 uMid; uniform vec3 uZenith;
+uniform vec3 uHorizon; uniform vec3 uLow; uniform vec3 uMid; uniform vec3 uZenith;
 uniform vec3 uSunDir; uniform vec3 uSunCol; uniform float uSunI;
-uniform float uBase; uniform float uTop; uniform float uCover; uniform float uRainbow; uniform float uGod; uniform float uSteps; uniform float uAbove;
+uniform float uBase; uniform float uTop; uniform float uCover; uniform float uFade; uniform float uRainbow; uniform float uGod; uniform float uSteps; uniform float uAbove;
 varying vec2 vUv;
 
 float ign(vec2 p){ return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00583715)))); }
 
 vec3 skyCol(vec3 rd){
   float h = max(rd.y, 0.0);
-  vec3 c = mix(uHorizon, uMid, smoothstep(0.0, 0.2, h));
-  c = mix(c, uZenith, smoothstep(0.12, 0.95, h));
+  vec3 c = mix(uHorizon, uLow, smoothstep(0.0, 0.06, h));
+  c = mix(c, uMid, smoothstep(0.04, 0.24, h));
+  c = mix(c, uZenith, smoothstep(0.18, 0.9, h));
   float s = max(dot(rd, uSunDir), 0.0);
-  c += uSunCol * uSunI * (pow(s, 8.0) * 0.08 + pow(s, 64.0) * 0.3);
+  // the sun's long warm glow, widest along the horizon
+  c += uSunCol * uSunI * (pow(s, 8.0) * 0.08 + pow(s, 64.0) * 0.3 + pow(s, 5.0) * 0.1 * (1.0 - smoothstep(0.0, 0.4, h)));
   // soft shafts of light fanning from the sun
   vec3 r = normalize(cross(uSunDir, vec3(0.0, 1.0, 0.0)));
   vec3 u = cross(r, uSunDir);
@@ -532,10 +534,12 @@ vec3 seaCol(vec3 rd){
   vec3 c = mix(vec3(0.004, 0.012, 0.03), uMid * 0.18, f);
   // looking down through more air the higher you are: the sea hazes toward the horizon colour
   float dist = uCamPos.y / max(-rd.y, 0.002);
-  c = mix(c, uHorizon * 0.55, 1.0 - exp(-dist / 14000.0));
+  c = mix(c, mix(uLow, uHorizon, 0.4) * 0.5, 1.0 - exp(-dist / 9000.0));
   vec3 rr = reflect(rd, vec3(0.0, 1.0, 0.0));
   float s = max(dot(rr, uSunDir), 0.0);
-  c += uSunCol * (pow(s, 400.0) * 4.0 + pow(s, 40.0) * 0.12) * uSunI;
+  c += uSunCol * (pow(s, 400.0) * 2.5 + pow(s, 40.0) * 0.12) * uSunI;
+  // no hard edge where sea meets sky: the far water dissolves into the horizon glow
+  c = mix(c, uHorizon * 0.9, smoothstep(-0.05, 0.0, rd.y) * smoothstep(20.0, 400.0, uCamPos.y));
   return c;
 }
 
@@ -572,8 +576,8 @@ void main(){
 
   vec3 col = bg;
   float T = 1.0;
-  if (t0 >= 0.0) {
-    t1 = min(t1, t0 + 16000.0);
+  if (t0 >= 0.0 && uFade > 0.004) {
+    t1 = min(t1, t0 + 11000.0);
     float steps = uSteps;
     float dt = (t1 - t0) / steps;
     float t = t0 + dt * ign(gl_FragCoord.xy);
@@ -600,10 +604,13 @@ void main(){
     }
     if (firstHit > 0.0) {
       // far cloud melts into the horizon haze (aerial perspective)
-      float fade = smoothstep(3000.0, 15000.0, firstHit);
+      float fade = smoothstep(2500.0, 11000.0, firstHit);
       float alpha = 1.0 - T;
       vec3 cloud = acc / max(alpha, 1e-4);
-      cloud = mix(cloud, uHorizon * 1.05, fade * 0.7);
+      cloud = mix(cloud, uHorizon * 1.05, fade * 0.75);
+      // the deck gathers slowly as you climb: from a clear evening sky to a full cover of cloud
+      alpha *= uFade * (1.0 - fade * 0.35);
+      T = 1.0 - alpha;
       col = mix(bg, cloud, alpha);
     }
   }
@@ -627,32 +634,48 @@ void main(){
   // the sun's disc, where the sky is clear
   float s = max(dot(rd, uSunDir), 0.0);
   col += uSunCol * pow(s, 2400.0) * 24.0 * T * uSunI;
-  gl_FragColor = vec4(max(col, vec3(0.0)), 1.0);
+  gl_FragColor = vec4(max(col, vec3(0.0)), rd.y > 0.0 ? T : 0.0);
 }`
 
-/* sky by altitude (sRGB-authored): [alt, horizon, mid, zenith, sunEl, sunCol, sunI, cover, rainbow, god] */
+/* sky by altitude (sRGB-authored). The ground is a clear dusk (no cloud at all, a few stars);
+   cloud gathers slowly from wisps to a full deck, and the light warms from dusk to a golden day. */
 type V3 = [number, number, number]
-type Stage = [number, V3, V3, V3, number, V3, number, number, number, number]
+interface Stage { alt: number; horizon: V3; low?: V3; mid: V3; zenith: V3; sunEl: number; sunCol: V3; sunI: number; cover: number; rainbow: number; god: number }
 const STAGES: Stage[] = [
-  [0, [0.98, 0.6, 0.36], [0.44, 0.36, 0.48], [0.07, 0.1, 0.24], 0.035, [1.0, 0.6, 0.32], 1.1, 0.5, 0, 0.15],
-  [450, [1.0, 0.72, 0.46], [0.62, 0.6, 0.74], [0.17, 0.27, 0.55], 0.06, [1.0, 0.74, 0.46], 1.5, 0.52, 0, 0.25],
-  [1150, [1.0, 0.82, 0.6], [0.62, 0.7, 0.88], [0.2, 0.36, 0.7], 0.09, [1.0, 0.82, 0.58], 1.8, 0.55, 0.7, 0.3],
-  [2000, [1.0, 0.86, 0.66], [0.64, 0.74, 0.92], [0.18, 0.36, 0.72], 0.11, [1.0, 0.86, 0.64], 2.0, 0.56, 1, 0.35],
-  [2700, [1.0, 0.88, 0.66], [0.5, 0.68, 0.96], [0.1, 0.27, 0.66], 0.13, [1.0, 0.9, 0.7], 2.0, 0.64, 0, 0.5],
-  [5000, [1.0, 0.86, 0.6], [0.52, 0.68, 0.95], [0.1, 0.26, 0.64], 0.14, [1.0, 0.88, 0.64], 2.1, 0.66, 0, 0.75],
-  [TOP, [1.0, 0.84, 0.54], [0.5, 0.66, 0.94], [0.1, 0.23, 0.6], 0.15, [1.0, 0.86, 0.6], 1.9, 0.68, 0, 0.8],
+  { alt: 0, horizon: [0.95, 0.56, 0.36], low: [0.6, 0.36, 0.54], mid: [0.2, 0.2, 0.48], zenith: [0.035, 0.05, 0.17], sunEl: 0.035, sunCol: [1.0, 0.62, 0.36], sunI: 1.0, cover: 0.42, rainbow: 0, god: 0 },
+  { alt: 140, horizon: [0.96, 0.58, 0.38], low: [0.62, 0.38, 0.55], mid: [0.22, 0.22, 0.5], zenith: [0.04, 0.06, 0.19], sunEl: 0.038, sunCol: [1.0, 0.64, 0.38], sunI: 1.08, cover: 0.43, rainbow: 0, god: 0.04 },
+  { alt: 420, horizon: [0.98, 0.64, 0.42], low: [0.68, 0.46, 0.58], mid: [0.3, 0.3, 0.56], zenith: [0.07, 0.1, 0.26], sunEl: 0.05, sunCol: [1.0, 0.68, 0.42], sunI: 1.28, cover: 0.47, rainbow: 0, god: 0.14 },
+  { alt: 800, horizon: [1.0, 0.74, 0.5], low: [0.74, 0.62, 0.66], mid: [0.44, 0.5, 0.7], zenith: [0.13, 0.22, 0.48], sunEl: 0.07, sunCol: [1.0, 0.76, 0.5], sunI: 1.55, cover: 0.51, rainbow: 0, god: 0.25 },
+  { alt: 1150, horizon: [1.0, 0.82, 0.6], mid: [0.62, 0.7, 0.88], zenith: [0.2, 0.36, 0.7], sunEl: 0.09, sunCol: [1.0, 0.82, 0.58], sunI: 1.8, cover: 0.55, rainbow: 0.7, god: 0.3 },
+  { alt: 2000, horizon: [1.0, 0.86, 0.66], mid: [0.64, 0.74, 0.92], zenith: [0.18, 0.36, 0.72], sunEl: 0.11, sunCol: [1.0, 0.86, 0.64], sunI: 2.0, cover: 0.56, rainbow: 1, god: 0.35 },
+  { alt: 2700, horizon: [1.0, 0.88, 0.66], mid: [0.5, 0.68, 0.96], zenith: [0.1, 0.27, 0.66], sunEl: 0.13, sunCol: [1.0, 0.9, 0.7], sunI: 2.0, cover: 0.64, rainbow: 0, god: 0.5 },
+  { alt: 5000, horizon: [1.0, 0.86, 0.6], mid: [0.52, 0.68, 0.95], zenith: [0.1, 0.26, 0.64], sunEl: 0.14, sunCol: [1.0, 0.88, 0.64], sunI: 2.1, cover: 0.66, rainbow: 0, god: 0.75 },
+  { alt: TOP, horizon: [1.0, 0.84, 0.54], mid: [0.5, 0.66, 0.94], zenith: [0.1, 0.23, 0.6], sunEl: 0.15, sunCol: [1.0, 0.86, 0.6], sunI: 1.9, cover: 0.68, rainbow: 0, god: 0.8 },
 ]
+for (const st of STAGES) st.low ??= st.horizon.map((v, j) => lerp(v, st.mid[j], 0.5)) as V3
 const SUN_AZ = 0.42
+/** reused every frame (no per-frame allocation, so no GC hitches mid-climb) */
+const SKY = { horizon: [0, 0, 0] as V3, low: [0, 0, 0] as V3, mid: [0, 0, 0] as V3, zenith: [0, 0, 0] as V3, sunEl: 0, sunCol: [0, 0, 0] as V3, sunI: 0, cover: 0, rainbow: 0, god: 0 }
 function stageAt(d: number) {
   let i = 1
-  while (i < STAGES.length - 1 && d > STAGES[i][0]) i++
+  while (i < STAGES.length - 1 && d > STAGES[i].alt) i++
   const a = STAGES[i - 1], b = STAGES[i]
-  const k = smooth(a[0], b[0], d)
-  const m3 = (x: V3, y: V3) => x.map((v, j) => lerp(v, y[j], k)) as V3
-  return {
-    horizon: m3(a[1], b[1]), mid: m3(a[2], b[2]), zenith: m3(a[3], b[3]), sunEl: lerp(a[4], b[4], k), sunCol: m3(a[5], b[5]),
-    sunI: lerp(a[6], b[6], k), cover: lerp(a[7], b[7], k), rainbow: lerp(a[8], b[8], k), god: lerp(a[9], b[9], k),
+  // linear between stops (smoothstep would stall at every stop and lurch between them)
+  const k = Math.max(0, Math.min(1, (d - a.alt) / (b.alt - a.alt)))
+  const m3 = (o: V3, x: V3, y: V3) => {
+    for (let j = 0; j < 3; j++) o[j] = lerp(x[j], y[j], k)
   }
+  m3(SKY.horizon, a.horizon, b.horizon)
+  m3(SKY.low, a.low!, b.low!)
+  m3(SKY.mid, a.mid, b.mid)
+  m3(SKY.zenith, a.zenith, b.zenith)
+  m3(SKY.sunCol, a.sunCol, b.sunCol)
+  SKY.sunEl = lerp(a.sunEl, b.sunEl, k)
+  SKY.sunI = lerp(a.sunI, b.sunI, k)
+  SKY.cover = lerp(a.cover, b.cover, k)
+  SKY.rainbow = lerp(a.rainbow, b.rainbow, k)
+  SKY.god = lerp(a.god, b.god, k)
+  return SKY
 }
 
 export default function World3D() {
@@ -669,7 +692,7 @@ export default function World3D() {
   // the climb itself: long, eased, never a jump cut
   useEffect(() => {
     const dist = Math.abs(target - depth.get())
-    const c = animate(depth, target, { duration: Math.min(7, Math.max(1.4, dist / 650)), ease: [0.45, 0, 0.2, 1] })
+    const c = animate(depth, target, { duration: Math.min(10, Math.max(2.4, 1.6 + dist / 400)), ease: [0.42, 0, 0.18, 1] })
     return () => c.stop()
   }, [target, depth])
 
@@ -682,9 +705,11 @@ export default function World3D() {
     renderer.toneMapping = THREE.ACESFilmicToneMapping
     renderer.toneMappingExposure = 1
     renderer.shadowMap.enabled = true
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    renderer.shadowMap.type = THREE.PCFShadowMap
     el.appendChild(renderer.domElement)
     renderer.domElement.style.display = 'block'
+    renderer.domElement.style.opacity = '0'
+    renderer.domElement.style.transition = 'opacity 1.4s ease'
 
     const scene = new THREE.Scene()
     const fog = new THREE.FogExp2('#f0d0a0', 0.0004)
@@ -722,6 +747,7 @@ export default function World3D() {
     const fill = new THREE.DirectionalLight('#ffe6c0', 0)
     fill.shadow.mapSize.set(small ? 1024 : 2048, small ? 1024 : 2048)
     Object.assign(fill.shadow.camera, { left: -240, right: 240, top: 340, bottom: -80, near: 10, far: 3000 })
+    fill.castShadow = true // constant: toggling it recompiles every lit material (a hitch at the cloud top)
     fill.shadow.bias = -0.0004
     fill.shadow.normalBias = 0.8
     scene.add(fill, fill.target)
@@ -742,6 +768,7 @@ export default function World3D() {
       uCamPos: { value: new THREE.Vector3() },
       uTime: { value: 0 },
       uHorizon: { value: new THREE.Color() },
+      uLow: { value: new THREE.Color() },
       uMid: { value: new THREE.Color() },
       uZenith: { value: new THREE.Color() },
       uSunDir: { value: new THREE.Vector3(0, 0.1, -1) },
@@ -750,6 +777,7 @@ export default function World3D() {
       uBase: { value: CLOUD_BASE },
       uTop: { value: CLOUD_TOP },
       uCover: { value: 0.5 },
+      uFade: { value: 0 },
       uRainbow: { value: 0 },
       uGod: { value: 0 },
       uSteps: { value: small ? 30 : 46 },
@@ -760,15 +788,44 @@ export default function World3D() {
     const bgMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({ uniforms: bgU, vertexShader: BG_VERT, fragmentShader: BG_FRAG, depthTest: false, depthWrite: false }))
     bgMesh.frustumCulled = false
     bgScene.add(bgMesh)
-    const BG_SCALE = small ? 0.42 : 0.55
+    // quality levels, stepped down automatically if frames run slow (and back up when there's headroom)
+    const dpr = window.devicePixelRatio || 1
+    const LEVELS = [
+      { pr: Math.min(dpr, small ? 1.5 : 2), bg: small ? 0.42 : 0.55, steps: small ? 30 : 46 },
+      { pr: Math.min(dpr, 1.5), bg: 0.45, steps: 36 },
+      { pr: Math.min(dpr, 1.25), bg: 0.38, steps: 30 },
+      { pr: 1, bg: 0.32, steps: 24 },
+    ]
+    let level = 0
+    let BG_SCALE = LEVELS[0].bg
+    const starsU = { value: 1 }
     const bgRT = new THREE.WebGLRenderTarget(2, 2, { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false })
     // the finished background, drawn first behind everything in the main scene
     const bgQuad = new THREE.Mesh(
       new THREE.PlaneGeometry(2, 2),
       new THREE.ShaderMaterial({
-        uniforms: { tBg: { value: bgRT.texture } },
+        uniforms: { tBg: { value: bgRT.texture }, uTexel: { value: new THREE.Vector2(1, 1) }, uInvProj: bgU.uInvProj, uCamWorld: bgU.uCamWorld, uTime: bgU.uTime, uStars: starsU },
         vertexShader: BG_VERT,
-        fragmentShader: `uniform sampler2D tBg; varying vec2 vUv; void main(){ gl_FragColor = texture2D(tBg, vUv); }`,
+        fragmentShader: `uniform sampler2D tBg; uniform vec2 uTexel; uniform mat4 uInvProj; uniform mat4 uCamWorld; uniform float uTime; uniform float uStars; varying vec2 vUv;
+          void main(){
+            // a small tent blur hides the ray-march dither (it was rendered at reduced resolution)
+            vec4 bg = texture2D(tBg, vUv) * 0.4
+              + (texture2D(tBg, vUv + vec2(uTexel.x, uTexel.y) * 0.85) + texture2D(tBg, vUv + vec2(-uTexel.x, uTexel.y) * 0.85)
+              + texture2D(tBg, vUv + vec2(uTexel.x, -uTexel.y) * 0.85) + texture2D(tBg, vUv - uTexel * 0.85)) * 0.15;
+            vec3 c = bg.rgb;
+            if (uStars > 0.001) {
+              // the first stars of evening, high up, gently twinkling; hidden behind any cloud (alpha = clear sky)
+              vec4 v = uInvProj * vec4(vUv * 2.0 - 1.0, 1.0, 1.0);
+              vec3 d = normalize((uCamWorld * vec4(normalize(v.xyz / v.w), 0.0)).xyz);
+              vec3 g = floor(d * 520.0);
+              float n = fract(sin(dot(g, vec3(12.9898, 78.233, 37.719))) * 43758.5453);
+              vec3 f = fract(d * 520.0) - 0.5;
+              float core = smoothstep(0.32, 0.0, length(f));
+              float tw = 0.65 + 0.35 * sin(uTime * (0.6 + fract(n * 37.0) * 1.4) + n * 60.0);
+              c += vec3(0.9, 0.92, 1.0) * step(0.9972, n) * core * smoothstep(0.18, 0.6, d.y) * (0.25 + 0.75 * fract(n * 91.0)) * tw * bg.a * uStars * 0.9;
+            }
+            gl_FragColor = vec4(c, 1.0);
+          }`,
         depthTest: false,
         depthWrite: false,
       }),
@@ -777,9 +834,10 @@ export default function World3D() {
     bgQuad.renderOrder = -100
     scene.add(bgQuad)
 
-    /* distant hills of Galilee */
+    /* distant hills of Galilee: each ridge is solid land running back from its silhouette,
+       so from higher up you look down onto dark country that sinks into the haze (never flat cut-outs) */
     const hills = new THREE.Group()
-    const hillMats: THREE.MeshBasicMaterial[] = []
+    const hillMats: { m: THREE.MeshBasicMaterial; c: THREE.Color }[] = []
     const ridge = (seed: number, x: number) =>
       Math.sin(x * 0.006 + seed) * 0.5 + Math.sin(x * 0.017 + seed * 2.3) * 0.28 + Math.sin(x * 0.047 + seed * 5.1) * 0.12 + Math.sin(x * 0.11 + seed * 7.7) * 0.05
     for (const L of [
@@ -787,14 +845,26 @@ export default function World3D() {
       { z: -1050, h: 80, base: 8, color: '#2c2440', seed: 4.1 },
       { z: -760, h: 38, base: 2, color: '#171628', seed: 8.6 },
     ]) {
-      const shape = new THREE.Shape()
-      const W = 5200
-      shape.moveTo(-W / 2, -10)
-      for (let x = -W / 2; x <= W / 2; x += 10) shape.lineTo(x, L.base + (ridge(L.seed, x * 0.45) * 0.5 + 0.5) * L.h)
-      shape.lineTo(W / 2, -10)
-      const mat = new THREE.MeshBasicMaterial({ color: L.color, fog: false, transparent: true })
-      hillMats.push(mat)
-      const m = new THREE.Mesh(new THREE.ShapeGeometry(shape), mat)
+      const W = 5200, DEEP = 2400, N = W / 10
+      const pos: number[] = []
+      const idx: number[] = []
+      for (let i = 0; i <= N; i++) {
+        const x = -W / 2 + i * 10
+        const y = L.base + (ridge(L.seed, x * 0.45) * 0.5 + 0.5) * L.h
+        // foot of the slope, the crest, and the land falling gently away behind it
+        pos.push(x, -10, 0, x, y, 0, x, y * 0.55 + ridge(L.seed + 3, x * 0.3) * 8, -DEEP * 0.4, x, 0, -DEEP)
+      }
+      for (let i = 0; i < N; i++)
+        for (let j = 0; j < 3; j++) {
+          const a = i * 4 + j, b = a + 4
+          idx.push(a, b, a + 1, b, b + 1, a + 1)
+        }
+      const geo = new THREE.BufferGeometry()
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
+      geo.setIndex(idx)
+      const mat = new THREE.MeshBasicMaterial({ color: L.color, fog: false, transparent: true, side: THREE.DoubleSide })
+      hillMats.push({ m: mat, c: new THREE.Color(L.color) })
+      const m = new THREE.Mesh(geo, mat)
       m.position.z = L.z
       hills.add(m)
     }
@@ -824,7 +894,7 @@ export default function World3D() {
             float rip = sin(vW.x*0.7+uTime)*sin(vW.z*0.6-uTime*0.8) + 0.5*sin(vW.x*2.1-uTime*1.7)*sin(vW.z*1.7+uTime*1.3);
             c += vec3(0.03,0.04,0.06) * rip;
             float dist = length(cameraPosition.xz - vW.xz);
-            float off = abs(vW.x - 0.42*vW.z) / (4.0 + dist*0.07);
+            float off = abs(vW.x - cameraPosition.x + 0.45*(vW.z - cameraPosition.z)) / (4.0 + dist*0.07);
             float path = exp(-off*off*2.0) * smoothstep(-5.0, -60.0, vW.z);
             float glint = smoothstep(0.55, 1.0, rip*0.6 + 0.4*sin(vW.x*5.3+uTime*2.6)*sin(vW.z*4.1-uTime*2.2) + vH*1.5);
             c += vec3(1.0,0.70,0.38) * path * (0.25 + 1.6*glint);
@@ -1058,6 +1128,7 @@ export default function World3D() {
       composer.setPixelRatio(renderer.getPixelRatio())
       composer.setSize(w, h)
       bgRT.setSize(Math.max(2, Math.round(w * BG_SCALE)), Math.max(2, Math.round(h * BG_SCALE)))
+      ;(bgQuad.material as THREE.ShaderMaterial).uniforms.uTexel.value.set(1 / bgRT.width, 1 / bgRT.height)
       camera.aspect = w / h
       camera.fov = w < h ? 66 : 55
       camera.updateProjectionMatrix()
@@ -1078,13 +1149,57 @@ export default function World3D() {
     window.addEventListener('pointermove', onMove)
     window.addEventListener('deviceorientation', onTilt)
 
+    const setLevel = (l: number) => {
+      level = l
+      renderer.setPixelRatio(LEVELS[l].pr)
+      BG_SCALE = LEVELS[l].bg
+      bgU.uSteps.value = LEVELS[l].steps
+      resize()
+    }
+    const perf = { acc: 0, n: 0, since: 0, warm: 0, fails: [0, 0, 0, 0] }
+    const govern = (dt: number) => {
+      perf.warm += dt
+      if (perf.warm < 3) return // shaders are still settling in
+      perf.acc += dt
+      perf.n++
+      perf.since += dt
+      if (perf.acc < 2) return
+      const avg = perf.acc / perf.n
+      perf.acc = perf.n = 0
+      if (avg > 1 / 45 && level < LEVELS.length - 1) {
+        perf.fails[level]++
+        perf.since = 0
+        setLevel(level + 1)
+      } else if (avg < 1 / 57 && level > 0 && perf.since > 10 && perf.fails[level - 1] < 2) {
+        perf.since = 0
+        setLevel(level - 1)
+      }
+    }
+
+    // once the landing is on screen, compile every other shader (city, angels, fire) in the background,
+    // so nothing stalls the first time it comes into view mid-climb
+    const warm = () => {
+      const hidden: THREE.Object3D[] = []
+      scene.traverse((o) => {
+        if (!o.visible) {
+          hidden.push(o)
+          o.visible = true
+        }
+      })
+      renderer.compileAsync(scene, camera).catch(() => {})
+      hidden.forEach((o) => (o.visible = false))
+    }
+    let frames = 0
+
     /* loop */
     const timer = new THREE.Timer()
     let raf = 0
     let lastCaption = ''
-    let pitch = 0
+    let lastBright = -1
+    let pitch = 0.025
     const look = new THREE.Vector3()
     const tmp = new THREE.Color()
+    const tmp2 = new THREE.Color()
     const white = new THREE.Color(1, 0.94, 0.86)
     const sunDir = new THREE.Vector3()
     const cityPos = new THREE.Vector3()
@@ -1094,7 +1209,9 @@ export default function World3D() {
       raf = requestAnimationFrame(frame)
       if (document.hidden) return
       timer.update(now)
-      const dt = Math.min(0.05, timer.getDelta())
+      const rawDt = timer.getDelta()
+      const dt = Math.min(0.05, rawDt)
+      if (!reduce) govern(Math.min(0.25, rawDt))
       const t = reduce ? 0 : timer.getElapsed()
       const d = depth.get()
       const vel = reduce ? 0 : depth.getVelocity()
@@ -1111,11 +1228,12 @@ export default function World3D() {
       // camera: beside the boat at 0 m, rising; a slow drift and the pointer's parallax
       pointer.x += (pointer.tx - pointer.x) * Math.min(1, dt * 2.5)
       pointer.y += (pointer.ty - pointer.y) * Math.min(1, dt * 2.5)
-      const k = Math.min(1, d / 40)
+      const k = smooth(0, 60, d)
       camera.position.set(pointer.x * 2.4 + Math.sin(t * 0.13) * 1.2, camY - pointer.y * 0.9 + Math.sin(t * 0.37) * 0.25, 10 + 6 * k + Math.cos(t * 0.11) * 0.8)
       // look down at the boat, up toward the clouds while climbing, level in them, gently down to the city above
-      const wantPitch = lerp(lerp(-0.09, 0.07, k) * (1 - inCloud), lerp(-0.1, -0.04, approach), above) + Math.max(-0.05, Math.min(0.05, vel * 0.00005))
-      pitch += (wantPitch - pitch) * Math.min(1, dt * 2)
+      const rise = smooth(0, 400, d)
+      const wantPitch = lerp(lerp(0.025, 0.07, rise) * (1 - inCloud), lerp(-0.1, -0.04, approach), above) + Math.max(-0.04, Math.min(0.04, vel * 0.00004))
+      pitch += (wantPitch - pitch) * Math.min(1, dt * 1.5)
       look.set(camera.position.x * 0.4, camY + Math.tan(pitch) * 100, camera.position.z - 100)
       camera.lookAt(look)
       camera.rotateZ(Math.sin(t * 0.21) * 0.008)
@@ -1128,6 +1246,7 @@ export default function World3D() {
       bgU.uCamWorld.value.copy(camera.matrixWorld)
       bgU.uCamPos.value.copy(camera.position)
       bgU.uHorizon.value.setRGB(...S.horizon, THREE.SRGBColorSpace)
+      bgU.uLow.value.setRGB(...S.low, THREE.SRGBColorSpace)
       bgU.uMid.value.setRGB(...S.mid, THREE.SRGBColorSpace)
       bgU.uZenith.value.setRGB(...S.zenith, THREE.SRGBColorSpace)
       bgU.uSunDir.value.copy(sunDir)
@@ -1136,14 +1255,16 @@ export default function World3D() {
       bgU.uBase.value = base
       bgU.uTop.value = top
       bgU.uCover.value = lerp(S.cover, 0.7, above) // a closed sea of cloud once you are above it
+      bgU.uFade.value = smooth(30, 820, d)
       bgU.uRainbow.value = S.rainbow * (0.55 + 0.45 * inCloud)
       bgU.uGod.value = S.god
       bgU.uAbove.value = camY > top ? 1 : 0
+      starsU.value = 1 - smooth(60, 520, d)
 
       fog.color.setRGB(...S.horizon, THREE.SRGBColorSpace).lerp(white, inCloud * 0.8)
       // thick haze as you break through, clearing as you climb: the city emerges out of the light;
       // inside the cloud a white mist that figures appear out of
-      fog.density = (camY > CLOUD_TOP ? lerp(0.0016, 0.00012, smooth(CLOUD_TOP, CLOUD_TOP + 2200, camY)) : 0.0005) + inCloud * 0.009
+      fog.density = lerp(lerp(0.0005, 0.0016, smooth(CLOUD_TOP - 400, CLOUD_TOP, camY)), 0.00012, smooth(CLOUD_TOP, CLOUD_TOP + 2200, camY)) + inCloud * 0.009
 
       // lights follow the sun; the city casts its own shadows
       hemi.color.setRGB(...S.mid, THREE.SRGBColorSpace)
@@ -1156,13 +1277,22 @@ export default function World3D() {
       bloom.strength = lerp(0.28, 0.4, above)
 
       // the ground falls away below the deck
-      const ground = 1 - smooth(150, 600, d)
+      const ground = 1 - smooth(120, 520, d)
       hills.visible = ground > 0
-      hillMats.forEach((m) => (m.opacity = ground))
+      // the land sinks into the evening haze as you rise, then is lost below
+      // (the same haze the sea below fades into, worked in linear light like the shader)
+      // at a couple of kilometres that is mostly the dark of the water with a little haze in it
+      tmp.setRGB(...S.low, THREE.SRGBColorSpace).lerp(tmp2.setRGB(...S.horizon, THREE.SRGBColorSpace), 0.4).multiplyScalar(0.5 * 0.22)
+      tmp.r += 0.004 * 0.78; tmp.g += 0.012 * 0.78; tmp.b += 0.03 * 0.78
+      const haze = smooth(10, 360, d)
+      for (const h of hillMats) {
+        h.m.color.copy(h.c).lerp(tmp, haze)
+        h.m.opacity = 1 - smooth(260, 520, d)
+      }
       waterU.uTime.value = t
-      waterU.uFade.value = 1 - smooth(120, 700, d)
-      water.visible = d < 720
-      boat.visible = d < 260
+      waterU.uFade.value = 1 - smooth(100, 760, d)
+      water.visible = d < 760
+      boat.visible = camera.position.y < 420
       boat.position.y = 0.2 + Math.sin(t * 1.1) * 0.1
       boat.position.x = Math.min(6.2, 6.5 * camera.aspect)
       boat.rotation.z = Math.sin(t * 0.9) * 0.04
@@ -1177,7 +1307,6 @@ export default function World3D() {
         city.rotation.y = Math.sin(t * 0.02) * 0.04
         sun.position.copy(cityPos).addScaledVector(sunDir, 1400)
         sun.target.position.copy(cityPos).add(up80)
-        fill.castShadow = true
         fill.position.copy(cityPos).add(fillOff)
         fill.target.position.copy(cityPos).add(up80)
         fill.intensity = 2.6
@@ -1195,7 +1324,6 @@ export default function World3D() {
         }
         gc.needsUpdate = true
       } else {
-        fill.castShadow = false
         sun.position.copy(camera.position).addScaledVector(sunDir, 500)
         sun.target.position.copy(camera.position)
         fill.intensity = 0
@@ -1292,8 +1420,12 @@ export default function World3D() {
       // keep ivory text readable as the sky brightens (strongest inside the white of the cloud)
       const lum = (S.mid[0] * 0.3 + S.mid[1] * 0.59 + S.mid[2] * 0.11) * (1 - inCloud) + inCloud
       const bright = Math.max(0, Math.min(1, (lum - 0.45) / 0.4))
-      if (scrim.current) scrim.current.style.opacity = String(bright)
-      if (vig.current) vig.current.style.opacity = String(1 - bright * 0.85)
+      const bq = Math.round(bright * 100) / 100
+      if (bq !== lastBright) {
+        lastBright = bq
+        if (scrim.current) scrim.current.style.opacity = String(bq)
+        if (vig.current) vig.current.style.opacity = String(1 - bq * 0.85)
+      }
 
       // altitude captions (DOM, no React re-render)
       if (caption.current) {
@@ -1316,6 +1448,9 @@ export default function World3D() {
       renderer.render(bgScene, bgCam)
       renderer.setRenderTarget(null)
       composer.render(dt)
+      frames++
+      if (frames === 1) renderer.domElement.style.opacity = '1' // fade in over the placeholder, never pop
+      if (frames === 3) warm()
     }
     raf = requestAnimationFrame(frame)
 
@@ -1343,7 +1478,12 @@ export default function World3D() {
   }, [depth])
 
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#0a1424]">
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+      // the same dusk as the loading placeholder, so the world fades in over it without a flash
+      style={{ background: 'linear-gradient(180deg,#03081a 0%,#14204a 40%,#5a4258 56%,#0a0f1e 58%,#030812 100%)' }}
+    >
       <div ref={mount} className="absolute inset-0" />
       <div ref={vig} className="absolute inset-0" style={{ background: 'radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(6,6,16,0.55) 100%)' }} />
       {/* in the bright heights: a warm shade behind the reading area so ivory text stays legible, the light left at the edges */}
