@@ -143,6 +143,8 @@ export class FireChariot {
   private spawnAcc = 0
   private seedPh: number
   private c = [0, 0, 0]
+  private bodies: FireBodies | null = null
+  private slot = 0
 
   constructor(seed: number) {
     let x = Math.floor(seed * 1e6) + 1
@@ -166,6 +168,16 @@ export class FireChariot {
     for (let i = 0; i < 260; i++) this.embers.push({ x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, life: 0, max: 1 })
   }
 
+  /** @internal used by FireBodies to lay out this chariot's static particles */
+  layout() {
+    return { horse: this.horse, car: this.car, wheel: this.wheel }
+  }
+  /** @internal */
+  bind(bodies: FireBodies, slot: number) {
+    this.bodies = bodies
+    this.slot = slot
+  }
+
   /** draw into `fire`. The rig faces +x locally; `yaw` turns it (atan2(-dz, dx) of the heading); `alpha` fades it */
   update(fire: FireSystem, t: number, dt: number, px: number, py: number, pz: number, yaw: number, S: number, alpha: number, speed: number) {
     if (alpha <= 0.01) return
@@ -179,42 +191,11 @@ export class FireChariot {
     const c = this.c
     const ph = t * 8.5 + this.seedPh
 
-    // two horses abreast, ahead of the car
-    for (let hi = 0; hi < 2; hi++) {
-      const sg = this.segs[hi]
-      horsePose(ph + hi * 0.9, sg)
-      const hx = 3.15, hz = hi ? -0.56 : 0.56
-      for (const p of this.horse) {
-        const o = p.seg * 8
-        const ra = sg[o + 6] + (sg[o + 7] - sg[o + 6]) * p.t
-        let x = sg[o] + (sg[o + 3] - sg[o]) * p.t + p.ox * ra
-        let y = sg[o + 1] + (sg[o + 4] - sg[o + 1]) * p.t + p.oy * ra
-        const z = sg[o + 2] + (sg[o + 5] - sg[o + 2]) * p.t + p.oz * ra * 0.85
-        // tongues of flame lick upward off the outer particles
-        const lick = p.seed < 0.45 ? ((t * (1.4 + p.seed) + p.seed * 7) % 1) : 0
-        y += lick * 0.42 * (0.4 + p.core)
-        x -= lick * 0.25
-        const fl = 0.7 + 0.3 * Math.sin(t * 13 + p.seed * 50)
-        flame((1 - p.core) * 0.85 + 0.15 - lick * 0.6, c)
-        W(hx + x * 0.95, y * 0.95, hz + z * 0.95, w)
-        fire.add(w[0], w[1], w[2], c[0], c[1], c[2], alpha * (0.78 - lick * 0.5) * fl, S * (0.2 - lick * 0.08) * (0.8 + p.seed * 0.5))
-      }
-    }
-    // the car and pole
-    for (const q of this.car) {
-      const lick = (t * 1.6 + q.seed * 9) % 1
-      flame(0.55 - lick * 0.5 + q.seed * 0.3, c)
-      W(q.x - lick * 0.2, q.y + lick * 0.3, q.z, w)
-      fire.add(w[0], w[1], w[2], c[0], c[1], c[2], alpha * 0.5 * (1 - lick * 0.6), S * 0.17)
-    }
-    // spinning wheels of fire
+    // two horses abreast, ahead of the car; the car, pole and wheels — drawn on the GPU by FireBodies
+    // (the same per-particle maths, run in its vertex shader); only the skeleton is posed here
+    for (let hi = 0; hi < 2; hi++) horsePose(ph + hi * 0.9, this.segs[hi])
     const spin = -t * (speed / (0.72 * S)) * 0.9
-    for (const q of this.wheel) {
-      const a = q.a + spin
-      flame(q.r > 0.7 ? 0.8 : 0.5, c)
-      W(-0.1 + Math.cos(a) * q.r, 0.72 + Math.sin(a) * q.r, q.z, w)
-      fire.add(w[0], w[1], w[2], c[0], c[1], c[2], alpha * (q.r > 0.7 ? 0.7 : 0.45), S * (q.r > 0.7 ? 0.16 : 0.11))
-    }
+    this.bodies?.set(this.slot, px, py, pz, S, cy, sy, alpha, spin, this.segs)
 
     // embers streaming behind from manes, tails and rims
     this.spawnAcc += dt * 240
@@ -261,5 +242,156 @@ export class FireChariot {
       flame(k * 0.9, c)
       fire.add(e.x, e.y, e.z, c[0], c[1], c[2], alpha * k * 0.7, S * 0.14 * (0.4 + k))
     }
+  }
+}
+
+/* ---------------- the flame bodies, on the GPU ---------------- */
+
+const BODY_VERT = /* glsl */ `
+uniform sampler2D uSegs; uniform vec4 uP[NC]; uniform vec4 uQ[NC]; uniform float uTime; uniform float uPx;
+attribute vec4 aInfo; attribute vec4 aA; attribute vec2 aB;
+varying vec4 vColor;
+vec3 flame(float heat){ float h = clamp(heat, 0.0, 1.0); return vec3(1.5 + h * 2.0, 0.16 + h * h * 1.45, 0.015 + h * h * h * 0.45); }
+void main(){
+  int ci = int(aInfo.y + 0.5);
+  vec4 P = uP[ci]; vec4 Q = uQ[ci];
+  float S = P.w, seed = aB.x, alpha, size, heat;
+  vec3 l;
+  int kind = int(aInfo.x + 0.5);
+  if (kind == 0) {
+    // a horse particle riding its bone
+    int row = ci * 2 + int(aInfo.z + 0.5), seg = int(aInfo.w + 0.5);
+    vec4 sa = texelFetch(uSegs, ivec2(seg * 2, row), 0), sb = texelFetch(uSegs, ivec2(seg * 2 + 1, row), 0);
+    float t = aA.x, core = aB.y;
+    float ra = sa.w + (sb.w - sa.w) * t;
+    float x = sa.x + (sb.x - sa.x) * t + aA.y * ra;
+    float y = sa.y + (sb.y - sa.y) * t + aA.z * ra;
+    float z = sa.z + (sb.z - sa.z) * t + aA.w * ra * 0.85;
+    float lick = seed < 0.45 ? fract(uTime * (1.4 + seed) + seed * 7.0) : 0.0;
+    y += lick * 0.42 * (0.4 + core);
+    x -= lick * 0.25;
+    float fl = 0.7 + 0.3 * sin(uTime * 13.0 + seed * 50.0);
+    heat = (1.0 - core) * 0.85 + 0.15 - lick * 0.6;
+    l = vec3(3.15 + x * 0.95, y * 0.95, (aInfo.z > 0.5 ? -0.56 : 0.56) + z * 0.95);
+    alpha = Q.z * (0.78 - lick * 0.5) * fl;
+    size = S * (0.2 - lick * 0.08) * (0.8 + seed * 0.5);
+  } else if (kind == 1) {
+    // the car and pole
+    float lick = fract(uTime * 1.6 + seed * 9.0);
+    heat = 0.55 - lick * 0.5 + seed * 0.3;
+    l = vec3(aA.x - lick * 0.2, aA.y + lick * 0.3, aA.z);
+    alpha = Q.z * 0.5 * (1.0 - lick * 0.6);
+    size = S * 0.17;
+  } else {
+    // spinning wheels
+    float a = aA.x + Q.w, r = aA.y;
+    bool rim = r > 0.7;
+    heat = rim ? 0.8 : 0.5;
+    l = vec3(-0.1 + cos(a) * r, 0.72 + sin(a) * r, aA.z);
+    alpha = Q.z * (rim ? 0.7 : 0.45);
+    size = S * (rim ? 0.16 : 0.11);
+  }
+  vec3 w = vec3(P.x + S * (l.x * Q.x + l.z * Q.y), P.y + S * l.y, P.z + S * (-l.x * Q.y + l.z * Q.x));
+  vColor = vec4(flame(heat), alpha);
+  vec4 mv = modelViewMatrix * vec4(w, 1.0);
+  gl_PointSize = clamp(size * uPx * 1.15 / max(-mv.z, 0.1), 2.0, 110.0);
+  gl_Position = projectionMatrix * mv;
+  // a chariot not drawn this frame, or a flame too faint to see
+  if (Q.z <= 0.01 || alpha <= 0.004) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); gl_PointSize = 0.0; }
+}`
+
+/**
+ * The horses, car and wheels of every chariot as one static point cloud whose motion is computed
+ * in the vertex shader — the same maths FireChariot used to run per particle on the CPU each frame.
+ * Per frame only the skeletons (12 bones × 2 horses) and each chariot's placement are uploaded.
+ * Embers (randomly spawned, simulated) stay on the CPU in FireSystem.
+ */
+export class FireBodies {
+  readonly points: THREE.Points
+  private segTex: THREE.DataTexture
+  private segData: Float32Array
+  private uP: THREE.Vector4[]
+  private uQ: THREE.Vector4[]
+  readonly uTime = { value: 0 }
+
+  constructor(chariots: FireChariot[], uPx: { value: number }) {
+    const NC = chariots.length
+    const info: number[] = [], A: number[] = [], B: number[] = []
+    chariots.forEach((ch, ci) => {
+      ch.bind(this, ci)
+      const { horse, car, wheel } = ch.layout()
+      for (let hi = 0; hi < 2; hi++)
+        for (const p of horse) {
+          info.push(0, ci, hi, p.seg)
+          A.push(p.t, p.ox, p.oy, p.oz)
+          B.push(p.seed, p.core)
+        }
+      for (const q of car) {
+        info.push(1, ci, 0, 0)
+        A.push(q.x, q.y, q.z, 0)
+        B.push(q.seed, 0)
+      }
+      for (const q of wheel) {
+        info.push(2, ci, 0, 0)
+        A.push(q.a, q.r, q.z, 0)
+        B.push(q.seed, 0)
+      }
+    })
+    const n = info.length / 4
+    const g = new THREE.BufferGeometry()
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3))
+    g.setAttribute('aInfo', new THREE.BufferAttribute(new Float32Array(info), 4))
+    g.setAttribute('aA', new THREE.BufferAttribute(new Float32Array(A), 4))
+    g.setAttribute('aB', new THREE.BufferAttribute(new Float32Array(B), 2))
+    // per horse: 12 bones as two texels each (a.xyz + radius, b.xyz + radius)
+    this.segData = new Float32Array(SEGS * 2 * NC * 2 * 4)
+    this.segTex = new THREE.DataTexture(this.segData, SEGS * 2, NC * 2, THREE.RGBAFormat, THREE.FloatType)
+    this.segTex.minFilter = this.segTex.magFilter = THREE.NearestFilter
+    this.segTex.needsUpdate = true
+    this.uP = Array.from({ length: NC }, () => new THREE.Vector4())
+    this.uQ = Array.from({ length: NC }, () => new THREE.Vector4())
+    this.points = new THREE.Points(
+      g,
+      new THREE.ShaderMaterial({
+        defines: { NC },
+        uniforms: { uSegs: { value: this.segTex }, uP: { value: this.uP }, uQ: { value: this.uQ }, uTime: this.uTime, uPx },
+        vertexShader: BODY_VERT,
+        fragmentShader: FRAG,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.NormalBlending,
+      }),
+    )
+    this.points.frustumCulled = false
+  }
+
+  /** start of frame: every chariot hidden until its update() places it */
+  begin(t: number) {
+    this.uTime.value = t
+    for (const q of this.uQ) q.z = 0
+  }
+
+  /** @internal called by FireChariot.update */
+  set(slot: number, px: number, py: number, pz: number, S: number, cy: number, sy: number, alpha: number, spin: number, segs: Float32Array[]) {
+    this.uP[slot].set(px, py, pz, S)
+    this.uQ[slot].set(cy, sy, alpha, spin)
+    for (let hi = 0; hi < 2; hi++) {
+      const sg = segs[hi]
+      const row = (slot * 2 + hi) * SEGS * 2 * 4
+      for (let k = 0; k < SEGS; k++) {
+        const o = k * 8, d = row + k * 8
+        this.segData[d] = sg[o]; this.segData[d + 1] = sg[o + 1]; this.segData[d + 2] = sg[o + 2]; this.segData[d + 3] = sg[o + 6]
+        this.segData[d + 4] = sg[o + 3]; this.segData[d + 5] = sg[o + 4]; this.segData[d + 6] = sg[o + 5]; this.segData[d + 7] = sg[o + 7]
+      }
+    }
+  }
+
+  end() {
+    this.points.visible = this.uQ.some((q) => q.z > 0.01)
+    if (this.points.visible) this.segTex.needsUpdate = true
+  }
+
+  dispose() {
+    this.segTex.dispose()
   }
 }

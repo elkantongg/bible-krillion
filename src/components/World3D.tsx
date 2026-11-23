@@ -8,7 +8,7 @@ import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { useDepthTarget } from '../lib/sky'
 import { Angel, AngelBatch, angelAssets } from './world/angels'
-import { FireChariot, FireSystem } from './world/fire'
+import { FireChariot, FireSystem, FireBodies } from './world/fire'
 import { usePath } from '../lib/router'
 
 /**
@@ -705,6 +705,7 @@ export default function World3D() {
     renderer.toneMappingExposure = 1
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFShadowMap
+    renderer.shadowMap.autoUpdate = false // redrawn on demand (see shadowTurn)
     el.appendChild(renderer.domElement)
     renderer.domElement.style.display = 'block'
     renderer.domElement.style.opacity = '0'
@@ -1107,10 +1108,12 @@ export default function World3D() {
     scene.add(hostBatch.group)
 
     /* chariots of fire: three circling the city, one passing close — only once the city is in sight */
-    const fire = new FireSystem(16000)
-    scene.add(fire.points)
     const cityChariots = [0.31, 0.57, 0.83].map((sd, i) => ({ c: new FireChariot(sd), r: 230 + i * 55, h: 50 + i * 80, w: (i % 2 ? -1 : 1) * (0.07 - i * 0.012), a0: i * 2.1 }))
     const nearChariot = new FireChariot(0.69)
+    const fire = new FireSystem(16000) // embers (simulated on the CPU)
+    // horses, cars and wheels: animated in a vertex shader; added first so they draw just before the embers
+    const fireBodies = new FireBodies([...cityChariots.map((c) => c.c), nearChariot], fire.uPx)
+    scene.add(fireBodies.points, fire.points)
 
     /* post: bloom for sunlight, gold and windows */
     const composer = new EffectComposer(renderer)
@@ -1210,6 +1213,7 @@ export default function World3D() {
     let raf = 0
     let lastCaption = ''
     let lastBright = -1
+    let shadowTurn: number | null = null
     let pitch = 0.025
     const look = new THREE.Vector3()
     const tmp = new THREE.Color()
@@ -1324,13 +1328,19 @@ export default function World3D() {
 
       // the city: far off and hazed when you first rise above the deck, drawing nearer the higher you climb
       city.visible = camY > CLOUD_TOP + 5
-      // the shadow light is dark below the deck: skip its depth pass there (the light itself stays on, so nothing recompiles)
-      renderer.shadowMap.autoUpdate = city.visible
+      // the shadow light is dark below the deck: no depth pass there (the light itself stays on, so nothing recompiles).
+      // Above it the shadow light and its target ride with the city, and the only casters are the city's own static
+      // meshes, so the shadow map only changes as the city slowly turns: redraw it once that turn reaches a fraction
+      // of a shadow texel, instead of every frame. (Its matrices still follow the city every frame, below.)
       if (city.visible) {
         const dist = lerp(2600, 385, Math.pow(approach, 0.85))
         cityPos.set(0, top - 22, camera.position.z - dist)
         city.position.copy(cityPos)
         city.rotation.y = Math.sin(t * 0.02) * 0.04
+        if (shadowTurn === null || Math.abs(city.rotation.y - shadowTurn) > 0.0004) {
+          renderer.shadowMap.needsUpdate = true
+          shadowTurn = city.rotation.y
+        }
         sun.position.copy(cityPos).addScaledVector(sunDir, 1400)
         sun.target.position.copy(cityPos).add(up80)
         fill.position.copy(cityPos).add(fillOff)
@@ -1350,6 +1360,7 @@ export default function World3D() {
         }
         gc.needsUpdate = true
       } else {
+        shadowTurn = null
         sun.position.copy(camera.position).addScaledVector(sunDir, 500)
         sun.target.position.copy(camera.position)
         fill.intensity = 0
@@ -1430,6 +1441,7 @@ export default function World3D() {
 
       // ---- chariots of fire ----
       fire.begin()
+      fireBodies.begin(t)
       if (city.visible) {
         const cA = smooth(CLOUD_TOP + 100, CLOUD_TOP + 900, camY)
         for (const cc of cityChariots) {
@@ -1442,6 +1454,7 @@ export default function World3D() {
         nearChariot.update(fire, t, dt, x, camY + 36 + Math.sin(t * 0.45) * 4, camera.position.z - 165, Math.PI, 4.2, cA, 34)
       }
       fire.end()
+      fireBodies.end()
 
       // keep ivory text readable as the sky brightens (strongest inside the white of the cloud)
       const lum = (S.mid[0] * 0.3 + S.mid[1] * 0.59 + S.mid[2] * 0.11) * (1 - inCloud) + inCloud
@@ -1473,6 +1486,12 @@ export default function World3D() {
       renderer.setRenderTarget(bgRT)
       renderer.render(bgScene, bgCam)
       renderer.setRenderTarget(null)
+      if (city.visible) {
+        // keep the shadow lookup in step with the city as it draws nearer (the map itself is unchanged by that)
+        fill.updateMatrixWorld()
+        fill.target.updateMatrixWorld()
+        fill.shadow.updateMatrices(fill)
+      }
       composer.render(dt)
       frames++
       if (frames === 1) renderer.domElement.style.opacity = '1' // fade in over the placeholder, never pop
@@ -1495,6 +1514,7 @@ export default function World3D() {
           else mat?.dispose?.()
         })
       noiseTex.dispose()
+      fireBodies.dispose()
       bgRT.dispose()
       envTex.dispose()
       pmrem.dispose()
