@@ -1,7 +1,7 @@
 import type { DB } from './db'
 import { tx } from './db'
 import { QUESTION_BY_ID, QUESTIONS, ALL_KEYS } from '../shared/data/index'
-import { matchAnswer } from '../shared/match'
+import { resolveAnswer } from '../shared/match'
 import { score, blendedShare, MISS_TIER, PROMPTS_PER_DIVE, SECONDS_PER_PROMPT } from '../shared/scoring'
 import { dateForDive, maxDiveAt, selectDaily } from '../shared/dives'
 import type { BoardEntry, DiveState, OpenPrompt, PracticePrompt, PromptResult, Question, TierKey } from '../shared/types'
@@ -107,8 +107,8 @@ export class SoloService {
     if (!q || this.liveIds().has(id)) throw new GameError(404, 'Unknown prompt')
     const clean = String(text ?? '').replace(/\s+/g, ' ').trim().slice(0, 60)
     if (!clean) return { ok: false as const, reason: 'empty' }
-    const hit = matchAnswer(q, clean, ALL_KEYS)
-    if (!hit) return { ok: false as const, reason: 'nomatch' }
+    const { hit, suggestions } = resolveAnswer(q, clean, ALL_KEYS)
+    if (!hit) return { ok: false as const, reason: 'nomatch', suggestions: suggestions.map((a) => a.name) }
     const { total, counts } = this.stats(q.id)
     const s = score(counts.get(hit.id) ?? 0, total, hit.level)
     return { ok: true as const, answerId: hit.id, answer: hit.name, ref: hit.ref, tier: s.tier.key, points: s.points }
@@ -293,10 +293,11 @@ export class SoloService {
       if (!clean) return { status: 'miss' as const, reason: 'empty', remainingMs: deadline - now }
       if (row.attempts >= MAX_ATTEMPTS) return { status: 'miss' as const, reason: 'limit', remainingMs: deadline - now }
 
-      const hit = matchAnswer(q, clean, ALL_KEYS)
+      const { hit, suggestions: near } = resolveAnswer(q, clean, ALL_KEYS)
       if (!hit) {
         this.db.prepare('UPDATE dive_answers SET attempts = attempts + 1, raw = ? WHERE player_id = ? AND dive_no = ? AND idx = ?').run(clean, player, n, idx)
-        return { status: 'miss' as const, reason: 'nomatch', remainingMs: deadline - now }
+        const suggestions = near.map((a) => a.name)
+        return { status: 'miss' as const, reason: 'nomatch', remainingMs: deadline - now, suggestions }
       }
 
       const { total, counts } = this.stats(q.id)

@@ -7,7 +7,7 @@ import { setDepth } from '../lib/sky'
 import { go } from '../lib/router'
 import { sfx } from '../lib/sound'
 import { load, save } from '../lib/storage'
-import { AnswerBoard, Burst, Ichthys, MuteButton, Spinner, TierChip, TimerRing, useShake } from '../components/ui'
+import { AnswerBoard, Burst, DidYouMean, Ichthys, MuteButton, Spinner, TierChip, TimerRing, useShake } from '../components/ui'
 
 let socketP: Promise<{ socket: Socket; me: string }> | null = null
 function connect() {
@@ -544,10 +544,10 @@ function useServerClock(serverNow: number) {
 function Game({ s, me, emit, typing }: { s: PartyState; me: string; emit: Emit; typing: { playerId: string; text: string } | null }) {
   const now = useServerClock(s.serverNow)
   const [value, setValue] = useState('')
-  const [miss, setMiss] = useState<{ key: number; msg: string } | null>(null)
+  const [miss, setMiss] = useState<{ key: number; msg: string; text?: string; suggestions?: string[] } | null>(null)
   const [landed, setLanded] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
-  const shakeRef = useShake<HTMLFormElement>(miss?.key)
+  const shakeRef = useShake<HTMLFormElement>(miss?.suggestions?.length ? null : miss?.key)
   const myTurn = s.phase === 'turn' && s.holderId === me
   const seats = s.players.filter((p) => !p.spectator)
   const holder = s.players.find((p) => p.id === s.holderId)
@@ -582,19 +582,21 @@ function Game({ s, me, emit, typing }: { s: PartyState; me: string; emit: Emit; 
     if (myTurn && !reading && secs <= 5 && secs > 0) sfx.tick()
   }, [secs, myTurn, reading])
 
-  const submit = () => {
-    const text = value.trim()
+  const submit = (pick?: string) => {
+    const text = (pick ?? value).trim()
     if (!text || !myTurn) return
-    emit('party:answer', { text }, ((r: { ok: boolean; reason?: string }) => {
+    emit('party:answer', { text }, ((r: { ok: boolean; reason?: string; suggestions?: string[] }) => {
       if (r.ok) {
         setValue('')
         setLanded(Date.now())
         sfx.land(35)
         emit('party:typing', '')
       } else {
-        sfx.miss()
+        if (!r.suggestions?.length) sfx.miss()
         setMiss({
           key: Date.now(),
+          text,
+          suggestions: r.suggestions,
           msg: r.reason === 'used' ? `“${text}” was already said!` : r.reason === 'not-yet' ? 'wait for the clock to start…' : `“${text}” doesn't fit — try another`,
         })
         setValue('')
@@ -721,7 +723,11 @@ function Game({ s, me, emit, typing }: { s: PartyState; me: string; emit: Emit; 
         )}
         {myTurn && <p className="mb-2 text-center font-mono text-xs uppercase tracking-[0.2em] text-gold">{reading ? 'you are first — get ready…' : 'your turn — name one!'}</p>}
         <AnimatePresence>
-          {miss && myTurn && (
+          {miss && myTurn && miss.suggestions?.length ? (
+            <motion.div key={miss.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <DidYouMean text={miss.text ?? ''} options={miss.suggestions} pick={submit} />
+            </motion.div>
+          ) : miss && myTurn && (
             <motion.p key={miss.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-2 text-center font-mono text-xs text-coral">
               {miss.msg}
             </motion.p>

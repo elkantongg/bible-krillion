@@ -90,7 +90,7 @@ describe('Big Fish party room', () => {
     const other = room.order.find((id) => id !== first)!
     const q = room.question!.id
     expect(room.answer(other, valid(room))).toEqual({ ok: false, reason: 'not-your-turn' })
-    expect(room.answer(first, 'zzzz not a thing')).toEqual({ ok: false, reason: 'nomatch' })
+    expect(room.answer(first, 'zzzz not a thing')).toMatchObject({ ok: false, reason: 'nomatch' })
     expect(room.answer(first, valid(room)).ok).toBe(true)
     expect(room.holderId).toBe(room.order[1])
     expect(room.question!.id).toBe(q)

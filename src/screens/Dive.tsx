@@ -6,7 +6,7 @@ import { api, ApiError, serverNow, syncClock } from '../lib/api'
 import { setDepth } from '../lib/sky'
 import { sfx } from '../lib/sound'
 import { link } from '../lib/router'
-import { AnimatedNumber, AnswerBoard, Burst, HomeButton, MuteButton, Spinner, TIER_COLOR, TierChip, TimerRing, useCountdownToMidnight, useShake } from '../components/ui'
+import { AnimatedNumber, AnswerBoard, Burst, DidYouMean, HomeButton, MuteButton, Spinner, TIER_COLOR, TierChip, TimerRing, useCountdownToMidnight, useShake } from '../components/ui'
 import { fmtRef, readUrl } from '../lib/refs'
 
 type Phase = 'loading' | 'resume' | 'intro' | 'answering' | 'sinking' | 'result' | 'final' | 'error'
@@ -19,7 +19,7 @@ export function Dive({ n, isToday }: { n: number; isToday: boolean }) {
   const [open, setOpen] = useState<OpenPrompt | null>(null)
   const [last, setLast] = useState<PromptResult | null>(null)
   const [error, setError] = useState('')
-  const [miss, setMiss] = useState<{ text: string; key: number } | null>(null)
+  const [miss, setMiss] = useState<{ text: string; key: number; suggestions?: string[] } | null>(null)
   const [value, setValue] = useState('')
   const [now, setNow] = useState(serverNow())
   const [busy, setBusy] = useState(false)
@@ -138,9 +138,9 @@ export function Dive({ n, isToday }: { n: number; isToday: boolean }) {
     return () => window.clearInterval(id)
   }, [phase, open, expire])
 
-  async function submit() {
+  async function submit(pick?: string) {
     if (!open || busy || phase !== 'answering') return
-    const text = value.trim()
+    const text = (pick ?? value).trim()
     if (!text) {
       setMiss({ text: '', key: Date.now() })
       return
@@ -149,11 +149,11 @@ export function Dive({ n, isToday }: { n: number; isToday: boolean }) {
     sfx.blub()
     try {
       const r = await api<
-        { status: 'miss'; reason: string; remainingMs: number } | { status: 'locked'; result: PromptResult }
+        { status: 'miss'; reason: string; remainingMs: number; suggestions?: string[] } | { status: 'locked'; result: PromptResult }
       >(`/dive/${n}/answer`, { idx: open.idx, text })
       if (r.status === 'miss') {
-        sfx.miss()
-        setMiss({ text, key: Date.now() })
+        if (!r.suggestions?.length) sfx.miss()
+        setMiss({ text, key: Date.now(), suggestions: r.suggestions })
         setValue('')
         inputRef.current?.focus()
       } else reveal(r.result)
@@ -244,7 +244,7 @@ export function Dive({ n, isToday }: { n: number; isToday: boolean }) {
               phase={phase}
               value={value}
               setValue={setValue}
-              submit={() => void submit()}
+              submit={(pick?: string) => void submit(pick)}
               busy={busy}
               miss={miss}
               inputRef={inputRef}
@@ -321,9 +321,9 @@ function PromptView({
   phase: Phase
   value: string
   setValue: (s: string) => void
-  submit: () => void
+  submit: (pick?: string) => void
   busy: boolean
-  miss: { text: string; key: number } | null
+  miss: { text: string; key: number; suggestions?: string[] } | null
   inputRef: React.RefObject<HTMLInputElement | null>
 }) {
   const total = open.deadline - open.startsAt
@@ -332,7 +332,7 @@ function PromptView({
   const frac = left / total
   const startsIn = Math.max(0, Math.ceil((open.startsAt - now) / 1000))
   const urgent = phase === 'answering' && secs <= 5
-  const shakeRef = useShake<HTMLFormElement>(miss?.key)
+  const shakeRef = useShake<HTMLFormElement>(miss?.suggestions?.length ? null : miss?.key)
 
   return (
     <motion.section
@@ -362,7 +362,11 @@ function PromptView({
           />
         </div>
         <AnimatePresence>
-          {miss && phase === 'answering' && (
+          {miss && phase === 'answering' && miss.suggestions?.length ? (
+            <motion.div key={miss.key} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+              <DidYouMean text={miss.text} options={miss.suggestions} pick={submit} disabled={busy} />
+            </motion.div>
+          ) : miss && phase === 'answering' && (
             <motion.p
               key={miss.key}
               initial={{ opacity: 0, y: 6 }}

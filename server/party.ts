@@ -1,5 +1,5 @@
 import { QUESTIONS, ALL_KEYS, CATEGORIES } from '../shared/data/index'
-import { matchAnswer } from '../shared/match'
+import { resolveAnswer } from '../shared/match'
 import { score } from '../shared/scoring'
 import type { PartyDifficulty, PartyFeedItem, PartyPlayer, PartySettings, PartyState, Question, TierKey } from '../shared/types'
 
@@ -45,7 +45,7 @@ export const realClock: Clock = {
 
 export type AnswerResult =
   | { ok: true; answer: string; tier: TierKey }
-  | { ok: false; reason: 'not-your-turn' | 'nomatch' | 'used' | 'not-playing' | 'empty' | 'not-yet' }
+  | { ok: false; reason: 'not-your-turn' | 'nomatch' | 'used' | 'not-playing' | 'empty' | 'not-yet'; suggestions?: string[] }
 
 /**
  * Turn-based "Big Fish":
@@ -255,8 +255,8 @@ export class PartyRoom {
     if (this.turnStartedAt && this.clock.now() < this.turnStartedAt - 250) return { ok: false, reason: 'not-yet' }
     const clean = text.replace(/\s+/g, ' ').trim().slice(0, 60)
     if (!clean) return { ok: false, reason: 'empty' }
-    const hit = matchAnswer(this.question, clean, ALL_KEYS)
-    if (!hit) return { ok: false, reason: 'nomatch' }
+    const { hit, suggestions } = resolveAnswer(this.question, clean, ALL_KEYS, this.used)
+    if (!hit) return { ok: false, reason: 'nomatch', suggestions: suggestions.map((a) => a.name) }
     if (this.used.has(hit.id)) return { ok: false, reason: 'used' }
     this.used.add(hit.id)
     const tier = score(0, 0, hit.level).tier.key

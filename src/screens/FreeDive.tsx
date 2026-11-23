@@ -7,7 +7,7 @@ import { setDepth } from '../lib/sky'
 import { sfx } from '../lib/sound'
 import { load, save } from '../lib/storage'
 import { fmtRef, readUrl } from '../lib/refs'
-import { AnimatedNumber, AnswerBoard, Burst, HomeButton, MuteButton, Spinner, TIER_COLOR, TimerRing, useShake } from '../components/ui'
+import { AnimatedNumber, AnswerBoard, Burst, DidYouMean, HomeButton, MuteButton, Spinner, TIER_COLOR, TimerRing, useShake } from '../components/ui'
 
 const SECONDS = 25
 const TANKS = 3
@@ -36,7 +36,7 @@ export function FreeDive() {
   const [deadline, setDeadline] = useState(0)
   const [now, setNow] = useState(Date.now())
   const [value, setValue] = useState('')
-  const [miss, setMiss] = useState<{ key: number; text: string } | null>(null)
+  const [miss, setMiss] = useState<{ key: number; text: string; suggestions?: string[] } | null>(null)
   const [landed, setLanded] = useState<Landed | null>(null)
   const [board, setBoard] = useState<BoardEntry[] | null>(null)
   const [score, setScore] = useState(0)
@@ -46,7 +46,7 @@ export function FreeDive() {
   const [busy, setBusy] = useState(false)
   const seen = useRef<string[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
-  const shakeRef = useShake<HTMLFormElement>(miss?.key)
+  const shakeRef = useShake<HTMLFormElement>(miss?.suggestions?.length ? null : miss?.key)
   const best = Number(load('free.best') ?? 0)
 
   useEffect(() => {
@@ -125,18 +125,18 @@ export function FreeDive() {
     }
   }, [phase, tanks, score, best])
 
-  async function submit() {
+  async function submit(pick?: string) {
     if (!prompt || busy || phase !== 'answering') return
-    const text = value.trim()
+    const text = (pick ?? value).trim()
     if (!text) return
     setBusy(true)
     sfx.blub()
     try {
-      const r = await api<{ ok: true; answer: string; ref: string; tier: TierKey; points: number } | { ok: false; reason: string }>('/practice/answer', { id: prompt.id, text })
+      const r = await api<{ ok: true; answer: string; ref: string; tier: TierKey; points: number } | { ok: false; reason: string; suggestions?: string[] }>('/practice/answer', { id: prompt.id, text })
       if (r.ok) finishPrompt({ answer: r.answer, ref: r.ref, tier: r.tier, points: r.points })
       else {
-        sfx.miss()
-        setMiss({ key: Date.now(), text })
+        if (!r.suggestions?.length) sfx.miss()
+        setMiss({ key: Date.now(), text, suggestions: r.suggestions })
         setValue('')
         inputRef.current?.focus()
       }
@@ -256,7 +256,11 @@ export function FreeDive() {
               </div>
               <div className="sticky bottom-0 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
                 <AnimatePresence>
-                  {miss && (
+                  {miss?.suggestions?.length ? (
+                    <motion.div key={miss.key} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                      <DidYouMean text={miss.text} options={miss.suggestions} pick={(o) => void submit(o)} disabled={busy} />
+                    </motion.div>
+                  ) : miss && (
                     <motion.p key={miss.key} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mb-2 text-center font-mono text-xs text-coral">
                       “{miss.text}” — that one didn’t take flight. try again
                     </motion.p>

@@ -298,3 +298,23 @@ export function TimerRing({ frac, secs, size = 64, urgent = false, hideText = fa
     </span>
   )
 }
+
+/** "did you mean …?" — keyword suggestions after a near miss; tapping one submits it */
+export function DidYouMean({ text, options, pick, disabled = false }: { text: string; options: string[]; pick: (s: string) => void; disabled?: boolean }) {
+  return (
+    <div className="mb-2 flex flex-wrap items-center justify-center gap-2 text-center" role="status">
+      <span className="font-mono text-xs text-white/70">“{text}” — did you mean</span>
+      {options.map((o) => (
+        <button
+          key={o}
+          type="button"
+          disabled={disabled}
+          onClick={() => pick(o)}
+          className="btn-glow rounded-full px-3 py-1 text-sm font-semibold"
+        >
+          {o}?
+        </button>
+      ))}
+    </div>
+  )
+}
