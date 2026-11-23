@@ -215,43 +215,44 @@ Christmas|Nativity:4:Lk2; Gideon's fleece:2:Jdg6; Elijah on Mount Carmel:2:1Ki18
 Moses in the basket|Baby Moses:4:Ex2; Ten Commandments:4:Ex20; Road to Emmaus:2:Lk24; Saul's conversion:3:Ac9; Pentecost:3:Ac2
 
 @noah-story|Events|Name something in the story of Noah's ark
-Ark:5:Ge6; Flood|Water:5:Ge7; Rain:5:Ge7; Animals:5:Ge7; Dove:5:Ge8; Raven:4:Ge8; Olive leaf|Olive branch:4:Ge8
+Ark:5:Ge6; Flood|Water:5:Ge7; Rain:5:Ge7; Animals|Beasts|Creatures|Every kind of animal|Lion|Lions|Elephant|Elephants|Giraffe|Giraffes|Tiger|Tigers|Bear|Bears|Horse|Horses|Zebra|Zebras|Monkey|Monkeys|Camel|Camels|Wolf|Wolves|Deer|Goat|Goats|Pig|Pigs|Rabbit|Rabbits|Kangaroo|Hippo|Hippopotamus|Rhino|Rhinoceros|Dog|Dogs|Cat|Cats|Mouse|Mice:5:Ge7; Dove:5:Ge8; Raven:4:Ge8; Olive leaf|Olive branch:4:Ge8
 Rainbow:5:Ge9; Ararat|Mountains of Ararat:4:Ge8; Gopher wood|Cypress wood:3:Ge6; Pitch|Tar:2:Ge6; Window:2:Ge8; Door:2:Ge7
 Forty days and forty nights|Forty days|40 days:4:Ge7; Altar|Sacrifice:2:Ge8; Vineyard|Wine:2:Ge9; Covenant:3:Ge9; Pairs|Two by two:4:Ge7
 Shem:2:Ge6; Ham:2:Ge6; Japheth:2:Ge6; Seven pairs:1:Ge7
+Birds|Fowl|Fowls:3:Ge7; Cattle|Livestock|Cows|Oxen:2:Ge7; Creeping things|Creatures that move along the ground|Snake|Snakes|Lizard|Lizards|Insects|Bugs:1:Ge7
 
 @eden|Events|Name something in the Garden of Eden
 Tree of life:5:Ge2; Tree of the knowledge of good and evil|Tree of knowledge:5:Ge2; Serpent|Snake:5:Ge3; Fruit|Apple|Forbidden fruit:5:Ge3
 Fig leaves:4:Ge3; Adam:5:Ge2; Eve:5:Ge3; Rivers|River:3:Ge2; Cherubim:3:Ge3; Flaming sword:3:Ge3; Garments of skin|Clothes of skin:2:Ge3
-Gold:1:Ge2; Onyx:1:Ge2; Bdellium|Aromatic resin:0:Ge2; Animals:3:Ge2; Rib:4:Ge2; Mist:1:Ge2
+Gold:1:Ge2; Onyx:1:Ge2; Bdellium|Aromatic resin:0:Ge2; Animals|Beasts|Beasts of the field|Wild animals:3:Ge2; Rib:4:Ge2; Mist:1:Ge2; Birds|Fowl|Birds of the air:2:Ge2; Livestock|Cattle:1:Ge2
 
 @david-goliath|Events|Name something in the story of David and Goliath
 Sling:5:1Sa17; Stones|Five smooth stones|Stone:5:1Sa17; Giant|Goliath:5:1Sa17; Sword:4:1Sa17; Armor:4:1Sa17; Shield:3:1Sa17
 Spear:3:1Sa17; Javelin:2:1Sa17; Staff:2:1Sa17; Brook|Stream:2:1Sa17; Valley of Elah|Elah:2:1Sa17; Philistines:4:1Sa17
 Saul:4:1Sa17; Israelites|Israel:3:1Sa17; Helmet:2:1Sa17; Cheese|Cheeses:1:1Sa17; Bread|Loaves:1:1Sa17; Roasted grain:0:1Sa17
-Lion and bear:2:1Sa17; Eliab:1:1Sa17; Jesse:2:1Sa17; Head:2:1Sa17; Forehead:3:1Sa17
+Lion and bear|Lion|Bear|Lions|Bears:3:1Sa17; Sheep|Flock|Lamb:3:1Sa17; Dog:1:1Sa17; Birds and beasts|Birds|Wild animals:1:1Sa17; Eliab:1:1Sa17; Jesse:2:1Sa17; Head:2:1Sa17; Forehead:3:1Sa17
 
 @jonah-story|Events|Name something in the story of Jonah
 Big fish|Great fish|Whale|Fish:5:Jon1; Ship|Boat:4:Jon1; Storm:5:Jon1; Nineveh:5:Jon1; Tarshish:3:Jon1; Joppa:2:Jon1
 Lots|Casting lots:2:Jon1; Plant|Vine|Gourd|Leafy plant:3:Jon4; Worm:2:Jon4; East wind|Wind:2:Jon4; Sackcloth:3:Jon3
-Sailors:3:Jon1; Three days and three nights|Three days:4:Jon1; Prayer:3:Jon2; Cattle|Animals:1:Jon3; King of Nineveh:2:Jon3; Sun:1:Jon4
+Sailors:3:Jon1; Three days and three nights|Three days:4:Jon1; Prayer:3:Jon2; Cattle|Animals|Herds|Flocks|Sheep|Livestock:1:Jon3; King of Nineveh:2:Jon3; Sun:1:Jon4
 
 @gideon-story|Events|Name something in the story of Gideon
 Fleece:5:Jdg6; Dew:4:Jdg6; Trumpets:4:Jdg7; Jars|Pitchers:3:Jdg7; Torches|Lamps:3:Jdg7; Three hundred men|300 men|300:4:Jdg7
-Midianites|Midian:4:Jdg6; Winepress:2:Jdg6; Lapping water|Drinking water:3:Jdg7; Barley loaf|Barley bread:1:Jdg7; Angel:3:Jdg6
+Midianites|Midian:4:Jdg6; Winepress:2:Jdg6; Lapping water|Drinking water|Lapped like dogs|Dog|Dogs:3:Jdg7; Camels:2:Jdg7; Bull|Young bull|Bullock|Second bull:2:Jdg6; Young goat|Kid|Goat:1:Jdg6; Barley loaf|Barley bread:1:Jdg7; Angel:3:Jdg6
 Altar of Baal|Baal:3:Jdg6; Ephod:1:Jdg8; Asherah pole:1:Jdg6; Oak|Terebinth:0:Jdg6; Sword of the Lord:2:Jdg7
 
 @samson-story|Events|Name something in the story of Samson
-Lion:5:Jdg14; Honey:4:Jdg14; Foxes:4:Jdg15; Jawbone|Donkey's jawbone:4:Jdg15; Riddle:3:Jdg14; Delilah:5:Jdg16
+Lion:5:Jdg14; Honey:4:Jdg14; Foxes:4:Jdg15; Jawbone|Donkey's jawbone|Donkey|Ass:4:Jdg15; Bees|Swarm of bees:3:Jdg14; Heifer|Plowed with my heifer:1:Jdg14; Young goat|Kid|Goat:1:Jdg15; Riddle:3:Jdg14; Delilah:5:Jdg16
 Hair:5:Jdg16; Razor:2:Jdg13; Pillars:4:Jdg16; Temple of Dagon|Dagon:3:Jdg16; Gates of Gaza|Gaza:2:Jdg16; Nazirite:3:Jdg13
 Philistines:4:Jdg13; Ropes|New ropes:2:Jdg15; Loom|Weaving:1:Jdg16; Bowstrings:1:Jdg16; Torches:2:Jdg15; Millstone|Grinding:1:Jdg16
 Manoah:2:Jdg13; Blinded|Eyes:3:Jdg16
 
 @daniel-story|Events|Name something in the book of Daniel
 Lions' den|Lions:5:Da6; Fiery furnace|Furnace:5:Da3; Writing on the wall|Handwriting on the wall:4:Da5; Statue|Image:4:Da2
-Vegetables|Pulse:3:Da1; King's food|King's meat:2:Da1; Dreams:3:Da2; Nebuchadnezzar ate grass:2:Da4; Babylon:4:Da1
-Window|Praying three times a day:3:Da6; Mene Mene Tekel Upharsin|Mene Tekel:2:Da5; Four beasts:2:Da7; Ancient of Days:2:Da7
-Seventy weeks:1:Da9; Gabriel:2:Da8; Fourth man in the fire|Son of God:3:Da3; Ram and goat:1:Da8; Gold:2:Da3
+Vegetables|Pulse:3:Da1; King's food|King's meat:2:Da1; Dreams:3:Da2; Nebuchadnezzar ate grass|Ate grass like oxen|Oxen:2:Da4; Babylon:4:Da1
+Window|Praying three times a day:3:Da6; Mene Mene Tekel Upharsin|Mene Tekel:2:Da5; Four beasts|Beasts|Leopard|Bear|Winged lion:2:Da7; Ancient of Days:2:Da7
+Seventy weeks:1:Da9; Gabriel:2:Da8; Fourth man in the fire|Son of God:3:Da3; Ram and goat|Ram|Goat|He-goat:2:Da8; Gold:2:Da3
 
 @christmas-things|Events|Name something in the Christmas story
 Manger:5:Lk2; Star:5:Mt2; Gold:4:Mt2; Frankincense:4:Mt2; Myrrh:4:Mt2; Shepherds:5:Lk2; Angels:5:Lk2; Inn:4:Lk2
@@ -263,5 +264,5 @@ Cross:5:Mt27; Tomb:5:Mt27; Stone:5:Mk16; Crown of thorns:5:Mt27; Nails:4:Jn20; S
 Spices:2:Mk16; Angel|Angels:4:Mt28; Garden:3:Jn19; Earthquake:2:Mt27; Thirty pieces of silver|Silver:4:Mt26; Rooster|Cock:4:Mt26
 Whip|Scourge|Flogging:3:Jn19; Purple robe|Scarlet robe|Robe:3:Mk15; Sign|King of the Jews|INRI:3:Jn19; Sponge:2:Mt27; Vinegar|Sour wine:3:Jn19
 Lots|Dice|Casting lots:3:Jn19; Veil torn|Curtain torn|Temple curtain:3:Mt27; Darkness:3:Mt27; Palm branches|Palms:3:Jn12; Donkey:3:Mt21
-Bread:3:Lk22; Cup|Wine:3:Lk22; Kiss:3:Lk22; Guards|Soldiers:3:Mt27; Sealed tomb|Seal:2:Mt27
+Bread:3:Lk22; Cup|Wine:3:Lk22; Passover lamb|Lamb:2:Lk22; Kiss:3:Lk22; Guards|Soldiers:3:Mt27; Sealed tomb|Seal:2:Mt27
 `)
